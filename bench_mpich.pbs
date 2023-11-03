@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#PBS -N bench_mpich
+#PBS -l select=2:node_type=rome:mpiprocs=2
+#PBS -l walltime=1:00:00
+
+module load hlrs-software-stack/current gcc/13.1.0
+module load mpich/4.1.2
+
+cd $PBS_O_WORKDIR
+
+mpirun --version > version_mpich.log
+mpirun -np 2 -ppn 1 ./bench > results.log 2>&1
+
+mkdir -p results/mpich-4.1.2/
+mv R0.csv R1.csv version_mpich.log bench_mpich.e* bench_mpich.o* results.log results/mpich-4.1.2/
