@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 mode_names = ['Send', 'Isend', 'IsendTest', 'Psend', 'Win']
 
 def results(file1, file2):
-	dtypes = {'mode':int, 'buffer_size':int, 'partition_size':int, 't_total' : float, 't_local' : float }
+	dtypes = {'mode':int, 'buffer_size':int, 'partition_size':int, 't_total' : float, 't_local' : float, 'sigma(t_total)' : float, 'sigma(t_local)' : float }
 	r0 = pd.read_csv(file1, dtype=dtypes)
 	r1 = pd.read_csv(file2, dtype=dtypes)
 

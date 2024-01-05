@@ -80,7 +80,7 @@ FILE *open_result_file(int comm_rank)
         printf("no output from this rank\n");
         return NULL;
     }
-    fprintf(file, "mode,buffer_size,partition_size,partition_size_recv,send_pattern,t_local,t_total,bandwidth\n");
+    fprintf(file, "mode,buffer_size,partition_size,partition_size_recv,send_pattern,t_local,t_total,bandwidth,sigma(t_local),sigma(t_total)\n");
     fclose(file);
 
     // open in append mode
@@ -94,7 +94,7 @@ FILE *open_result_file(int comm_rank)
 
 void record_result(TestCase *test_case, Result *result, FILE *file)
 {
-    fprintf(file, "%i,%i,%i,%i,%s,%f,%f,%f\n", test_case->mode, test_case->buffer_size, test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num], result->t_local, result->t_total, result->bandwidth);
+    fprintf(file, "%i,%i,%i,%i,%s,%f,%f,%f,%f,%f\n", test_case->mode, test_case->buffer_size, test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num], result->t_local, result->t_total, result->bandwidth, result->t_local_std_dev, reuslt->t_total_std_dev);
 
     fflush(file);
 }

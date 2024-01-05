@@ -28,9 +28,11 @@ typedef enum
 typedef struct
 {
 	int success;
-	double t_local;		// in seconds
-	double t_total;		// in seconds
-	double bandwidth;	// in bytes per second
+	double t_local;			// in seconds
+	double t_total;			// in seconds
+	double t_total_std_dev; // standard deviation in seconds (over each run)
+	double t_local_std_dev; // standard deviation in seconds (over each run)
+	double bandwidth;		// in bytes per second
 	MPI_Status send_status;
 	MPI_Status recv_status;
 } Result;
