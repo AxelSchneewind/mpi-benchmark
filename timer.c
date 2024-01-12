@@ -30,10 +30,10 @@ void timer_stop(timer* t) {
 	t->average = new_average;
 }
 
-void timer_mean(timer* t) {
+double timer_mean(timer* t) {
 	return t->average;
 }
 
-void timer_std_dev(timer* t) {
+double timer_std_dev(timer* t) {
 	return sqrt(t->standard_deviation / t->count);
 }

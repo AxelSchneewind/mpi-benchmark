@@ -13,5 +13,5 @@ extern void timer_init(timer* t);
 extern void timer_start(timer* t);
 extern void timer_stop(timer* t);
 
-extern void timer_mean(timer* t);
-extern void timer_std_dev(timer* t);
+extern double timer_mean(timer* t);
+extern double timer_std_dev(timer* t);

@@ -64,6 +64,8 @@ void timers_store(timer *timers, Result *result)
 {
     result->t_total = timers[0].sum;
     result->t_local = timers[1].sum;
+    result->t_total_std_dev = timer_std_dev(&timers[0])
+    result->t_local_std_dev = timer_std_dev(&timers[1])
 }
 
 FILE *open_result_file(int comm_rank)
@@ -94,7 +96,7 @@ FILE *open_result_file(int comm_rank)
 
 void record_result(TestCase *test_case, Result *result, FILE *file)
 {
-    fprintf(file, "%i,%i,%i,%i,%s,%f,%f,%f,%f,%f\n", test_case->mode, test_case->buffer_size, test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num], result->t_local, result->t_total, result->bandwidth, result->t_local_std_dev, reuslt->t_total_std_dev);
+    fprintf(file, "%i,%i,%i,%i,%s,%f,%f,%f,%f,%f\n", test_case->mode, test_case->buffer_size, test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num], result->t_local, result->t_total, result->bandwidth, result->t_local_std_dev, result->t_total_std_dev);
 
     fflush(file);
 }
@@ -160,8 +162,8 @@ int main(int argc, char **argv)
     // init test cases
     const MPI_Count buffer_size = 4 * MB;
     //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, Psend = 5, PsendProgress = 6, PSendThreaded = 7, CustomPsend = 8, WinSingle = 9, Win = 10
-  //bool use_mode[ModeCount] = {    true,      true,          true,              true,              true,     true,              true,              true,            true,           true,      true};
-    bool use_mode[ModeCount] = {   false,     false,         false,             false,             false,    false,              true,             false,           false,           true,      true};
+    bool use_mode[ModeCount] = {    true,      true,          true,              true,              true,     true,              true,              true,            true,           true,      true};
+    // bool use_mode[ModeCount] = {   false,     false,         false,             false,             false,    false,              true,             false,           false,           true,      true};
 
     // openmpi/5.0.0, on laptop (Ryzen 4 4700U), at 16MiB
     // Send:           tested down to     8B
