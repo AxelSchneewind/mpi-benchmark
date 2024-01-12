@@ -64,8 +64,8 @@ void timers_store(timer *timers, Result *result)
 {
     result->t_total = timers[0].sum;
     result->t_local = timers[1].sum;
-    result->t_total_std_dev = timer_std_dev(&timers[0])
-    result->t_local_std_dev = timer_std_dev(&timers[1])
+    result->t_total_std_dev = timer_std_dev(&timers[0]);
+    result->t_local_std_dev = timer_std_dev(&timers[1]);
 }
 
 FILE *open_result_file(int comm_rank)
