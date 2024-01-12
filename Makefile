@@ -1,6 +1,6 @@
 
-MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
-#MPI_DIR=/home/axel/software/mpich-4.1.2/build/bin/
+#MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
+MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
 
 MPI_RUN=$(MPI_DIR)mpirun
 MPI_CC=$(MPI_DIR)mpicc
@@ -11,10 +11,10 @@ SRC=$(wildcard benchmarks/*.c) $(wildcard *.c)
 all: bench
 
 bench_dbg: $(SRC) bench.h test_cases.h
-	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I.
+	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I. -lm
 
 bench: $(SRC) bench.h test_cases.h
-	$(MPI_CC) $(SRC) -o bench -O3 -lpthread -I. # -Wall
+	$(MPI_CC) $(SRC) -o bench -lm -lpthread -I. # -Wall -O3
 
 
 run: bench
