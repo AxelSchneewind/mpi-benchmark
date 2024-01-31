@@ -17,6 +17,7 @@ void timer_init(timer* t) {
 void timer_start(timer* t) {
 	t->running_since = MPI_Wtime();
 }
+
 void timer_stop(timer* t) {
 	double delta = MPI_Wtime() - t->running_since;
 
@@ -25,7 +26,7 @@ void timer_stop(timer* t) {
 
 	double new_average = t->sum / t->count;
 
-	// compute standard deviation on line (https://www.johndcook.com/blog/standard_deviation/)
+	// compute standard deviation (https://www.johndcook.com/blog/standard_deviation/)
 	t->standard_deviation = t->standard_deviation + (delta - t->average) * (delta - new_average);
 	t->average = new_average;
 }
@@ -35,5 +36,5 @@ double timer_mean(timer* t) {
 }
 
 double timer_std_dev(timer* t) {
-	return sqrt(t->standard_deviation / t->count);
+	return sqrt(t->standard_deviation / (double)t->count);
 }
