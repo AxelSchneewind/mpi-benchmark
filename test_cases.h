@@ -1,7 +1,9 @@
 #include "bench.h"
-#include "stdlib.h"
-#include "stdbool.h"
 #include "send_patterns.h"
+
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 // TODO move into struct and store pointers to partition send patterns there
 static char *buffer;
@@ -38,7 +40,7 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use
             if (global_min_partition_size > min_partition_size[mode])
                 global_min_partition_size = min_partition_size[mode];
 
-            if (mode == Psend || mode == PsendThreaded || mode == PsendProgress)
+            if (mode == Psend || mode == PsendThreaded || mode == PsendProgress || mode == PsendParrived || mode == PsendProgressThread)
             {
                 for (MPI_Count partition_size = max_partition_size[mode]; partition_size >= min_partition_size[mode]; partition_size = partition_size / 2)
                 {
@@ -76,9 +78,9 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use
             for (int i = 0; i < byte_send_patterns_count; i++)
             {
                 partition_send_patterns[size_index][i] = malloc(sizeof(unsigned int) * buffer_size / partition_size);
-                printf("from byte send pattern %20s: %i %i %i %i %i %i...\n", send_pattern_identifiers[i], byte_send_patterns[i][0], byte_send_patterns[i][1], byte_send_patterns[i][2], byte_send_patterns[i][3], byte_send_patterns[i][4], byte_send_patterns[i][5]);
+                // printf("from byte send pattern %20s: %i %i %i %i %i %i...\n", send_pattern_identifiers[i], byte_send_patterns[i][0], byte_send_patterns[i][1], byte_send_patterns[i][2], byte_send_patterns[i][3], byte_send_patterns[i][4], byte_send_patterns[i][5]);
                 make_partition_send_pattern(byte_send_patterns[i], partition_send_patterns[size_index][i], buffer_size, partition_size);
-                printf(" making partition send pattern for size %i: %i %i %i %i %i %i %i %i...\n", partition_size, partition_send_patterns[size_index][i][0],partition_send_patterns[size_index][i][1],partition_send_patterns[size_index][i][2],partition_send_patterns[size_index][i][3],partition_send_patterns[size_index][i][4],partition_send_patterns[size_index][i][5],partition_send_patterns[size_index][i][6],partition_send_patterns[size_index][i][7],partition_send_patterns[size_index][i][8]);
+                // printf(" making partition send pattern for size %10lli: %i %i %i %i %i %i %i %i %i...\n", partition_size, partition_send_patterns[size_index][i][0],partition_send_patterns[size_index][i][1],partition_send_patterns[size_index][i][2],partition_send_patterns[size_index][i][3],partition_send_patterns[size_index][i][4],partition_send_patterns[size_index][i][5],partition_send_patterns[size_index][i][6],partition_send_patterns[size_index][i][7],partition_send_patterns[size_index][i][8]);
             }
             size_index++;
         }
@@ -97,7 +99,7 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use
             for (MPI_Count partition_size = global_max_partition_size; partition_size > max_partition_size[mode]; partition_size = partition_size / 2)
                 first_size_index += 4;
 
-            if (mode == Psend || mode == PsendThreaded || mode == PsendProgress)
+            if (mode == Psend || mode == PsendThreaded || mode == PsendProgress || mode == PsendParrived || mode == PsendProgressThread)
             {
                 size_t pattern_index = first_size_index;
                 for (MPI_Count partition_size = max_partition_size[mode]; partition_size >= min_partition_size[mode]; partition_size = partition_size / 2)
