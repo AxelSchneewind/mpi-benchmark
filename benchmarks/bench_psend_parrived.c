@@ -1,8 +1,8 @@
 #include "bench.h"
 
-void bench_psend(TestCase *test_case, Result *result, int comm_rank)
+void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
 {
-	// init
+	// init requests and timer
 	MPI_Request request;
 
 	timer *timers;
@@ -48,6 +48,23 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank)
 			timers_start_local(timers);
 
 			MPI_Start(&request);
+
+			int flag = 0;
+			while (!flag)
+			{
+				flag = 1;
+				for (size_t p = 0; p < test_case->partition_count_recv; p++)
+				{
+				    int _flag = 0;
+				    MPI_Request_get_status(request, &_flag, &result->recv_status);
+				    flag = flag && _flag;
+					if (flag)		// somehow deadlocks without this (in openmpi)
+					    break;
+					MPI_Parrived(request, p, &_flag);
+					flag = flag && _flag;
+				}
+			}
+
 			MPI_Wait(&request, &result->recv_status);
 
 			timers_stop_local(timers);

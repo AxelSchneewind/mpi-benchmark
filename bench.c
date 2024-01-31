@@ -96,8 +96,7 @@ FILE *open_result_file(int comm_rank)
 
 void record_result(TestCase *test_case, Result *result, FILE *file)
 {
-    fprintf(file, "%i,%i,%i,%i,%s,%f,%f,%f,%f,%f\n", test_case->mode, test_case->buffer_size, test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num], result->t_local, result->t_total, result->bandwidth, result->t_local_std_dev, result->t_total_std_dev);
-
+    fprintf(file, "%i,%lli,%lli,%lli,%s,%f,%f,%f,%f,%f\n", test_case->mode, test_case->buffer_size, test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num], result->t_local, result->t_total, result->bandwidth, result->t_local_std_dev, result->t_total_std_dev);
     fflush(file);
 }
 
@@ -159,11 +158,14 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
+    if (comm_size != 2)
+        return 0;
+
     // init test cases
     const MPI_Count buffer_size = 4 * MB;
-    //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, Psend = 5, PsendProgress = 6, PSendThreaded = 7, CustomPsend = 8, WinSingle = 9, Win = 10
-    bool use_mode[ModeCount] = {    true,      true,          true,              true,              true,     true,              true,              true,            true,           true,      true};
-    // bool use_mode[ModeCount] = {   false,     false,         false,             false,             false,    false,              true,             false,           false,           true,      true};
+    //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, Psend = 5, PsendParrived = 6, PsendProgress = 7, PsendProgressThreaded = 8, PSendThreaded = 9, CustomPsend = 10, WinSingle = 11, Win = 12
+    //bool use_mode[ModeCount] = {    true,      true,          true,              true,              true,     true,              true,              true,                      true,              true,           false,           true,      true};
+    bool use_mode[ModeCount] = {   false,     false,         false,             false,            false,     false,              true,              true,                      true,              true,           false,           true,      true};
 
     // openmpi/5.0.0, on laptop (Ryzen 4 4700U), at 16MiB
     // Send:           tested down to     8B
@@ -177,11 +179,11 @@ int main(int argc, char **argv)
     // Win:            tested down to   512B, fails at 256B (16MiB / 64Ki) due to mmap error 12
 
     const MPI_Count min_partition_size[ModeCount] =
-    //         Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4,     Psend = 5, PsendProgress = 6, PSendThreaded = 7, CustomPsend = 8, WinSingle = 9, Win = 10
-        {           256,       256,           256,               256,              256,           256,               256,               256,             256,          4096, buffer_size / KB  };
+    //         Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4,     Psend = 5, PsendParrived = 6, PsendProgress = 7, PsendProgressThreaded = 8, PSendThreaded = 9, CustomPsend = 10, WinSingle = 11, Win = 12
+        {           512,       512,           512,               512,              512,           512,              2048,               512,                      4096,               512,             4096,          4096, buffer_size / KB  };
     const MPI_Count max_partition_size[ModeCount] =                                                                                         
-    //         Send = 0, Isend = 1  , IsendTest = 2, IsendThenTest = 3, IsendTestall = 4,   Psend = 5, PsendProgress = 6, PSendThreaded = 7, CustomPsend = 8, WinSingle = 9, Win = 10
-        {   buffer_size, buffer_size,   buffer_size,       buffer_size,      buffer_size, buffer_size,       buffer_size,       buffer_size,     buffer_size,   buffer_size, buffer_size };
+    //         Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4,     Psend = 5, PsendParrived = 5, PsendProgress = 6, PsendProgressThreaded = 7, PSendThreaded = 8, CustomPsend = 9, WinSingle = 10, Win = 11
+        {   buffer_size, buffer_size,   buffer_size,       buffer_size,      buffer_size, buffer_size,       buffer_size,       buffer_size,               buffer_size,       buffer_size,     buffer_size,    buffer_size, buffer_size };
 
     // openmpi/5.0.0, on hawk, at  64MiB
     // Send:           tested down to     1B,
@@ -230,9 +232,9 @@ int main(int argc, char **argv)
         if (comm_rank == 1)
         {
             if (test_case->partition_size == test_case->partition_size_recv)
-                printf("Running test %.3i in mode %15s, buffer size %9i, partition size %9i, iteration count %3i, send pattern %i :\n\t", i, mode_names[test_case->mode], test_case->buffer_size, test_case->partition_size, test_case->iteration_count, test_case->send_pattern_num);
+                printf("Running test %.4li in mode %15s, buffer size %9lli, partition size %7lli, iteration count %3li, send pattern %i :\n\t", i, mode_names[test_case->mode], test_case->buffer_size, test_case->partition_size, test_case->iteration_count, test_case->send_pattern_num);
             else
-                printf("Running test %.3i in mode %15s, buffer size %9i, partition size %9i -> %9i, iteration count %3i, send pattern %i :\n\t", i, mode_names[test_case->mode], test_case->buffer_size, test_case->partition_size, test_case->partition_size_recv, test_case->iteration_count, test_case->send_pattern_num);
+                printf("Running test %.4li in mode %15s, buffer size %9lli, partition size %7lli -> %7lli, iteration count %3li, send pattern %i :\n\t", i, mode_names[test_case->mode], test_case->buffer_size, test_case->partition_size, test_case->partition_size_recv, test_case->iteration_count, test_case->send_pattern_num);
             fflush(stdout);
         }
 
@@ -249,13 +251,17 @@ int main(int argc, char **argv)
         if (i > 0 && test_case->mode == get_test_case(i - 1)->mode && get_result(i - 1)->t_total * test_case->iteration_count > time_limit) {
             *result = *get_result(i-1);
 
-            if (comm_rank == 1)
-                printf("time limit exceeded in previous run, not running benchmark\n");
+            if (comm_rank == 1){
+                printf("time limit exceeded in previous run, not running benchmark\n"); 
+                fflush(stdout);
+            }
         } else {    // otherwise, run benchmark
             *result = bench(test_case, comm_rank, comm_size);
 
-            if (comm_rank == 1)
-                printf("success = %d, average time: %10gμs, total time: %10gs\n", result->success, result->t_total * 1000000, result->t_total * test_case->iteration_count);
+            if (comm_rank == 1) {
+                printf("success = %i, average time: %10gμs, total time: %10gs, sigma = %g\n", result->success, result->t_total * 1000000, result->t_total * test_case->iteration_count, result->t_total_std_dev);
+                fflush(stdout);
+            }
         }
 
         record_result(test_case, result, result_file);

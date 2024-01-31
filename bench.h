@@ -13,10 +13,11 @@ typedef enum
 	IsendTest          ,
 	IsendThenTest      ,
 	IsendTestall       ,
-
 #ifndef DISABLE_PSEND
 	Psend              ,
+	PsendParrived      ,
 	PsendProgress      ,
+	PsendProgressThread,
 	PsendThreaded      ,
 #endif
 	CustomPsend        ,
@@ -47,11 +48,12 @@ enum SendPattern {
 	Stride1K,
 	Random,
     RandomBurst128,
-    RandomBurst1K
+    RandomBurst1K,
+	SendPatternCount
 };
 typedef enum SendPattern SendPattern;
 
-static const char* send_pattern_identifiers[] = {
+static const char* const send_pattern_identifiers[SendPatternCount] = {
     "linear",
     "linear inverse",
     "stride (128B)",
@@ -89,7 +91,9 @@ extern void bench_isend_testall(TestCase *test_case, Result *result, int comm_ra
 
 #ifndef DISABLE_PSEND
 extern void bench_psend(TestCase *test_case, Result *result, int comm_rank);
+extern void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank);
+extern void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank);
 #endif
 
@@ -97,7 +101,7 @@ extern void bench_custom_psend(TestCase *test_case, Result *result, int comm_ran
 extern void bench_win_single(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_win(TestCase *test_case, Result *result, int comm_rank);
 
-static RunMethod mode_methods[ModeCount] = {
+static RunMethod const mode_methods[ModeCount] = {
 	{ &bench_send },
 	{ &bench_isend },
 	{ &bench_isend_test },
@@ -105,7 +109,9 @@ static RunMethod mode_methods[ModeCount] = {
 	{ &bench_isend_testall },
 #ifndef DISABLE_PSEND
 	{ &bench_psend },
+	{ &bench_psend_parrived },
 	{ &bench_psend_progress },
+	{ &bench_psend_progress_thread },
 	{ &bench_psend_threaded },
 #endif
 	{ &bench_custom_psend },
@@ -113,7 +119,7 @@ static RunMethod mode_methods[ModeCount] = {
 	{ &bench_win }
 };
 
-static const char* mode_names[ModeCount] = {
+static const char* const mode_names[ModeCount] = {
 	"Send",
 	"Isend",
 	"Isend_test",
@@ -121,7 +127,9 @@ static const char* mode_names[ModeCount] = {
 	"Isend_testall",
 #ifndef DISABLE_PSEND
 	"Psend",
+	"Psend_Parrived",
 	"Psend_progress",
+	"Psend_progress_threaded",
 	"Psend_threaded",
 #endif
 	"Psend_custom",

@@ -27,7 +27,7 @@ typedef struct _thread_args thread_args;
 
 void bench_send_thread(TestCase *test_case, Result *result, MPI_Request *request, int comm_rank, timer *timers, int thread_num, int thread_count)
 {
-	timers_start_local(timers);
+	//timers_start_local(timers);
 
 	int partitions_per_thread = test_case->partition_count / thread_count;
 	for (size_t p = 0; p < partitions_per_thread; p++)
@@ -37,17 +37,17 @@ void bench_send_thread(TestCase *test_case, Result *result, MPI_Request *request
 		MPI_Pready(partition_num, *request);
 	}
 
-	timers_stop_local(timers);
+	//timers_stop_local(timers);
 }
 void bench_recv_thread(TestCase *test_case, Result *result, MPI_Request *request, int comm_rank, timer *timers, int thread_num, int thread_count)
 {
-	timers_start_local(timers);
+	//timers_start_local(timers);
 
 	for (size_t p = 0; p < test_case->partition_count / thread_count; p++)
 	{
 	}
 
-	timers_stop_local(timers);
+	//timers_stop_local(timers);
 };
 
 void *run_send_thread(void *_args)
@@ -154,6 +154,7 @@ void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank)
 		pthread_join(threads[i], NULL);
 
 	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Request_free(&request);
 	timers_stop_global(timers);
 
 	timers_store(timers, result);

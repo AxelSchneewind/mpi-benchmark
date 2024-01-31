@@ -35,7 +35,8 @@ void bench_isend_test(TestCase *test_case, Result *result, int comm_rank)
 			timers_start_local(timers);
 
 			for (size_t p = 0; p < test_case->partition_count; p++) {
-				unsigned int partition_num = test_case->send_pattern[p];				MPI_Irecv(test_case->buffer + partition_num * test_case->partition_size, test_case->partition_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &requests[partition_num]);
+				unsigned int partition_num = test_case->send_pattern[p];				
+				MPI_Irecv(test_case->buffer + partition_num * test_case->partition_size, test_case->partition_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &requests[partition_num]);
 			}
 
 			MPI_Waitall(test_case->partition_count, requests, MPI_STATUSES_IGNORE);
