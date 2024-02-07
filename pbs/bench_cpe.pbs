@@ -4,15 +4,13 @@
 #PBS -l select=2:node_type=rome:mpiprocs=2
 #PBS -l walltime=1:00:00
 
+NAME=bench_cpe
+
 module load cpe/22.11
 
-cd $PBS_O_WORKDIR
-BIN_DIRECTORY=$PBS_O_WORKDIR/bin/
-
-mkdir -p results/cpe/22-11/
-rm -f results/cpe/22-11/
-cd results/cpe/22-11/
-
+source pbs/bench.sh
+setup "$NAME" 
+BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_cpe.log
 mpirun -np 2 $BIN_DIRECTORY/bench_cpe > results.log 2>&1

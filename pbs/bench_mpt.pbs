@@ -4,16 +4,14 @@
 #PBS -l select=2:node_type=rome:mpiprocs=2
 #PBS -l walltime=1:00:00
 
+IMPL=mpt/2.26
+
 module load hlrs-software-stack/current gcc/13.1.0
 module load mpt/2.26
 
-cd $PBS_O_WORKDIR
-BIN_DIRECTORY=$PBS_O_WORKDIR/bin/
-
-mkdir -p results/mpt-2.26/
-rm -f results/mpt-2.26/*
-cd results/mpt-2.26/
+source pbs/bench.sh
+setup $IMPL
+BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_mpt.log
-
 mpirun -np 2 -N 1 $BIN_DIRECTORY/bench_mpt > results.log 2>&1

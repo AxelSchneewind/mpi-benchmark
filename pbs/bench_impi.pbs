@@ -4,16 +4,15 @@
 #PBS -l select=2:node_type=rome:mpiprocs=2
 #PBS -l walltime=1:00:00
 
+IMPL=impi/19.1.0
+
 module load hlrs-software-stack/current gcc/13.1.0
 module load impi/19.1.0
 
-cd $PBS_O_WORKDIR
-BIN_DIRECTORY=$PBS_O_WORKDIR/bin/
-
-mkdir -p results/impi-19.1.0/
-rm -f results/impi-19.1.0/*
-cd results/impi-19.1.0
+source pbs/bench.sh
+setup "$IMPL"
+BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_impi.log
-mpirun -np 2 .$BIN_DIRECTORY/bench > results.log 2>&1
+mpirun -np 2 $BIN_DIRECTORY/bench_impi > results.log 2>&1
 
