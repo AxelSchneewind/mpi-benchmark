@@ -6,7 +6,7 @@ setup() {
 
 	mkdir -p results/"$NAME"/
 	rm -f results/"$NAME"/*
-	cd results/"$NAME"/
+	cd results/"$NAME"
 }
 
 bin_directory() {

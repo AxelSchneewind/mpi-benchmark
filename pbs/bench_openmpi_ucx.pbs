@@ -3,6 +3,7 @@
 #PBS -N bench_openmpi_ucx
 #PBS -l select=2:node_type=rome:mpiprocs=2
 #PBS -l walltime=1:00:00
+cd $PBS_O_WORKDIR
 
 IMPL=openmpi/5.0.0/ucx 
 module load hlrs-software-stack/current gcc/13.1.0

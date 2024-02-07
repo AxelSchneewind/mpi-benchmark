@@ -3,6 +3,7 @@
 #PBS -N bench_cpe
 #PBS -l select=2:node_type=rome:mpiprocs=2
 #PBS -l walltime=1:00:00
+cd $PBS_O_WORKDIR
 
 IMPL=cray-mpich-ucx/8.1.21
 module load cpe/22.11 cray-mpich-ucx/8.1.21
