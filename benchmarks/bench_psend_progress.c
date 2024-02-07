@@ -24,6 +24,7 @@ In openMPI on hawk with ucx, crashes with error:
     13 0x0000000000401c7e _start()  ???:0
     =================================
 */
+
 void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
 {
     // init request and timer
@@ -60,15 +61,14 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
             {
                 unsigned int partition_num = test_case->send_pattern[p];
 
-                // trigger progress as MPI_Pready doesn't (at least for openmpi)
+                // try to trigger progress as MPI_Pready doesn't (at least for openmpi)
                 MPI_Request_get_status(request, &flag, MPI_STATUS_IGNORE);
 
                 /* how can MPI_Request_get_status return true if not all Pready calls have been made?
-                 * only occurs with openmpi and only for i % 2 == 1 
+                 * occurs with openmpi and only for i % 2 == 1 
                  */
                 // if (flag) {            
-                //                        
-                //     printf("How did I get here (partition %i of %i, iteration %i)\n", p, test_case->partition_count, i); 
+                //     printf("MPI_Request_get_status() returned true before MPI_Pready done (partition %i of %i, iteration %i)\n", p, test_case->partition_count, i); 
                 //     fflush(stdout);
                 //    break;
                 // }
@@ -88,7 +88,14 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
             timers_start_local(timers);
 
             MPI_Start(&request);
-            MPI_Wait(&request, &result->recv_status);
+
+            int flag = false;
+            while(!flag)
+            {
+                MPI_Request_get_status(request, &flag, MPI_STATUS_IGNORE);
+            }
+
+            MPI_Wait(&request, MPI_STATUS_IGNORE);
 
             timers_stop_local(timers);
         }

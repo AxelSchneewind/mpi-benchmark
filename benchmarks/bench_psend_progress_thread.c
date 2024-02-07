@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdatomic.h>
+#include <stdbool.h>
 #include <semaphore.h>
 #include <pthread.h>
 #include <unistd.h>
@@ -83,8 +84,8 @@ void *progress(void *arguments)
 		ret_trywait = sem_trywait(&thread->signal_done);
 		while (ret_trywait != 0) // exit if signal_done is posted
 		{
-			MPI_Request_get_status(*thread->request, &flag, &status);
-			//usleep(100);
+			// MPI_Request_get_status(*thread->request, &flag, &status);
+			usleep(100);
 			ret_trywait = sem_trywait(&thread->signal_done);
 		}
 
@@ -232,6 +233,13 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 			printf("%d, R1: MPI_Start(&request);        iteration %d\n", __LINE__, i);
 			assert(0 == fflush(stdout));
 #endif
+
+            int flag = false;
+            while(!flag)
+            {
+                MPI_Request_get_status(request, &flag, MPI_STATUS_IGNORE);
+            }
+
 			OUTPUT_RANK(MPI_Wait(&request, &result->recv_status));
 
 			timers_stop_local(timers);
