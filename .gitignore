@@ -1,2 +1,5 @@
 results
+bin
 *.csv
+
+__pycache__
