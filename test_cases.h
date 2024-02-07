@@ -40,6 +40,7 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use
             if (global_min_partition_size > min_partition_size[mode])
                 global_min_partition_size = min_partition_size[mode];
 
+#ifndef DISABLE_PSEND
             if (mode == Psend || mode == PsendThreaded || mode == PsendProgress || mode == PsendParrived || mode == PsendProgressThread)
             {
                 for (MPI_Count partition_size = max_partition_size[mode]; partition_size >= min_partition_size[mode]; partition_size = partition_size / 2)
@@ -50,9 +51,12 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use
             }
             else
             {
+#endif
                 for (MPI_Count partition_size = max_partition_size[mode]; partition_size >= min_partition_size[mode]; partition_size = partition_size / 2)
                     test_count += byte_send_patterns_count;
+#ifndef DISABLE_PSEND
             }
+#endif
         }
 
     // set up byte send patterns
@@ -99,7 +103,8 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use
             for (MPI_Count partition_size = global_max_partition_size; partition_size > max_partition_size[mode]; partition_size = partition_size / 2)
                 first_size_index += 4;
 
-            if (mode == Psend || mode == PsendThreaded || mode == PsendProgress || mode == PsendParrived || mode == PsendProgressThread)
+#ifndef DISABLE_PSEND
+            if (mode == CustomPsend || mode == Psend || mode == PsendProgress || mode == PsendParrived || mode == PsendProgressThread)
             {
                 size_t pattern_index = first_size_index;
                 for (MPI_Count partition_size = max_partition_size[mode]; partition_size >= min_partition_size[mode]; partition_size = partition_size / 2)
@@ -128,6 +133,7 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use
             }
             else
             {
+#endif 
                 size_t pattern_index = first_size_index;
                 for (MPI_Count partition_size = max_partition_size[mode]; partition_size >= min_partition_size[mode]; partition_size = partition_size / 2)
                 {
@@ -148,7 +154,9 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use
                     }
                     pattern_index++;
                 }
+#ifndef DISABLE_PSEND
             }
+#endif
         }
     }
 

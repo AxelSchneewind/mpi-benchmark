@@ -13,6 +13,9 @@ typedef enum
 	IsendTest          ,
 	IsendThenTest      ,
 	IsendTestall       ,
+	CustomPsend        ,
+	WinSingle          ,
+	Win                ,
 #ifndef DISABLE_PSEND
 	Psend              ,
 	PsendParrived      ,
@@ -20,9 +23,6 @@ typedef enum
 	PsendProgressThread,
 	PsendThreaded      ,
 #endif
-	CustomPsend        ,
-	WinSingle          ,
-	Win                ,
 	ModeCount
 } Mode;
 
@@ -107,34 +107,36 @@ static RunMethod const mode_methods[ModeCount] = {
 	{ &bench_isend_test },
 	{ &bench_isend_then_test },
 	{ &bench_isend_testall },
+	{ &bench_custom_psend },
+	{ &bench_win_single },
+	{ &bench_win }
 #ifndef DISABLE_PSEND
+	, 
 	{ &bench_psend },
 	{ &bench_psend_parrived },
 	{ &bench_psend_progress },
 	{ &bench_psend_progress_thread },
-	{ &bench_psend_threaded },
+	{ &bench_psend_threaded }
 #endif
-	{ &bench_custom_psend },
-	{ &bench_win_single },
-	{ &bench_win }
 };
 
 static const char* const mode_names[ModeCount] = {
 	"Send",
 	"Isend",
-	"Isend_test",
-	"Isend_then_test",
-	"Isend_testall",
-#ifndef DISABLE_PSEND
-	"Psend",
-	"Psend_Parrived",
-	"Psend_progress",
-	"Psend_progress_threaded",
-	"Psend_threaded",
-#endif
-	"Psend_custom",
-	"Win_single",
+	"IsendTest",
+	"IsendThenTest",
+	"IsendTestall",
+	"Psendcustom",
+	"WinSingle",
 	"Win"
+#ifndef DISABLE_PSEND
+	,
+	"Psend",
+	"PsendParrived",
+	"PsendProgress",
+	"PsendProgressThreaded",
+	"PsendThreaded"
+#endif
 };
 
 

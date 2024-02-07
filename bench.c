@@ -163,9 +163,8 @@ int main(int argc, char **argv)
 
     // init test cases
     const MPI_Count buffer_size = 4 * MB;
-    //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, Psend = 5, PsendParrived = 6, PsendProgress = 7, PsendProgressThreaded = 8, PSendThreaded = 9, CustomPsend = 10, WinSingle = 11, Win = 12
-    bool use_mode[ModeCount] = {    true,      true,          true,              true,              true,     true,              true,              true,                      true,              true,           false,           true,      true};
-    // bool use_mode[ModeCount] = {   false,     false,         false,             false,            false,     false,             false,              true,                      true,              true,           false,           true,      true};
+    //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6, Win = 7, Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
+    bool use_mode[ModeCount] = {    true,      true,          true,              true,              true,          false,          true,    true,      true,              true,              false,                      false,              false};
 
     // openmpi/5.0.0, on laptop (Ryzen 4 4700U), at 16MiB
     // Send:           tested down to     8B
