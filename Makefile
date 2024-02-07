@@ -41,13 +41,11 @@ run_parrived: parrived
 	$(MPI_RUN) -n 2 ./parrived
 
 put:
-	scp -r pbs benchmarks *.c *.h *.pbs hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark
+	scp -r pbs benchmarks *.c *.h hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark
 
 get: 
 	rm -f results/*/*
 	scp -r hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark/results .
-
-
 
 
 
