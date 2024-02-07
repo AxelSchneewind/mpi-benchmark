@@ -8,9 +8,12 @@ module load hlrs-software-stack/current gcc/13.1.0
 module load mpt/2.26
 
 cd $PBS_O_WORKDIR
-
-mpirun --version > version_mpt.log
-mpirun -np 2 ./bench > results.log 2>&1
+BIN_DIRECTORY=$PBS_O_WORKDIR/bin/
 
 mkdir -p results/mpt-2.26/
-mv R0.csv R1.csv version_mpich.log bench_mpich.e* bench_mpich.o* results.log results/mpt-2.26/
+rm -f results/mpt-2.26/*
+cd results/mpt-2.26/
+
+mpirun --version > version_mpt.log
+
+mpirun -np 2 -N 1 $BIN_DIRECTORY/bench_mpt > results.log 2>&1

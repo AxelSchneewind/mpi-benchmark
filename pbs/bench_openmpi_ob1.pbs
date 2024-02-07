@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#PBS -N bench_openmpi
+#PBS -l select=2:node_type=rome:mpiprocs=2
+#PBS -l walltime=1:00:00
+
+module load hlrs-software-stack/current gcc/13.1.0
+module load openmpi/5.0.0
+
+cd $PBS_O_WORKDIR/
+BIN_DIRECTORY=$PBS_O_WORKDIR/bin/
+
+mkdir -p results/openmpi-5.0.0_ob1/
+rm -f results/openmpi-5.0.0_ob1/*
+
+cd results/openmpi-5.0.0_ob1/
+
+
+mpirun --version > version_openmpi.log
+mpirun --mca prte_allocation_required 0 --mca mpi_show_mca_params all ./bench > params.txt
+
+mpirun --mca pml ob1 -np 2 -N 1 $BIN_DIRECTORY/bench > results.log 2>&1

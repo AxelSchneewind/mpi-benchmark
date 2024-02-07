@@ -8,9 +8,12 @@ module load hlrs-software-stack/current gcc/13.1.0
 module load impi/19.1.0
 
 cd $PBS_O_WORKDIR
-
-mpirun --version > version_impi.log
-mpirun -np 2 ./bench > results.log 2>&1
+BIN_DIRECTORY=$PBS_O_WORKDIR/bin/
 
 mkdir -p results/impi-19.1.0/
-mv R0.csv R1.csv version_mpich.log bench_mpich.e* bench_mpich.o* results.log results/impi-19.1.0/
+rm -f results/impi-19.1.0/*
+cd results/impi-19.1.0
+
+mpirun --version > version_impi.log
+mpirun -np 2 .$BIN_DIRECTORY/bench > results.log 2>&1
+
