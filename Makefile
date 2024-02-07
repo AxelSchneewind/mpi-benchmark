@@ -1,4 +1,6 @@
 
+### FOR LOCAL TESTING
+
 MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
 #MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
 
@@ -44,3 +46,50 @@ put:
 get: 
 	rm -f results/*/*
 	scp -r hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark/results .
+
+
+
+
+
+### FOR HAWK
+# MPI_RUN=mpirun
+# MPI_CC=mpicc
+# 
+# SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c, $(wildcard *.c))
+# 
+# .phony: all bench run debug ddd deploy run-remote get put bin/bench_openmpi bin/bench_mpich bin/bench_impi bin/bench_cpe
+# all: bench
+# 
+# bench_dbg: $(SRC) bench.h test_cases.h
+# 	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I. -lm
+# 
+# bin/bench_openmpi: $(SRC) bench.h test_cases.h
+# 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.0 && $(MPI_CC) $(SRC) -o bin/bench_openmpi -lm -lpthread -I. -Wall)
+# bin/bench_mpich: $(SRC) bench.h test_cases.h
+# 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 mpich/4.1.2 && $(MPI_CC) $(SRC) -o bin/bench_mpich -lm -lpthread -I. -Wall)
+# bin/bench_impi: $(SRC) bench.h test_cases.h
+# 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0  impi/2021.9.0 &&  $(MPI_CC) $(SRC) -o bin/bench_impi -lm -lpthread -I. -Wall)
+# bin/bench_cpe: $(SRC) bench.h test_cases.h
+# 	echo $(shell module load cpe/22.11 && $(MPI_CC) $(SRC) -o bin/bench_cpe -lm -lpthread -I. -Wall)
+# bin/bench_mpt: $(SRC) bench.h test_cases.h
+# 	echo $(shell module load mpt/2.28 && $(MPI_CC) $(SRC) -o bin/bench_mpt -lm -lpthread -I. -Wall)
+# 
+# bench: bin/bench_openmpi bin/bench_mpich bin/bench_impi bin/bench_cpe
+# 
+# .phony: run_bench_openmpi run_bench_mpich run_bench_impi run_bench_cpe
+# run_bench_openmpi: bin/bench_openmpi
+# 	echo $(shell qsub pbs/bench_openmpi.pbs)
+# run_bench_mpich: bin/bench_mpich
+# 	echo $(shell qsub pbs/bench_mpich.pbs)
+# run_bench_impi: bin/bench_impi
+# 	echo $(shell qsub pbs/bench_impi.pbs)
+# run_bench_cpe: bin/bench_cpe
+# 	echo $(shell qsub pbs/bench_cpe.pbs)
+# run_bench_mpt: bin/bench_mpt
+# 	echo $(shell qsub pbs/bench_mpt.pbs)
+# 
+# run: run_bench_openmpi run_bench_mpich run_bench_impi run_bench_cpe
+# 
+# 
+# debug: bench_dbg
+# 	$(MPI_RUN) -n 2 ./bench_dbg 
