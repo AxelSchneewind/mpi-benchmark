@@ -4,12 +4,11 @@
 #PBS -l select=2:node_type=rome:mpiprocs=2
 #PBS -l walltime=1:00:00
 
-NAME=bench_cpe
-
-module load cpe/22.11
+IMPL=cray-mpich-ucx/8.1.21
+module load cpe/22.11 cray-mpich-ucx/8.1.21
 
 source pbs/bench.sh
-setup "$NAME" 
+setup "$IMPL" 
 BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_cpe.log
