@@ -164,8 +164,8 @@ int main(int argc, char **argv)
     // init test cases
     const MPI_Count buffer_size = 4 * MB;
     //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, Psend = 5, PsendParrived = 6, PsendProgress = 7, PsendProgressThreaded = 8, PSendThreaded = 9, CustomPsend = 10, WinSingle = 11, Win = 12
-    //bool use_mode[ModeCount] = {    true,      true,          true,              true,              true,     true,              true,              true,                      true,              true,           false,           true,      true};
-    bool use_mode[ModeCount] = {   false,     false,         false,             false,            false,     false,              true,              true,                      true,              true,           false,           true,      true};
+    bool use_mode[ModeCount] = {    true,      true,          true,              true,              true,     true,              true,              true,                      true,              true,           false,           true,      true};
+    // bool use_mode[ModeCount] = {   false,     false,         false,             false,            false,     false,             false,              true,                      true,              true,           false,           true,      true};
 
     // openmpi/5.0.0, on laptop (Ryzen 4 4700U), at 16MiB
     // Send:           tested down to     8B
@@ -259,7 +259,7 @@ int main(int argc, char **argv)
             *result = bench(test_case, comm_rank, comm_size);
 
             if (comm_rank == 1) {
-                printf("success = %i, average time: %10gμs, total time: %10gs, sigma = %g\n", result->success, result->t_total * 1000000, result->t_total * test_case->iteration_count, result->t_total_std_dev);
+                printf("success = %i, total time: %10gs, average time: %10gμs, standard deviation = %g\n", result->success, result->t_total * test_case->iteration_count, result->t_total * 1000000, result->t_total_std_dev);
                 fflush(stdout);
             }
         }
