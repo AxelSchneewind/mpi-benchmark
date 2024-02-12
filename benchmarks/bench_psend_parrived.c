@@ -54,7 +54,7 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
 			{
 				for (size_t p = 0; p < test_case->partition_count_recv; p++)
 				{
-				    MPI_Request_get_statue(request, &flag, &result->recv_status);
+				    MPI_Request_get_status(request, &flag, &result->recv_status);
 					// if (flag)		// enable if something goes wrong
 					//     break;
 
