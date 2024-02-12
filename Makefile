@@ -44,7 +44,7 @@ put:
 	scp -r pbs benchmarks *.c *.h hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark
 
 get: 
-	rm -f results/*/*
+	rm -r results/
 	scp -r hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark/results .
 
 
