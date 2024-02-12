@@ -52,16 +52,15 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
 			int flag = 0;
 			while (!flag)
 			{
-				flag = 1;
 				for (size_t p = 0; p < test_case->partition_count_recv; p++)
 				{
-				    int _flag = 0;
-				    MPI_Request_get_status(request, &_flag, &result->recv_status);
-				    flag = flag && _flag;
-					if (flag)		// somehow deadlocks without this (in openmpi)
-					    break;
+				    MPI_Request_get_statue(request, &flag, &result->recv_status);
+					// if (flag)		// enable if something goes wrong
+					//     break;
+
+					// ignoring result of MPI_Parrived
+					int _flag;
 					MPI_Parrived(request, p, &_flag);
-					flag = flag && _flag;
 				}
 			}
 
