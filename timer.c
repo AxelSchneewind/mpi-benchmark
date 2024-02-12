@@ -24,10 +24,10 @@ void timer_stop(timer* t) {
 	t->count += 1;
 	t->sum += delta;
 
-	double new_average = t->sum / t->count;
+	double new_average = t->average + (delta / (double)t->count);
 
 	// compute standard deviation (https://www.johndcook.com/blog/standard_deviation/)
-	t->standard_deviation = t->standard_deviation + (delta - t->average) * (delta - new_average);
+	t->standard_deviation += (delta - t->average) * (delta - new_average);
 	t->average = new_average;
 }
 
@@ -36,5 +36,5 @@ double timer_mean(timer* t) {
 }
 
 double timer_std_dev(timer* t) {
-	return sqrt(t->standard_deviation / (double)t->count);
+	return sqrt(t->standard_deviation / (double)(t->count - 1));
 }

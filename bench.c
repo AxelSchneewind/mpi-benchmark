@@ -164,7 +164,7 @@ int main(int argc, char **argv)
     // init test cases
     const MPI_Count buffer_size = 4 * MB;
     //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6, Win = 7, Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
-    bool use_mode[ModeCount] = {    true,      true,          true,              true,              true,          false,          true,    true,      true,              true,              false,                      false,              false};
+    bool use_mode[ModeCount] = {    true,      true,          true,              true,              true,          false,          true,    true,      true,              true,               true,                      false,              false};
 
     // openmpi/5.0.0, on laptop (Ryzen 4 4700U), at 16MiB
     // Send:           tested down to     8B
@@ -215,7 +215,7 @@ int main(int argc, char **argv)
     test_cases_init(buffer_size, 100, use_mode, min_partition_size, max_partition_size, send_patterns, sizeof(send_patterns) / sizeof(SendPattern));
 
     //
-    if (comm_rank == 1)
+    if (comm_rank == 0)
         printf("Running %i tests: \n", test_cases_get_count());
 
     // set up result file for this rank
@@ -228,7 +228,7 @@ int main(int argc, char **argv)
         TestCase *test_case = get_test_case(i);
         Result *result = get_result(i);
 
-        if (comm_rank == 1)
+        if (comm_rank == 0)
         {
             if (test_case->partition_size == test_case->partition_size_recv)
                 printf("Running test %.4li in mode %15s, buffer size %9lli, partition size %7lli, iteration count %3li, send pattern %i :\n\t", i, mode_names[test_case->mode], test_case->buffer_size, test_case->partition_size, test_case->iteration_count, test_case->send_pattern_num);
@@ -250,15 +250,15 @@ int main(int argc, char **argv)
         if (i > 0 && test_case->mode == get_test_case(i - 1)->mode && get_result(i - 1)->t_total * test_case->iteration_count > time_limit) {
             *result = *get_result(i-1);
 
-            if (comm_rank == 1){
+            if (comm_rank == 0){
                 printf("time limit exceeded in previous run, not running benchmark\n"); 
                 fflush(stdout);
             }
         } else {    // otherwise, run benchmark
             *result = bench(test_case, comm_rank, comm_size);
 
-            if (comm_rank == 1) {
-                printf("success = %i, total time: %10gs, average time: %10gμs, standard deviation = %g\n", result->success, result->t_total * test_case->iteration_count, result->t_total * 1000000, result->t_total_std_dev);
+            if (comm_rank == 0) {
+                printf("success = %i, total time: %10gs, average time: %10gμs, standard deviation = %10g\n", result->success, result->t_total * test_case->iteration_count, result->t_total * 1000000, result->t_local_std_dev);
                 fflush(stdout);
             }
         }
@@ -272,7 +272,7 @@ int main(int argc, char **argv)
 
     MPI_Finalize();
 
-    if (comm_rank == 1)
+    if (comm_rank == 0)
     {
         printf("done, success: %d\n", success);
     }
