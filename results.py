@@ -7,7 +7,7 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 
 
-mode_names = ['Send', 'Isend', 'IsendTest', 'IsendThenTest', 'IsendTestall', 'Psend', 'PsendParrived', 'Psend progress', 'Psend progress threaded', 'PsendThreaded', 'custom Psend', 'WinSingle', 'Win']
+mode_names = ['Send', 'Isend', 'IsendTest', 'IsendThenTest', 'IsendTestall', 'custom Psend', 'WinSingle', 'Win', 'Psend', 'PsendParrived', 'Psend progress', 'Psend progress threaded', 'PsendThreaded' ]
 send_pattern_names = [ "linear", "linear inverse", "stride (128B)", "stride (1KB)", "random", "random burst (128B)" "random burst (1KB)" ]
 
 def plot(data, ax, mode, columns, domain=None, ylabel=None):
@@ -116,14 +116,12 @@ def plot_times(data):
     plot(data, ax[0,2],  2, column_names, domain, ylabel=ylabel)
     plot(data, ax[1,0],  3, column_names, domain, ylabel=ylabel)
     plot(data, ax[1,1],  4, column_names, domain, ylabel=ylabel)
-    plot(data, ax[1,2],  5, column_names, domain, ylabel=ylabel)
-    plot(data, ax[2,0],  6, column_names, domain, ylabel=ylabel)
-    plot(data, ax[2,1],  7, column_names, domain, ylabel=ylabel)
-    plot(data, ax[2,2],  8, column_names, domain, ylabel=ylabel)
-    plot(data, ax[3,0],  9, column_names, domain, ylabel=ylabel)
-    # plot(data, ax[3,1], 10, column_names, domain, ylabel=ylabel)
-    plot(data, ax[3,1], 11, column_names, domain, ylabel=ylabel)
-    plot(data, ax[3,2], 12, column_names, domain, ylabel=ylabel)
+    plot(data, ax[1,2],  6, column_names, domain, ylabel=ylabel)
+    plot(data, ax[2,0],  7, column_names, domain, ylabel=ylabel)
+    plot(data, ax[2,1],  8, column_names, domain, ylabel=ylabel)
+    plot(data, ax[2,2],  9, column_names, domain, ylabel=ylabel)
+    plot(data, ax[3,0], 10, column_names, domain, ylabel=ylabel)
+    plot(data, ax[3,1], 12, column_names, domain, ylabel=ylabel)
     plt.show()
 
 
