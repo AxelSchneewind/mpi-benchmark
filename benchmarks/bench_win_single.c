@@ -53,10 +53,9 @@ void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
 	MPI_Barrier(MPI_COMM_WORLD);
 	timers_stop_global(timers);
 
+	MPI_Win_free(&window);
+	MPI_Barrier(MPI_COMM_WORLD);
+
 	timers_store(timers, result);
 	timers_free(timers);
-
-	MPI_Win_free(&window);
-
-	MPI_Barrier(MPI_COMM_WORLD);
 };
