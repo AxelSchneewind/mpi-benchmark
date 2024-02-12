@@ -163,8 +163,8 @@ int main(int argc, char **argv)
 
     // init test cases
     const MPI_Count buffer_size = 4 * MB;
-    //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6, Win = 7, Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
-    bool use_mode[ModeCount] = {    true,      true,          true,              true,              true,          false,          true,    true,      true,              true,               true,                      false,              false};
+    //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
+    bool use_mode[ModeCount] = {    true,      true,          true,              true,             true,           false,          true,               true,        true,              true,               true,                      false,              false};
 
     // openmpi/5.0.0, on laptop (Ryzen 4 4700U), at 16MiB
     // Send:           tested down to     8B
@@ -178,11 +178,11 @@ int main(int argc, char **argv)
     // Win:            tested down to   512B, fails at 256B (16MiB / 64Ki) due to mmap error 12
 
     const MPI_Count min_partition_size[ModeCount] =
-    //         Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4,     Psend = 5, PsendParrived = 6, PsendProgress = 7, PsendProgressThreaded = 8, PSendThreaded = 9, CustomPsend = 10, WinSingle = 11, Win = 12
-        {           512,       512,           512,               512,              512,           512,              2048,               512,                      4096,               512,             4096,          4096, buffer_size / KB  };
+    //         Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
+        {           512,       512,           512,               512,              512,            4096,          2048, buffer_size / 1024,         512,               512,                512,                        512,                512 };
     const MPI_Count max_partition_size[ModeCount] =                                                                                         
-    //         Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4,     Psend = 5, PsendParrived = 5, PsendProgress = 6, PsendProgressThreaded = 7, PSendThreaded = 8, CustomPsend = 9, WinSingle = 10, Win = 11
-        {   buffer_size, buffer_size,   buffer_size,       buffer_size,      buffer_size, buffer_size,       buffer_size,       buffer_size,               buffer_size,       buffer_size,     buffer_size,    buffer_size, buffer_size };
+    //         Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
+        {   buffer_size, buffer_size, buffer_size,       buffer_size,      buffer_size,     buffer_size,   buffer_size,        buffer_size, buffer_size,       buffer_size,        buffer_size,                buffer_size,        buffer_size };
 
     // openmpi/5.0.0, on hawk, at  64MiB
     // Send:           tested down to     1B,
