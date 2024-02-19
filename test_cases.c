@@ -21,6 +21,7 @@ struct test_cases {
     TestCase *test_cases;
     Result *results;
 
+    // TODO make more readable
     // [index of partition size][index of pattern]
     unsigned int ***partition_send_patterns;
     int num_partition_sizes;
@@ -56,6 +57,7 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use
     struct test_cases* result = malloc(sizeof(struct test_cases));
     result->buffer = malloc(buffer_size);
     result->buffer_size = buffer_size;
+    result->num_send_patterns = byte_send_patterns_count;
 
     // here minimum and maximum over all partition sizes are stored 
     size_t global_min_partition_size = buffer_size;
@@ -104,11 +106,11 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use
     }
 
     // set up partition send patterns
-    size_t num_partition_sizes = 0;
+    result->num_partition_sizes = 0;
     for (MPI_Count partition_size = global_max_partition_size; partition_size >= global_min_partition_size; partition_size = partition_size / 2)
-        num_partition_sizes++;
+        result->num_partition_sizes++;
 
-    result->partition_send_patterns = malloc(sizeof(unsigned int *) * num_partition_sizes);
+    result->partition_send_patterns = malloc(sizeof(unsigned int *) * result->num_partition_sizes);
     {
         size_t size_index = 0;
         for (MPI_Count partition_size = global_max_partition_size; partition_size >= global_min_partition_size; partition_size = partition_size / 2)
