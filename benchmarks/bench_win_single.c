@@ -23,6 +23,13 @@ void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
 	timer *timers;
 	timers_init(&timers, test_case, result);
 
+	// warmup
+	if (comm_rank == 0)
+	{
+		MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, MPI_MODE_NOCHECK, window);
+		MPI_Win_unlock(1, window);
+	}
+
 	MPI_Barrier(MPI_COMM_WORLD);
 	timers_start_global(timers);
 
