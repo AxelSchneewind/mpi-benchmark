@@ -53,4 +53,6 @@ void bench_isend_then_test(TestCase *test_case, Result *result, int comm_rank)
 
 	timers_store(timers, result);
 	timers_free(timers);
+
+	free(requests);
 };
