@@ -13,6 +13,7 @@
 #include "math.h"
 
 #include <time.h>
+#include <stdlib.h>
 
 // perform some virtual work on a partition
 void work(const MPI_Count partition_size)
@@ -105,15 +106,30 @@ void close_result_file(FILE *file)
     fclose(file);
 }
 
+void init_buffer(char* buffer, int size) {
+    srand(234);
+    for (size_t i = 0; i < size; i++)
+    {
+        buffer[i] = (char)(rand());
+    }
+}
+
+bool check_buffer(char* buffer, int size) {
+    srand(234);
+    for (size_t i = 0; i < size; i++) {
+        if (buffer[i] != ((char)rand())) {
+            return false;
+        }
+    }
+    return true;
+}
+
 Result bench(TestCase *test_case, int comm_rank, int comm_size)
 {
     // init send buffer with 0s and recv buffer with 1s
     if (comm_rank == 0)
     {
-        for (size_t i = 0; i < test_case->buffer_size; i++)
-        {
-            test_case->buffer[i] = (char)((i * 89261) % 137);
-        }
+        init_buffer(test_case->buffer, test_case->buffer_size);
     } else {
         memset(test_case->buffer, 1, test_case->buffer_size * sizeof(char));
     }
@@ -131,11 +147,7 @@ Result bench(TestCase *test_case, int comm_rank, int comm_size)
     result.bandwidth = ((double)test_case->buffer_size) / result.t_total;
 
     // check that data was transmitted correctly
-    bool correct = true;
-    for (size_t i = 0; i < test_case->buffer_size; i++)
-        if (test_case->buffer[i] != (char)((i * 89261) % 137))
-            correct = false;
-    result.success = correct;
+    result.success = check_buffer(test_case->buffer, test_case->buffer_size);
 
     return result;
 }
@@ -152,7 +164,6 @@ int main(int argc, char **argv)
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &thread_support);
     if (thread_support != MPI_THREAD_MULTIPLE)
         return -1;
-    // MPI_Init(&argc, &argv);
 
     int comm_rank, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
@@ -205,28 +216,29 @@ int main(int argc, char **argv)
     // 
     SendPattern send_patterns[] = {
         Linear,
-        LinearInverse,
         Stride128,
-        Stride1K,
         Random,
-        RandomBurst128,
-        RandomBurst1K
+        RandomBurst128
+        //  , RandomBurst1K,
+        //  LinearInverse,
+        //  Stride1K
     }; 
-    test_cases_init(buffer_size, 100, use_mode, min_partition_size, max_partition_size, send_patterns, sizeof(send_patterns) / sizeof(SendPattern));
+    TestCases tests;
+    test_cases_init(buffer_size, 2, use_mode, min_partition_size, max_partition_size, send_patterns, sizeof(send_patterns) / sizeof(SendPattern), &tests);
 
     //
     if (comm_rank == 0)
-        printf("Running %i tests: \n", test_cases_get_count());
+        printf("Running %i tests: \n", test_cases_get_count(tests));
 
     // set up result file for this rank
     FILE *result_file = open_result_file(comm_rank);
     bool success = comm_rank == 1;  // don't use success value on rank 0
 
     // run test cases
-    for (size_t i = 0; i < test_count; i++)
+    for (size_t i = 0; i < test_cases_get_count(tests); i++)
     {
-        TestCase *test_case = get_test_case(i);
-        Result *result = get_result(i);
+        TestCase *test_case = test_cases_get_test_case(tests, i);
+        Result *result = test_cases_get_result(tests, i);
 
         if (comm_rank == 0)
         {
@@ -238,7 +250,7 @@ int main(int argc, char **argv)
         }
 
         // perform warmup run when switching transfer mode as first run performs worse than the following ones
-        if (i == 0 || test_case->mode != get_test_case(i - 1)->mode)
+        if (i == 0 || test_case->mode != test_cases_get_test_case(tests, i - 1)->mode)
         {
             // use copy of the current test case for warmup
             TestCase warmup = *test_case;
@@ -247,8 +259,8 @@ int main(int argc, char **argv)
 
         // if time limit was exceeded in last test, don't bench this mode any more
         double time_limit = 2.0;
-        if (i > 0 && test_case->mode == get_test_case(i - 1)->mode && get_result(i - 1)->t_total * test_case->iteration_count > time_limit) {
-            *result = *get_result(i-1);
+        if (i > 0 && test_case->mode == test_cases_get_test_case(tests, i - 1)->mode && test_cases_get_result(tests, i - 1)->t_total * test_case->iteration_count > time_limit) {
+            *result = *test_cases_get_result(tests, i-1);
 
             if (comm_rank == 0){
                 printf("time limit exceeded in previous run, not running benchmark\n"); 
@@ -268,7 +280,7 @@ int main(int argc, char **argv)
     }
 
     close_result_file(result_file);
-    test_cases_free();
+    test_cases_free(&tests);
 
     MPI_Finalize();
 
