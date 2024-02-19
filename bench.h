@@ -4,6 +4,7 @@
 
 #include "mpi.h"
 #include "stdlib.h"
+#include <time.h>
 
 
 typedef enum
@@ -16,15 +17,17 @@ typedef enum
 	CustomPsend        ,
 	WinSingle          ,
 	Win                ,
-#ifndef DISABLE_PSEND
 	Psend              ,
 	PsendParrived      ,
 	PsendProgress      ,
 	PsendProgressThread,
 	PsendThreaded      ,
-#endif
 	ModeCount
 } Mode;
+
+static int is_psend(Mode mode) {
+    return (mode == Psend || mode == PsendThreaded || mode == PsendProgress || mode == PsendParrived || mode == PsendProgressThread);
+}
 
 typedef struct
 {
@@ -109,16 +112,22 @@ static RunMethod const mode_methods[ModeCount] = {
 	{ &bench_isend_testall },
 	{ &bench_custom_psend },
 	{ &bench_win_single },
-	{ &bench_win }
+	{ &bench_win },
 #ifndef DISABLE_PSEND
-	, 
 	{ &bench_psend },
 	{ &bench_psend_parrived },
 	{ &bench_psend_progress },
 	{ &bench_psend_progress_thread },
 	{ &bench_psend_threaded }
+#else 
+	{ &bench_send },
+	{ &bench_send },
+	{ &bench_send },
+	{ &bench_send },
+	{ &bench_send }
 #endif
 };
+
 
 static const char* const mode_names[ModeCount] = {
 	"Send",
@@ -128,19 +137,15 @@ static const char* const mode_names[ModeCount] = {
 	"IsendTestall",
 	"Psendcustom",
 	"WinSingle",
-	"Win"
-#ifndef DISABLE_PSEND
-	,
+	"Win",
 	"Psend",
 	"PsendParrived",
 	"PsendProgress",
 	"PsendProgressThreaded",
 	"PsendThreaded"
-#endif
 };
 
 
-#include <time.h>
 
 extern void work(const MPI_Count partition_size);
 
