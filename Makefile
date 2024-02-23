@@ -2,7 +2,7 @@
 ### FOR LOCAL TESTING
 
 MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
-#MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
+# MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
 
 MPI_RUN=$(MPI_DIR)mpirun
 MPI_CC=$(MPI_DIR)mpicc
@@ -16,17 +16,20 @@ bench_dbg: $(SRC) bench.h test_cases.h
 	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I. -lm
 
 bench: $(SRC) bench.h test_cases.h
-	$(MPI_CC) $(SRC) -o bench -lm -lpthread -I. -Wall
-#-O3
+	$(MPI_CC) $(SRC) -o bench -lm -lpthread -I. -Wall -Og -g -DNDEBUG
 
 
 run: bench
-	$(MPI_RUN) -n 2 ./bench 
+	$(MPI_RUN) ob1 -n 2 ./bench 
 
 #$(MPI_RUN) --mca pml ob1 -n 2 ./bench 
 
+run_valgrind: bench
+	$(MPI_RUN) -n 2 valgrind --suppressions=$(MPI_DIR)/../share/openmpi/openmpi-valgrind.supp --leak-check=yes --log-file=valgrind-%p.txt ./bench 
+
+
 debug: bench_dbg
-	$(MPI_RUN) -n 2 ./bench_dbg 
+	$(MPI_RUN) -n 2 ddd ./bench_dbg 
 
 get_status: get_status.c
 	$(MPI_CC) get_status.c -o get_status -g -lm -lpthread -I. -Wall
