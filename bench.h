@@ -1,60 +1,17 @@
 #pragma once 
 
 #include "timer.h"
+#include "send_patterns.h"
+#include "test_cases.h"
 
 #include "mpi.h"
 #include "stdlib.h"
+#include <stdio.h>
 #include <time.h>
 
 
-typedef enum
-{
-	Send =             0,
-	Isend              ,
-	IsendTest          ,
-	IsendThenTest      ,
-	IsendTestall       ,
-	CustomPsend        ,
-	WinSingle          ,
-	Win                ,
-	Psend              ,
-	PsendParrived      ,
-	PsendProgress      ,
-	PsendProgressThread,
-	PsendThreaded      ,
-	ModeCount
-} Mode;
 
-static int is_psend(Mode mode) {
-    return (mode == Psend || mode == PsendThreaded || mode == PsendProgress || mode == PsendParrived || mode == PsendProgressThread);
-}
-
-typedef struct
-{
-	int success;
-	double t_local;			// in seconds
-	double t_total;			// in seconds
-	double t_total_std_dev; // standard deviation in seconds (over each run)
-	double t_local_std_dev; // standard deviation in seconds (over each run)
-	double bandwidth;		// in bytes per second
-	MPI_Status send_status;
-	MPI_Status recv_status;
-} Result;
-
-struct TestCase;
-typedef struct {void (*run)(struct TestCase* test_case, Result *result, int comm_rank); } RunMethod;
-
-enum SendPattern {
-	Linear = 0,
-	LinearInverse,
-	Stride128,
-	Stride1K,
-	Random,
-    RandomBurst128,
-    RandomBurst1K,
-	SendPatternCount
-};
-typedef enum SendPattern SendPattern;
+int is_psend(Mode mode);
 
 static const char* const send_pattern_identifiers[SendPatternCount] = {
     "linear",
@@ -65,26 +22,6 @@ static const char* const send_pattern_identifiers[SendPatternCount] = {
     "random burst (128B at a time)",
     "random burst (1KB at a time)"
 };
-
-
-
-
-struct TestCase
-{
-	Mode mode;
-	RunMethod method;
-	char* buffer;
-	enum SendPattern send_pattern_num;
-	unsigned int* send_pattern;
-	size_t iteration_count;
-	MPI_Count buffer_size;
-	MPI_Count partition_size;
-	MPI_Count partition_size_recv; 		// for now, only used by Psend
-	MPI_Count partition_count;
-	MPI_Count partition_count_recv;
-};
-typedef struct TestCase TestCase;
-
 
 extern void bench_send(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_isend(TestCase *test_case, Result *result, int comm_rank);
@@ -158,3 +95,18 @@ extern void timers_free(timer* timers);
 extern void timers_store(timer* timers, Result* result);
 
 extern Result bench(TestCase *test_case, int comm_rank, int comm_size);
+
+
+
+// macro for checking that mpi call was successfull
+#define MPI_CHECK(x)                                                           \
+  do {                                                                         \
+    int __ret = (x);                                                           \
+    if (MPI_SUCCESS != __ret) {                                                \
+      char err_string[MPI_MAX_ERROR_STRING];                                   \
+      int err_string_len = 0;                                                  \
+      MPI_Error_string(__ret, err_string, &err_string_len);                    \
+      fprintf(stderr, "(%s:%d) ERROR: MPI call returned error code %d (%s)",   \
+              __FILE__, __LINE__, __ret, err_string);                          \
+    }                                                                          \
+  } while (0)

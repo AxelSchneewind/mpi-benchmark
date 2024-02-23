@@ -15,6 +15,7 @@
 #include <time.h>
 #include <stdlib.h>
 
+
 // perform some virtual work on a partition
 void work(const MPI_Count partition_size)
 {
@@ -175,7 +176,8 @@ int main(int argc, char **argv)
     // init test cases
     const MPI_Count buffer_size = 4 * MB;
     //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
-    bool use_mode[ModeCount] = {    true,      true,          true,              true,             true,           false,          true,               true,        true,              true,               true,                      false,              false};
+    // bool use_mode[ModeCount] = {    true,      true,          true,              true,             true,           false,          true,               true,        true,              true,               true,                      false,              false};
+    bool use_mode[ModeCount] = {   false,     false,         false,             false,            false,           false,         false,              false,       false,             false,               true,                       true,              false};
 
     // openmpi/5.0.0, on laptop (Ryzen 4 4700U), at 16MiB
     // Send:           tested down to     8B
@@ -190,7 +192,8 @@ int main(int argc, char **argv)
 
     const MPI_Count min_partition_size[ModeCount] =
     //         Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
-        {           512,       512,           512,               512,              512,            4096,          2048, buffer_size / 1024,         512,               512,                512,                        512,                512 };
+    //  {           512,       512,           512,               512,              512,            4096,          2048, buffer_size / 1024,         512,               512,                512,                        512,                512 };
+        {          1024,      1024,          1024,              1024,             1024,            4096,          2048, buffer_size / 1024,        1024,              1024,               1024,                       1024,               1024 };
     const MPI_Count max_partition_size[ModeCount] =                                                                                         
     //         Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
         {   buffer_size, buffer_size, buffer_size,       buffer_size,      buffer_size,     buffer_size,   buffer_size,        buffer_size, buffer_size,       buffer_size,        buffer_size,                buffer_size,        buffer_size };
@@ -224,7 +227,7 @@ int main(int argc, char **argv)
         //  Stride1K
     }; 
     TestCases tests;
-    test_cases_init(buffer_size, 2, use_mode, min_partition_size, max_partition_size, send_patterns, sizeof(send_patterns) / sizeof(SendPattern), &tests);
+    test_cases_init(buffer_size, 1, use_mode, min_partition_size, max_partition_size, send_patterns, sizeof(send_patterns) / sizeof(SendPattern), &tests);
 
     //
     if (comm_rank == 0)
@@ -232,7 +235,7 @@ int main(int argc, char **argv)
 
     // set up result file for this rank
     FILE *result_file = open_result_file(comm_rank);
-    bool success = comm_rank == 1;  // don't use success value on rank 0
+    bool success = (comm_rank == 0);  // don't use success value on rank 1
 
     // run test cases
     for (size_t i = 0; i < test_cases_get_count(tests); i++)

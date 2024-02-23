@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 void make_linear_pattern(unsigned int *result, size_t count)
 {
@@ -80,53 +81,33 @@ void make_random_burst_pattern(unsigned int *result, size_t count, size_t burst_
     free(offsets);
 }
 
-void make_send_pattern(unsigned int *result, size_t count, SendPattern pattern)
-{
-    switch (pattern)
-    {
-    case Linear:
-        make_linear_pattern(result, count);
-        break;
-    case LinearInverse:
-        make_linear_inverse_pattern(result, count);
-        break;
-    case Stride1K:
-        make_stride_pattern(result, count, 1024);
-        break;
-    case Stride128:
-        make_stride_pattern(result, count, 128);
-        break;
-    case Random:
-        make_random_pattern(result, count);
-        break;
-    case RandomBurst128:
-        make_random_burst_pattern(result, count, 128);
-        break;
-    case RandomBurst1K:
-        make_random_burst_pattern(result, count, 1024);
-        break;
-    
-    default:
-        break;
-    }
-}
 
-void make_partition_send_pattern(const unsigned int* byte_send_pattern, unsigned int* partition_send_pattern, size_t byte_count, size_t partition_size) {
+void make_partition_send_pattern(const permutation byte_send_pattern, permutation partition_send_pattern, size_t byte_count, size_t partition_size) {
     size_t partition_count = byte_count / partition_size;
-    size_t *num_ready = malloc(sizeof(size_t) * partition_count);
-    memset(num_ready, 0, sizeof(size_t) * partition_count);
+    size_t *num_ready = calloc(partition_count, sizeof(size_t));
+    // memset(num_ready, 0, sizeof(size_t) * partition_count);
 
     size_t j = 0;
     for (size_t i = 0; i < byte_count; i++)
     {
         size_t partition_index = byte_send_pattern[i] / partition_size;
+        assert(partition_index >= 0 && partition_index < partition_count);
         num_ready[partition_index] += 1;
 
         if (num_ready[partition_index] == partition_size) {
+            assert(j >= 0 && j < partition_count);
             partition_send_pattern[j++] = partition_index;
-            num_ready[partition_index] += 1;
         }
+        assert(num_ready[partition_index] <= partition_size);
     }
 
     free(num_ready);
 }
+
+void send_pattern_create(permutation * out, size_t num_elements) {
+    *out = calloc(num_elements, sizeof(unsigned int));
+};
+void send_pattern_destroy(permutation * out) {
+    free(*out);
+    *out = NULL;
+};
