@@ -7,7 +7,7 @@ void bench_send(TestCase *test_case, Result *result, int comm_rank)
 	timer *timers;
 	timers_init(&timers, test_case, result);
 
-	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 	timers_start_global(timers);
 
 	for (size_t i = 0; i < test_case->iteration_count; i++)
@@ -20,7 +20,7 @@ void bench_send(TestCase *test_case, Result *result, int comm_rank)
 			{
 				unsigned int partition_num = test_case->send_pattern[p];
 				work(test_case->partition_size);
-				MPI_Send(test_case->buffer + test_case->partition_size * partition_num, test_case->partition_size, MPI_BYTE, 1, 0, MPI_COMM_WORLD);
+				MPI_CHECK(MPI_Send(test_case->buffer + test_case->partition_size * partition_num, test_case->partition_size, MPI_BYTE, 1, 0, MPI_COMM_WORLD));
 			}
 
 			timers_stop_local(timers);
@@ -32,14 +32,14 @@ void bench_send(TestCase *test_case, Result *result, int comm_rank)
 			for (size_t p = 0; p < test_case->partition_count; p++)
 			{
 				unsigned int partition_num = test_case->send_pattern[p];
-				MPI_Recv(test_case->buffer + test_case->partition_size * partition_num, test_case->partition_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &result->recv_status);
+				MPI_CHECK(MPI_Recv(test_case->buffer + test_case->partition_size * partition_num, test_case->partition_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &result->recv_status));
 			}
 
 			timers_stop_local(timers);
 		}
 	}
 
-	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 
 	timers_stop_global(timers);
 	timers_store(timers, result);

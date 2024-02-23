@@ -178,15 +178,15 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 
 	if (comm_rank == 0)
 	{
-		MPI_Psend_init(test_case->buffer, test_case->partition_count, test_case->partition_size, MPI_CHAR, 1, 0, MPI_COMM_WORLD, MPI_INFO_ENV, &request);
+		MPI_CHECK(MPI_Psend_init(test_case->buffer, test_case->partition_count, test_case->partition_size, MPI_CHAR, 1, 0, MPI_COMM_WORLD, MPI_INFO_ENV, &request));
 	}
 	else if (comm_rank == 1)
 	{
-		MPI_Precv_init(test_case->buffer, test_case->partition_count_recv, test_case->partition_size_recv, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_INFO_ENV, &request);
+		MPI_CHECK(MPI_Precv_init(test_case->buffer, test_case->partition_count_recv, test_case->partition_size_recv, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_INFO_ENV, &request));
 	}
 
 	// run
-	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 	timers_start_global(timers);
 
 	progress_thread progress;
@@ -199,7 +199,7 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 		{
 			timers_start_local(timers);
 
-			MPI_Start(&request);
+			MPI_CHECK(MPI_Start(&request));
 #if ENABLE_STATUS == 1
 			printf("%d, R0: MPI_Start(&request);        iteration %d\n", __LINE__, i);
 			assert(0 == fflush(stdout));
@@ -211,12 +211,12 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 			{
 				unsigned int partition_num = test_case->send_pattern[p];
 				work(test_case->partition_size);
-				MPI_Pready(partition_num, request);
+				MPI_CHECK(MPI_Pready(partition_num, request));
 			}
 
 
 			OUTPUT_RANK(progress_thread_pause(&progress));
-			OUTPUT_RANK(MPI_Wait(&request, &result->send_status));
+			OUTPUT_RANK(MPI_CHECK(MPI_Wait(&request, &result->send_status)));
 
 			timers_stop_local(timers);
 		}
@@ -228,7 +228,7 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 		{
 			timers_start_local(timers);
 
-			MPI_Start(&request);
+			MPI_CHECK(MPI_Start(&request));
 #if ENABLE_STATUS == 1
 			printf("%d, R1: MPI_Start(&request);        iteration %d\n", __LINE__, i);
 			assert(0 == fflush(stdout));
@@ -237,22 +237,22 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
             int flag = false;
             while(!flag)
             {
-                MPI_Request_get_status(request, &flag, MPI_STATUS_IGNORE);
+                MPI_CHECK(MPI_Request_get_status(request, &flag, MPI_STATUS_IGNORE));
             }
 
-			OUTPUT_RANK(MPI_Wait(&request, &result->recv_status));
+			OUTPUT_RANK(MPI_CHECK(MPI_Wait(&request, &result->recv_status)));
 
 			timers_stop_local(timers);
 		}
 	}
 
-	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 	timers_stop_global(timers);
 
 	OUTPUT_RANK(progress_thread_destroy(&progress));
-	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 
-	OUTPUT_RANK(MPI_Request_free(&request));
+	OUTPUT_RANK(MPI_CHECK(MPI_Request_free(&request)));
 
 	timers_store(timers, result);
 	timers_free(timers);
