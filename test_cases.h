@@ -61,7 +61,7 @@ struct TestCase
 };
 typedef struct TestCase TestCase;
 
-typedef struct Result
+struct Result
 {
 	int success;
 	double t_local;			// in seconds

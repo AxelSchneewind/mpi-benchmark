@@ -104,10 +104,11 @@ void make_partition_send_pattern(const permutation byte_send_pattern, permutatio
     free(num_ready);
 }
 
-void send_pattern_create(permutation * out, size_t num_elements) {
+void permutation_create(permutation * out, size_t num_elements) {
     *out = calloc(num_elements, sizeof(unsigned int));
 };
-void send_pattern_destroy(permutation * out) {
+
+void permutation_destroy(permutation * out) {
     free(*out);
     *out = NULL;
 };

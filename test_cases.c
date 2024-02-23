@@ -1,5 +1,6 @@
-#include "bench.h"
+
 #include "send_patterns.h"
+#include "bench.h"
 
 #include "test_cases.h"
 
@@ -87,7 +88,7 @@ Result *test_cases_get_result(TestCases tests, int i)
 }
 
 void partition_send_pattern_create(permutation* result_ptr, const permutation byte_send_pattern, int buffer_size, int partition_size) {
-    send_pattern_create(result_ptr, buffer_size / partition_size);
+    permutation_create(result_ptr, buffer_size / partition_size);
     make_partition_send_pattern(byte_send_pattern, *result_ptr, buffer_size, partition_size);
 }
 
