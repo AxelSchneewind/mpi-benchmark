@@ -2,29 +2,48 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdbool.h>
+
+#define minimum(a,b) (a<b) ? a : b;
+#define maximum(a,b) (a>b) ? a : b;
 
 // node representing a contiguous interval
 struct node {
     struct node* parent;
     struct node* left;
     struct node* right;
-    int min;
-    int max;
     int min_marked;
     int max_marked;
 };
 typedef struct node node;
 
+bool has_left(node* n) {
+    return NULL != n->left;
+}
+bool has_right(node* n) {
+    return NULL != n->right;
+}
+
+void node_init(node* n) {
+    n->parent = NULL;
+    n->left = NULL;
+    n->right = NULL;
+    n->min_marked = -1;
+    n->max_marked = -1;
+}
+
 void node_set_left(node* n, node* child) {
     assert(NULL != n);
     n->left = child;
-    child->parent = n;
+    if (NULL != child)
+        child->parent = n;
 }
 
 void node_set_right(node* n, node* child) {
     assert(NULL != n);
     n->right = child;
-    child->parent = n;
+    if (NULL != child)
+        child->parent = n;
 }
 
 node* left_most_child(node* n) {
@@ -47,109 +66,191 @@ void expand_left(node* n) {
     assert(NULL == n->left);
 
     node* new_node = malloc(sizeof(node));
-    new_node->min = n->min;
-    new_node->max = n->min_marked;
-    
-    if (n->min_marked <= new_node->max) {
-        new_node->min_marked = n->min_marked;
-        new_node->max_marked = n->max;
-    } else {
-        new_node->min_marked = (new_node->max + new_node->min) / 2;
-        new_node->max_marked = (new_node->max + new_node->min) / 2;
-    }
+    node_init(new_node);
 
     n->left = new_node;
+    new_node->parent = n;
 }
 void expand_right(node* n) {
     assert(NULL != n);
     assert(NULL == n->right);
 
     node* new_node = malloc(sizeof(node));
-    new_node->max = n->max;
-    new_node->min = n->max_marked;
+    node_init(new_node);
     
-    if (n->max_marked > new_node->min) {
-        new_node->min_marked = new_node->min;
-        new_node->max_marked = n->max_marked;
-    } else {
-        new_node->min_marked = (new_node->max + new_node->min) / 2;
-        new_node->max_marked = (new_node->max + new_node->min) / 2;
-    }
-
     n->right = new_node;
+    new_node->parent = n;
 }
 
 void merge_left(node* n) {
     assert(NULL != n);
     node* child = n->left;
     if (NULL == child) return;
+
+    // next ancestor to the left
     node* right_grand_child = right_most_child(child);
 
-    if (right_grand_child->max != n->min || right_grand_child->max_marked != n->min_marked)
+    // if n and grand_child don't make up contiguous interval, no merge possible
+    if (right_grand_child->max_marked != n->min_marked)
         return;
 
-    n->min = right_grand_child->min;
+    // extend min value to min of grand_childs 
     n->min_marked = right_grand_child->min_marked;
 
-    node_set_right(right_grand_child->parent, right_grand_child->left);
+    if (right_grand_child->parent != n) {
+        node_set_right(right_grand_child->parent, right_grand_child->left);
+    } else {
+        node_set_left(n, NULL);
+    }
     free(right_grand_child);
 }
 void merge_right(node* n) {
     assert(NULL != n);
-    node* child = n->left;
+    node* child = n->right;
     if (NULL == child) return;
+
+    // next ancestor to the right
     node* left_grand_child = left_most_child(child);
 
-    if(n->max != left_grand_child->min || n->max_marked != left_grand_child->min_marked)
+    // if n and grand_child don't make up contiguous interval, no merge possible
+    if(left_grand_child->min_marked != n->max_marked)
         return;
 
-    n->max = left_grand_child->max;
+    // extend max value to max of grand_childs 
     n->max_marked = left_grand_child->max_marked;
 
-    node_set_left(left_grand_child->parent, left_grand_child->right);
+    if (left_grand_child->parent != n) {
+        node_set_left(left_grand_child->parent, left_grand_child->right);
+    } else {
+        node_set_right(n, NULL);
+    }
     free(left_grand_child);
 }
 
-void insert(node* root, int mark) {
-    assert(mark >= root->min);
-    assert(mark < root->max);
+void marks_insert(node* root, int min, int max) {
+    assert((NULL == root->left && NULL == root->right) || root->left != root->right);
 
+    // node does not contain interval
     if (root->min_marked == root->max_marked) {
         assert(NULL == root->left);
         assert(NULL == root->right);
-        root->min_marked = mark;
-        root->max_marked = mark + 1;
-        assert(root->min_marked >= root->min);
-        assert(root->max_marked <= root->max);
+        root->min_marked = min;
+        root->max_marked = max;
+        return;
     }
 
-    if (mark == root->min_marked - 1) {
-        root->min_marked--;
+    // given interval is directly to the left of current node
+    if (max == root->min_marked) {
+        root->min_marked = min;
         merge_left(root);
         return;
     }
 
-    if (mark == root->max_marked) {
-        root->max_marked++;
+    // given interval is directly to the right of current node
+    if (min == root->max_marked) {
+        root->max_marked = max;
         merge_right(root);
         return;
     }
 
-    if (mark < root->min_marked - 1) {
+    // given interval is to the left of current node
+    if (max < root->min_marked) {
         if (NULL == root->left) {
             expand_left(root);
         }
-        insert(root->left, mark);
+        marks_insert(root->left, min, max);
         merge_left(root);
     } 
     
-    if (mark > root->max_marked) {
+    // given interval is to the right of current node
+    if (min > root->max_marked) {
         if (NULL == root->right) {
             expand_right(root);
         }
-        insert(root->right, mark);
+        marks_insert(root->right, min, max);
         merge_right(root);
     }
+}
+
+void node_remove(node* n) {
+    if (has_left(n)) {
+        n->min_marked = n->left->min_marked;
+        n->max_marked = n->left->max_marked;
+        node_remove(n->left);
+    } else if (has_right(n)) {
+        n->min_marked = n->right->min_marked;
+        n->max_marked = n->right->max_marked;
+        node_remove(n->right);
+    } else {
+        if (NULL == n->parent)
+            return;
+        if (n->parent->left == n) {
+            node_set_left(n->parent, NULL);
+            free(n);
+        } else {
+            node_set_right(n->parent, NULL);
+            free(n);
+        }
+    }
+} 
+
+void marks_remove(node* root, int min, int max) {
+    if (min >= max) return;
+
+    // interval not contained
+    if (root->min_marked == root->max_marked) {
+        // assert(NULL == root->left);
+        // assert(NULL == root->right);
+        return;
+    }
+
+    if (max <= root->min_marked) {
+        if (has_left(root))
+            marks_remove(root->left, min, max);
+        return;
+    }
+
+    if (min >= root->max_marked) {
+        if (has_right(root))
+            marks_remove(root->right, min, max);
+        return;
+    }
+
+    // given interval is in the right of this node
+    if (max == root->max_marked) {
+        if (root->min_marked <= min) {
+            root->max_marked = min;
+        } else {
+            root->max_marked = root->min_marked;
+            node_remove(root);
+            marks_remove(root->left, min, root->min_marked);
+        }
+    }
+
+    // given interval is in the left of this node
+    else if (min == root->min_marked) {
+        if (root->max_marked >= max) {
+            root->min_marked = max;
+        } else {
+            root->min_marked = root->max_marked;
+            node_remove(root);
+            marks_remove(root->right, root->max_marked, max);
+        }
+    }
+
+    // split
+    else if (max < root->max_marked) {
+        marks_insert(root, root->min_marked, min);
+        root->min_marked = max;
+    } 
+    
+    else if (min > root->min_marked) {
+        marks_insert(root, max, root->max_marked);
+        root->max_marked = min;
+    }
+
+    if (root->min_marked == root->max_marked)
+        node_remove(root);
 }
 
 void node_print(node* n, int level) {
@@ -159,33 +260,46 @@ void node_print(node* n, int level) {
     }
 
     if (NULL == n) {
-        printf("---\n");
+        printf("x\n");
     } else {
-        printf("[%i,%i]: [%i,%i]\n", n->min, n->max, n->min_marked, n->max_marked);
-        node_print(n->left, level + 1);
-        node_print(n->right, level + 1);
+        printf("[%i,%i]\n", n->min_marked, n->max_marked);
+        if (NULL != n->left || NULL != n->right) {
+            node_print(n->left, level + 1);
+            node_print(n->right, level + 1);
+        }
     }
-
 }
 
 
 int main() {
     node root;
-    root.min = 0;
-    root.max = 127;
-    root.min_marked = (root.max + root.min) / 2;
-    root.max_marked = (root.max + root.min) / 2;;
+    node_init(&root);
 
-    insert(&root, 10);
-    insert(&root, 11);
-    insert(&root, 23);
-    insert(&root, 8);
-    insert(&root, 9);
-    insert(&root, 68);
-    insert(&root, 12);
-    insert(&root, 2);
-    insert(&root, 15);
-    insert(&root, 90);
+    const int num_insertions = 10;
+    int min_max[20] = { 
+        10, 11,
+        11, 12,
+        23, 24,
+        6, 9,
+        9, 10,
+        68, 90,
+        12, 13,
+        2, 3,
+        15, 18,
+        90, 91
+    };
 
+    for (int i = 0; i < num_insertions; i++)
+    {
+        marks_insert(&root, min_max[2 * i], min_max[2 * i + 1]);
+    }
+
+    node_print(&root, 0);
+
+    for (int i = num_insertions - 1; i >= 0; i--)
+    {
+        marks_remove(&root, min_max[2 * i], min_max[2 * i + 1]);
+    }
+    
     node_print(&root, 0);
 }
