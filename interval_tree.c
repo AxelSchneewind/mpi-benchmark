@@ -270,13 +270,34 @@ void node_print(node* n, int level) {
     }
 }
 
+void find_interval(node* root, int min_size, int* min, int* max) {
+    *min = root->min_marked;
+    *max = root->max_marked;
+    if (*max - *min >= min_size)
+        return;
+
+    if (has_left(root)) {
+        find_interval(root->left, min_size, min, max);
+        if (*max - *min >= min_size)
+            return;
+    }
+
+    if (has_right(root)) {
+        find_interval(root->right, min_size, min, max);
+        if (*max - *min >= min_size)
+            return;
+    }
+
+    *min = 0;
+    *max = -1;
+}
+
 
 int main() {
     node root;
     node_init(&root);
 
-    const int num_insertions = 10;
-    int min_max[20] = { 
+    int min_max[] = { 
         10, 11,
         11, 12,
         23, 24,
@@ -286,8 +307,10 @@ int main() {
         12, 13,
         2, 3,
         15, 18,
-        90, 91
+        90, 91,
+        100, 1023,
     };
+    const int num_insertions = sizeof(min_max) / sizeof(int) / 2;
 
     for (int i = 0; i < num_insertions; i++)
     {
@@ -296,9 +319,18 @@ int main() {
 
     node_print(&root, 0);
 
-    for (int i = num_insertions - 1; i >= 0; i--)
-    {
-        marks_remove(&root, min_max[2 * i], min_max[2 * i + 1]);
+
+    int min, max;
+    int size = 10;
+    while (size >= 1) {
+        find_interval(&root, size, &min, &max);
+        while (max - min >= size) {
+            printf("found [%i,%i] (>=%i)\n", min, max, size);
+            marks_remove(&root, min, max);
+            node_print(&root, 0);
+            find_interval(&root, size, &min, &max);
+        }
+        size--;
     }
     
     node_print(&root, 0);
