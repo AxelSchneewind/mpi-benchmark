@@ -1,4 +1,5 @@
 #include "interval_tree.h"
+#include <stdio.h>
 
 int main() {
     tree root;
@@ -21,24 +22,24 @@ int main() {
 
     for (int i = 0; i < num_insertions; i++)
     {
-        marks_insert(&root, min_max[2 * i], min_max[2 * i + 1]);
+        marks_insert(root, min_max[2 * i], min_max[2 * i + 1]);
     }
 
-    node_print(&root, 0);
+    node_print(root, 0);
 
 
     int min, max;
     int size = 10;
     while (size >= 1) {
-        find_interval(&root, size, &min, &max);
+        find_interval(root, size, &min, &max);
         while (max - min >= size) {
             printf("found [%i,%i] (>=%i)\n", min, max, size);
-            marks_remove(&root, min, max);
-            node_print(&root, 0);
-            find_interval(&root, size, &min, &max);
+            marks_remove(root, min, max);
+            node_print(root, 0);
+            find_interval(root, size, &min, &max);
         }
         size--;
     }
     
-    node_print(&root, 0);
+    node_print(root, 0);
 }
