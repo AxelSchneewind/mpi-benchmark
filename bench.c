@@ -156,11 +156,11 @@ int main(int argc, char **argv)
         return 0;
 
     // init test cases
-    const MPI_Count buffer_size = 128 * MB;
+    const MPI_Count buffer_size = 8 * MB;
     //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
-    //bool use_mode[ModeCount] = {    true,      true,          true,              true,             true,           false,          true,               true,        true,              true,               true,                      false,              false};
+    bool use_mode[ModeCount] = {    true,      true,          true,              true,             true,           false,          true,               true,        true,              true,              false,                      false,               true};
     // bool use_mode[ModeCount] = {   false,     false,         false,             false,            false,           false,         false,              false,       false,             false,               true,                      false,              false};
-    bool use_mode[ModeCount] = {   false,     false,         false,             false,            false,            true,         false,              false,        true,             false,              false,                     false,             false};
+    //bool use_mode[ModeCount] = {   false,     false,         false,             false,            false,           false,         false,              false,       false,             false,              false,                      false,               true};
 
     // openmpi/5.0.0, on laptop (Ryzen 4 4700U), at 16MiB
     // Send:           tested down to     8B
@@ -217,7 +217,7 @@ int main(int argc, char **argv)
 
     //
     if (comm_rank == 0)
-        printf("Running %i tests: \n", test_cases_get_count(tests));
+        printf("Running %i tests, with buffer size %9lli, iteration count: %i: \n", test_cases_get_count(tests), buffer_size, iterations);
 
     // set up result file for this rank
     FILE *result_file = open_result_file(comm_rank);
@@ -232,14 +232,14 @@ int main(int argc, char **argv)
         if (comm_rank == 0)
         {
             if (test_case->partition_size == test_case->partition_size_recv)
-                printf("Running test %.4li in mode %15s, buffer size %9lli, partition size %7lli, iteration count %3li, send pattern %i :\n\t", i, mode_names[test_case->mode], test_case->buffer_size, test_case->partition_size, test_case->iteration_count, test_case->send_pattern_num);
+                printf("Running test %.4li in mode %15s, partition size %7lli, send pattern %i :\n\t", i, mode_names[test_case->mode], test_case->partition_size, test_case->send_pattern_num);
             else
-                printf("Running test %.4li in mode %15s, buffer size %9lli, partition size %7lli -> %7lli, iteration count %3li, send pattern %i :\n\t", i, mode_names[test_case->mode], test_case->buffer_size, test_case->partition_size, test_case->partition_size_recv, test_case->iteration_count, test_case->send_pattern_num);
+                printf("Running test %.4li in mode %15s, partition size %7lli -> %7lli, send pattern %i :\n\t", i, mode_names[test_case->mode], test_case->partition_size, test_case->partition_size_recv, test_case->send_pattern_num);
             fflush(stdout);
         }
 
         // if time limit was exceeded in last test, don't bench this mode any more
-        double time_limit = 2.0;
+        const double time_limit = 2.0;
         if (i > 0 && test_case->mode == test_cases_get_test_case(tests, i - 1)->mode && test_cases_get_result(tests, i - 1)->timings[Total] * test_case->iteration_count > time_limit) {
             *result = *test_cases_get_result(tests, i-1);
 
