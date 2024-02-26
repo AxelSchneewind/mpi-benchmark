@@ -2,6 +2,7 @@
 
 #include "bench.h"
 #include "send_patterns.h"
+#include "timers.h"
 
 #include <mpi.h>
 #include <stdbool.h>
@@ -30,15 +31,16 @@ enum SendPattern {
 	LinearInverse,
 	Stride128,
 	Stride1K,
+	Stride16K,
 	Random,
     RandomBurst128,
     RandomBurst1K,
+    RandomBurst16K,
 	SendPatternCount
 };
 typedef enum SendPattern SendPattern;
 
 extern void make_send_pattern(permutation result, size_t count, SendPattern pattern);
-
 
 struct TestCase;
 struct Result;
@@ -64,16 +66,16 @@ typedef struct TestCase TestCase;
 struct Result
 {
 	int success;
-	double t_local;			// in seconds
-	double t_total;			// in seconds
-	double t_total_std_dev; // standard deviation in seconds (over each run)
-	double t_local_std_dev; // standard deviation in seconds (over each run)
-	double bandwidth;		// in bytes per second
+    double timings[TimerCount];             // in seconds
+    double timings_std_dev[TimerCount];     // standard deviation in seconds (over each run)
+	double bandwidth;                       // in bytes per second
 	MPI_Status send_status;
 	MPI_Status recv_status;
 };
 typedef struct Result Result;
 
+
+extern void timers_store(timer* timers, Result* result);
 
 struct test_cases;
 typedef struct test_cases* TestCases;
@@ -82,5 +84,5 @@ extern int test_cases_get_count(TestCases tests);
 extern TestCase *test_cases_get_test_case(TestCases tests, int i);
 extern Result *test_cases_get_result(TestCases tests, int i);
 
-extern void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use_mode, const MPI_Count *min_partition_size, const MPI_Count *max_partition_size, const SendPattern *send_patterns, int byte_send_patterns_count, TestCases* tests);
+extern void test_cases_init(MPI_Count buffer_size, int num_repetitions, bool *use_mode, const MPI_Count *min_partition_size, const MPI_Count *max_partition_size, const SendPattern *send_patterns, int byte_send_patterns_count, TestCases* tests);
 extern void test_cases_free(TestCases* tests);

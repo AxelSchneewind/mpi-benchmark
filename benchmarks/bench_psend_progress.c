@@ -52,7 +52,7 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
     MPI_Request request;
 
     timer *timers;
-    timers_init(&timers, test_case, result);
+    timers_init(&timers);
 
     if (comm_rank == 0)
     {
@@ -65,13 +65,14 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
 
     // run
     MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
-    timers_start_global(timers);
+    timers_start(timers, Total);
 
     if (comm_rank == 0)
     {
         for (size_t i = 0; i < test_case->iteration_count; i++)
         {
-            timers_start_local(timers);
+			timers_start(timers, Iteration);
+			timers_start(timers, IterationStartToWait);
 
             // printf("s1\n"); fflush(stdout);
             MPI_CHECK(MPI_Start(&request));
@@ -98,15 +99,17 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
 
             // printf("s3\n"); fflush(stdout);
             // sometimes gets stuck here, but only if MPI_Request_get_status is called
+			timers_stop(timers, IterationStartToWait);
             MPI_CHECK(MPI_Wait(&request, &result->send_status));
             // printf("done\n");
 
-            timers_stop_local(timers);
+            timers_stop(timers, Iteration);
         }
     } else if (comm_rank == 1) {
         for (size_t i = 0; i < test_case->iteration_count; i++)
         {
-            timers_start_local(timers);
+            timers_start(timers, Iteration);
+            timers_start(timers, IterationStartToWait);
 
             MPI_CHECK(MPI_Start(&request));
 
@@ -116,14 +119,15 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
                 MPI_CHECK(MPI_Request_get_status(request, &flag, MPI_STATUS_IGNORE));
             }
 
+			timers_stop(timers, IterationStartToWait);
             MPI_CHECK(MPI_Wait(&request, MPI_STATUS_IGNORE));
 
-            timers_stop_local(timers);
+			timers_stop(timers, Iteration);
         }
     }
 
     MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
-    timers_stop_global(timers);
+    timers_stop(timers, Total);
 
     MPI_CHECK(MPI_Request_free(&request));
 

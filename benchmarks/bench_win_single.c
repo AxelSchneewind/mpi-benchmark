@@ -21,7 +21,7 @@ void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
 	MPI_CHECK(MPI_Win_create(test_case->buffer, test_case->buffer_size, 1, MPI_INFO_ENV, MPI_COMM_WORLD, &window));
 
 	timer *timers;
-	timers_init(&timers, test_case, result);
+	timers_init(&timers);
 
 	// warmup
 	if (comm_rank == 0)
@@ -31,13 +31,14 @@ void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
 	}
 
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
-	timers_start_global(timers);
+	timers_start(timers, Total);
 
 	for (size_t i = 0; i < test_case->iteration_count; i++)
 	{
 		if (comm_rank == 0)
 		{
-			timers_start_local(timers);
+			timers_start(timers, Iteration);
+			timers_start(timers, IterationStartToWait);
 
 			MPI_CHECK(MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, MPI_MODE_NOCHECK, window));
 
@@ -51,14 +52,16 @@ void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
 					test_case->partition_size * partition_num,
 					test_case->partition_size, MPI_BYTE, window));
 			}
+
+			timers_stop(timers, IterationStartToWait);
 			MPI_CHECK(MPI_Win_unlock(1, window));
 
-			timers_stop_local(timers);
+			timers_stop(timers, Iteration);
 		}
 	}
 
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
-	timers_stop_global(timers);
+	timers_stop(timers, Total);
 
 	MPI_CHECK(MPI_Win_free(&window));
 	MPI_Barrier(MPI_COMM_WORLD);

@@ -79,7 +79,7 @@ void *run_recv_thread(void *_args)
 void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank)
 {
 	timer *timers;
-	timers_init(&timers, test_case, result);
+	timers_init(&timers);
 
 	MPI_Request request;
 
@@ -138,16 +138,20 @@ void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank)
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);
-	timers_start_global(timers);
+	timers_start(timers, Total);
 
 	for (size_t i = 0; i < args->test_case->iteration_count; i++)
 	{
+		timers_start(timers, Iteration);
+		timers_start(timers, IterationStartToWait);
 		MPI_Start(&request);
 		for (size_t i = 0; i < thread_count; i++)
 			sem_post(&start_thread[i]);
 		for (size_t i = 0; i < thread_count; i++)
 			sem_wait(&thread_done[i]);
+		timers_stop(timers, IterationStartToWait);
 		MPI_Wait(&request, MPI_STATUS_IGNORE);
+		timers_stop(timers, Iteration);
 	}
 
 	for (size_t i = 0; i < thread_count; i++)
@@ -155,7 +159,7 @@ void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank)
 
 	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Request_free(&request);
-	timers_stop_global(timers);
+	timers_stop(timers, Total);
 
 	timers_store(timers, result);
 	timers_free(timers);

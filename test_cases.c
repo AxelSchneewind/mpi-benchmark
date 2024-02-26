@@ -37,7 +37,7 @@ typedef struct test_cases* TestCases;
 
 int is_psend(Mode mode)
 {
-    return (mode == Psend || mode == PsendThreaded || mode == PsendProgress || mode == PsendParrived || mode == PsendProgressThread);
+    return (mode == Psend || mode == PsendThreaded || mode == PsendProgress || mode == PsendParrived || mode == PsendProgressThread || mode == CustomPsend);
 }
 
 void make_send_pattern(permutation result, size_t count, SendPattern pattern)
@@ -53,6 +53,9 @@ void make_send_pattern(permutation result, size_t count, SendPattern pattern)
     case Stride1K:
         make_stride_pattern(result, count, 1024);
         break;
+    case Stride16K:
+        make_stride_pattern(result, count, 16*1024);
+        break;
     case Stride128:
         make_stride_pattern(result, count, 128);
         break;
@@ -64,6 +67,9 @@ void make_send_pattern(permutation result, size_t count, SendPattern pattern)
         break;
     case RandomBurst1K:
         make_random_burst_pattern(result, count, 1024);
+        break;
+    case RandomBurst16K:
+        make_random_burst_pattern(result, count, 16*1024);
         break;
     
     default:
@@ -118,7 +124,7 @@ void set_send_pattern_count(struct test_cases* tests, int num_partition_sizes, i
  *
  * @param buffer_size size of the buffer in bytes
  */
-void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use_mode, const MPI_Count *min_partition_size, const MPI_Count *max_partition_size, const SendPattern *send_patterns, int byte_send_patterns_count, TestCases* tests)
+void test_cases_init(MPI_Count buffer_size, int num_repetitions, bool *use_mode, const MPI_Count *min_partition_size, const MPI_Count *max_partition_size, const SendPattern *send_patterns, int byte_send_patterns_count, TestCases* tests)
 {
     struct test_cases* result = malloc(sizeof(struct test_cases));
     result->buffer = malloc(sizeof(char) * buffer_size);
@@ -169,7 +175,7 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use
     {
         byte_send_patterns[i] = malloc(sizeof(unsigned int) * buffer_size);
         make_send_pattern(byte_send_patterns[i], buffer_size, send_patterns[i]);
-        printf("Making byte send pattern %s: %i %i %i %i %i %i...\n", send_pattern_identifiers[i], byte_send_patterns[i][0], byte_send_patterns[i][1], byte_send_patterns[i][2], byte_send_patterns[i][3], byte_send_patterns[i][4], byte_send_patterns[i][5]);
+        printf("Making byte send pattern %s: %d %d %d %d %d %d...\n", send_pattern_identifiers[send_patterns[i]], byte_send_patterns[i][0], byte_send_patterns[i][1], byte_send_patterns[i][2], byte_send_patterns[i][3], byte_send_patterns[i][4], byte_send_patterns[i][5]);
     }
 
     // set up partition send patterns
@@ -285,4 +291,13 @@ void test_cases_free(TestCases* tests)
     struct test_cases* test_ptr = *tests;
     _test_cases_free(test_ptr);
     *tests = NULL;
+}
+
+
+void timers_store(timer *timers, Result *result)
+{
+    for (int i = 0; i < TimerCount; i++) {
+        result->timings[i] = timers[i].sum;
+        result->timings_std_dev[i] = timer_std_dev(&timers[i]);
+    }
 }

@@ -18,9 +18,11 @@ static const char* const send_pattern_identifiers[SendPatternCount] = {
     "linear inverse",
     "stride (128B)",
     "stride (1KB)",
+    "stride (16KB)",
     "random",
     "random burst (128B at a time)",
     "random burst (1KB at a time)"
+    "random burst (16KB at a time)"
 };
 
 extern void bench_send(TestCase *test_case, Result *result, int comm_rank);
@@ -72,7 +74,7 @@ static const char* const mode_names[ModeCount] = {
 	"IsendTest",
 	"IsendThenTest",
 	"IsendTestall",
-	"Psendcustom",
+	"PsendCustom",
 	"WinSingle",
 	"Win",
 	"Psend",
@@ -85,14 +87,6 @@ static const char* const mode_names[ModeCount] = {
 
 
 extern void work(const MPI_Count partition_size);
-
-extern void timers_init(timer** timers, TestCase* test_case, Result* result);
-extern void timers_start_global(timer* timers);
-extern void timers_start_local(timer* timers);
-extern void timers_stop_global(timer* timers);
-extern void timers_stop_local(timer* timers);
-extern void timers_free(timer* timers);
-extern void timers_store(timer* timers, Result* result);
 
 extern Result bench(TestCase *test_case, int comm_rank, int comm_size);
 

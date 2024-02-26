@@ -174,7 +174,7 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 	MPI_Request request;
 
 	timer *timers;
-	timers_init(&timers, test_case, result);
+	timers_init(&timers);
 
 	if (comm_rank == 0)
 	{
@@ -187,7 +187,7 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 
 	// run
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
-	timers_start_global(timers);
+	timers_start(timers, Total);
 
 	progress_thread progress;
 	progress_thread_create(&progress);
@@ -197,7 +197,8 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 	{
 		for (size_t i = 0; i < test_case->iteration_count; i++)
 		{
-			timers_start_local(timers);
+			timers_start(timers, Iteration);
+			timers_start(timers, IterationStartToWait);
 
 			MPI_CHECK(MPI_Start(&request));
 #if ENABLE_STATUS == 1
@@ -216,9 +217,10 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 
 
 			OUTPUT_RANK(progress_thread_pause(&progress));
+			timers_stop(timers, IterationStartToWait);
 			OUTPUT_RANK(MPI_CHECK(MPI_Wait(&request, &result->send_status)));
 
-			timers_stop_local(timers);
+			timers_stop(timers, Iteration);
 		}
 
 	}
@@ -226,7 +228,8 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 	{
 		for (size_t i = 0; i < test_case->iteration_count; i++)
 		{
-			timers_start_local(timers);
+			timers_start(timers, Iteration);
+			timers_start(timers, IterationStartToWait);
 
 			MPI_CHECK(MPI_Start(&request));
 #if ENABLE_STATUS == 1
@@ -240,14 +243,15 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
                 MPI_CHECK(MPI_Request_get_status(request, &flag, MPI_STATUS_IGNORE));
             }
 
+			timers_stop(timers, IterationStartToWait);
 			OUTPUT_RANK(MPI_CHECK(MPI_Wait(&request, &result->recv_status)));
 
-			timers_stop_local(timers);
+			timers_stop(timers, Iteration);
 		}
 	}
 
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
-	timers_stop_global(timers);
+	timers_stop(timers, Total);
 
 	OUTPUT_RANK(progress_thread_destroy(&progress));
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
