@@ -7,7 +7,7 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 
 
-mode_names = [ 'Send' 'Isend', 'IsendTest', 'IsendThenTest', 'IsendTestall', 'CustomPsend', 'WinSingle', 'Win', 'Psend', 'PsendParrived', 'PsendProgress', 'PsendProgressThread', 'PsendThreaded']
+mode_names = [ 'Send', 'Isend', 'IsendTest', 'IsendThenTest', 'IsendTestall', 'CustomPsend', 'WinSingle', 'Win', 'Psend', 'PsendParrived', 'PsendProgress', 'PsendProgressThread', 'PsendThreaded']
 send_pattern_names = [ 'linear', 'linear inverse', 'stride (128B)', 'stride (1KB)', 'stride (16KB)', 'random', 'random burst (128B at a time)', 'random burst (1KB at a time)', 'random burst (16KB at a time)' ]
 
 # returns (xValues, yValues, pattern, mode, column) all partition_size -> column plots for the given modes and patterns
