@@ -1,6 +1,6 @@
 #include "bench.h"
 #include "stdio.h"
-#include "custom_psend_new.h"
+#include "custom_psend.h"
 
 void bench_custom_psend(TestCase *test_case, Result *result, int comm_rank)
 {
