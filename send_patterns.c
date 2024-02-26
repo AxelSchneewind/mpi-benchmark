@@ -1,5 +1,4 @@
 #include "send_patterns.h"
-#include "bench.h"
 
 #include <stdlib.h>
 #include <string.h>
