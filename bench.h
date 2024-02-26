@@ -21,7 +21,7 @@ static const char* const send_pattern_identifiers[SendPatternCount] = {
     "stride (16KB)",
     "random",
     "random burst (128B at a time)",
-    "random burst (1KB at a time)"
+    "random burst (1KB at a time)",
     "random burst (16KB at a time)"
 };
 
