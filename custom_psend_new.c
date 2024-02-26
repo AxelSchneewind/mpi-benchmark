@@ -3,6 +3,7 @@
 #include <semaphore.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "interval_tree.h"
 
@@ -23,7 +24,7 @@ struct custom_MPI_Request_t
 typedef struct custom_MPI_Request_t* custom_MPI_Request;
 int custom_MPI_Start(custom_MPI_Request request) {
     if (request->is_sender) {
-        MPI_Win_lock(MPI_LOCK_EXCLUSIVE, request->destination, MPI_MODE_NOCHECK, request->window);
+        MPI_Win_lock(MPI_LOCK_EXCLUSIVE, request->destination, 0, request->window);
     }
     return 0;
 };
@@ -34,8 +35,12 @@ int custom_MPI_Wait(custom_MPI_Request request, MPI_Status* status) {
         while (size >= 1) {
             tree_find_interval(request->ready_intervals, size, &min, &max);
             while (max - min >= size) {
+                assert(max >= 0 && min >= 0);
+                assert(max < request->buffer_size / request->partition_size);
+                assert(min < request->buffer_size / request->partition_size);
+                assert(request->partition_size * min + request->partition_size * request->aggregation_factor <= request->buffer_size);
                 MPI_Put(&request->buffer[request->partition_size * min], request->partition_size * request->aggregation_factor, MPI_CHAR, request->destination, request->partition_size * min, request->partition_size * request->aggregation_factor, MPI_CHAR, request->window);
-                tree_remove(request->ready_intervals, min, max);
+                tree_remove(request->ready_intervals, min, min + request->aggregation_factor);
                 tree_find_interval(request->ready_intervals, size, &min, &max);
             }
             size--;
@@ -43,7 +48,7 @@ int custom_MPI_Wait(custom_MPI_Request request, MPI_Status* status) {
 
         MPI_Win_unlock(request->destination, request->window);
     } else {
-        MPI_Win_lock(MPI_LOCK_EXCLUSIVE, request->destination, MPI_MODE_NOCHECK, request->window);
+        MPI_Win_lock(MPI_LOCK_EXCLUSIVE, request->destination, 0, request->window);
         MPI_Win_unlock(request->destination, request->window);
     }
 
