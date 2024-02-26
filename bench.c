@@ -61,7 +61,7 @@ FILE *open_result_file(int comm_rank)
 
 void record_result(TestCase *test_case, Result *result, FILE *file)
 {
-    fprintf(file, "%i,%lli,%lli,%lli,%s,%f,%f,%f,%f,%f,%f,%f\n", 
+    fprintf(file, "%s,%lli,%lli,%lli,%s,%f,%f,%f,%f,%f,%f,%f\n", 
                     mode_names[test_case->mode], 
                     test_case->buffer_size, 
                     test_case->partition_size, 
