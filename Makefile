@@ -13,10 +13,10 @@ SRC=$(wildcard benchmarks/*.c) $(filter-out interval_tree_test.c get_status.c pa
 all: bench
 
 bench_dbg: $(SRC) bench.h test_cases.h
-	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I. -lm
+	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I. -lm -fopenmp
 
 bench: $(SRC) bench.h test_cases.h
-	$(MPI_CC) $(SRC) -o bench -lm -lpthread -I. -Wall -O2 -g -DNDEBUG
+	$(MPI_CC) $(SRC) -o bench -lm -lpthread -I. -Wall -O2 -DNDEBUG -fopenmp
 
 
 run: bench
