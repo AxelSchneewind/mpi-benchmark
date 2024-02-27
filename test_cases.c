@@ -219,7 +219,7 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, bool *use_mode,
                         for (int i = 0; i < byte_send_patterns_count; i++)
                         {
                             TestCase *test_case = &result->test_cases[index++];
-                            test_case->send_pattern_num = i;
+                            test_case->send_pattern_num = send_patterns[i];
                             test_case->send_pattern = *test_cases_send_pattern(result, partition_size, i);
                             test_case->recv_pattern = *test_cases_send_pattern(result, partition_size_recv, i);
                             test_case->mode = mode;
@@ -240,7 +240,7 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, bool *use_mode,
                     for (int i = 0; i < byte_send_patterns_count; i++)
                     {
                         TestCase *test_case = &result->test_cases[index++];
-                        test_case->send_pattern_num = i;
+                        test_case->send_pattern_num = send_patterns[i];
                         test_case->send_pattern = *test_cases_send_pattern(result, partition_size, i);
                         test_case->recv_pattern = *test_cases_send_pattern(result, partition_size, i);
                         test_case->mode = mode;

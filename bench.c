@@ -47,7 +47,7 @@ FILE *open_result_file(int comm_rank)
         printf("no output from this rank\n");
         return NULL;
     }
-    fprintf(file, "mode,buffer_size,partition_size,partition_size_recv,send_pattern,t_local,t_start_to_wait,t_total,bandwidth,std_dev(t_local),std_dev(t_start_to_wait),std_dev(t_total)\n");
+    fprintf(file, "mode,buffer_size,partition_size,partition_size_recv,send_pattern,t_local,t_start_to_wait,t_wait,t_total,bandwidth,std_dev(t_local),std_dev(t_start_to_wait),std_dev(t_total)\n");
     fclose(file);
 
     // open in append mode
@@ -61,7 +61,7 @@ FILE *open_result_file(int comm_rank)
 
 void record_result(TestCase *test_case, Result *result, FILE *file)
 {
-    fprintf(file, "%s,%lli,%lli,%lli,%s,%f,%f,%f,%f,%f,%f,%f\n", 
+    fprintf(file, "%s,%lli,%lli,%lli,%s,%f,%f,%f,%f,%f,%f,%f,%f\n", 
                     mode_names[test_case->mode], 
                     test_case->buffer_size, 
                     test_case->partition_size, 
@@ -69,6 +69,7 @@ void record_result(TestCase *test_case, Result *result, FILE *file)
                     send_pattern_identifiers[test_case->send_pattern_num], 
                     result->timings[Iteration], 
                     result->timings[IterationStartToWait], 
+                    result->timings[Iteration] - result->timings[IterationStartToWait],
                     result->timings[Total], 
                     result->bandwidth, 
                     result->timings_std_dev[Iteration],
@@ -221,7 +222,7 @@ int main(int argc, char **argv)
 
     // set up result file for this rank
     FILE *result_file = open_result_file(comm_rank);
-    bool success = (comm_rank == 0);  // don't use success value on rank 1
+    bool success = (comm_rank == 1);  // don't use success value on rank 1
 
     // run test cases
     for (size_t i = 0; i < test_cases_get_count(tests); i++)
@@ -250,13 +251,14 @@ int main(int argc, char **argv)
         } else {    // otherwise, run benchmark
             *result = bench(test_case, comm_rank, comm_size);
 
-            if (comm_rank == 0) {
+            if (comm_rank == 1) {
                 printf("success = %i, total time: %10gs, average time: %10gμs, standard deviation = %10g\n", result->success, result->timings[Total] * test_case->iteration_count, result->timings[Total] * 1000000, result->timings_std_dev[Iteration]);
                 fflush(stdout);
             }
         }
 
         record_result(test_case, result, result_file);
+
         success &= result->success;
     }
 
@@ -265,7 +267,7 @@ int main(int argc, char **argv)
 
     MPI_Finalize();
 
-    if (comm_rank == 0)
+    if (comm_rank == 1)
     {
         printf("done, success: %d\n", success);
     }
