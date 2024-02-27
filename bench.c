@@ -1,6 +1,7 @@
 #include "send_patterns.h"
 #include "bench.h"
 #include "test_cases.h"
+#include "setups.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -131,12 +132,6 @@ Result bench(TestCase *test_case, int comm_rank, int comm_size)
     return result;
 }
 
-// powers of two for buffer sizes
-#define B (MPI_Count)1
-#define KB (MPI_Count)(1024)
-#define MB (MPI_Count)(1024 * 1024)
-#define GB (MPI_Count)(1024 * 1024 * 1024)
-
 int main(int argc, char **argv)
 {
     int thread_support;
@@ -149,71 +144,18 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
     if (comm_size != 2)
-        return 0;
+        return -1;
 
-    // init test cases
-    const MPI_Count buffer_size = 8 * MB;
-    //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
-    bool use_mode[ModeCount] = {    true,      true,          true,              true,             true,           false,          true,               true,        true,              true,               true,                      false,               true};
-    // bool use_mode[ModeCount] = {   false,     false,         false,             false,            false,           false,         false,              false,       false,             false,               true,                      false,              false};
-    //bool use_mode[ModeCount] = {   false,     false,         false,             false,            false,           false,         false,              false,       false,             false,              false,                      false,               true};
+    setup selection = select_setup(argv[1]);
+    if (NULL == selection) 
+        return -1;
 
-    // openmpi/5.0.0, on laptop (Ryzen 4 4700U), at 16MiB
-    // Send:           tested down to     8B
-    // Isend:          tested down to    64B, takes >500s, 512B takes >7s
-    // IsendTest:      tested down to    64B, takes 1.6s, 32B slow(>10min, deadlock?)
-    // IsendThenTest:  tested down to    64B,  (i guess, see IsendTest)
-    // IsendTestall:   tested down to    64B,
-    // Psend:          tested down to   128B, takes 130s
-    // CustomPsend:    tested down to   1024
-    // Win single:     tested down to     8B, takes 6s, now somehow fails at 1024 B
-    // Win:            tested down to   512B, fails at 256B (16MiB / 64Ki) due to mmap error 12
-
-    const MPI_Count min_partition_size[ModeCount] =
-    //         Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
-    //  {           512,       512,           512,               512,              512,             512,          2048, buffer_size / 1024,         512,               512,                512,                        512,                512 };
-    //  {          4096,      4096,          4096,              4096,             4096,            4096,          4096, buffer_size / 1024,        4096,              4096,               4096,                       4096,               4096 };
-        {         16384,     16384,         16384,             16384,            16384,           16384,         16384, buffer_size / 1024,       16384,             16384,              16384,                      16384,              16384 };
-    const MPI_Count max_partition_size[ModeCount] =                                                                                         
-    //         Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
-        {   buffer_size, buffer_size, buffer_size,       buffer_size,      buffer_size,     buffer_size,   buffer_size,        buffer_size, buffer_size,       buffer_size,        buffer_size,                buffer_size,        buffer_size };
-
-    // openmpi/5.0.0, on hawk, at  64MiB
-    // Send:           tested down to     1B,
-    // Isend:          tested down to     1B,
-    // IsendTest:      tested down to     1B,
-    // IsendThenTest:  tested down to     1B,
-    // IsendTestall:   tested down to     1B,
-    // Psend:          tested down to     1B,
-    // CustomPsend:    tested down to  2048B, at 4MiB buffer size
-    // Win single:     tested down to     1B,
-    // Win:            tested down to  64KiB, fails at 32KiB = 16MiB / 512 (address not mapped to object)
-
-    // const MPI_Count min_partition_size[ModeCount] =
-    // //   Send = 0      , Isend = 1    , IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, Psend = 5, CustomPsend = 6, WinSingle = 7, Win = 8
-    //     {             1,             1,             1,                 1,                1,         1,               1,             1, buffer_size / 256  };
-    // const MPI_Count max_partition_size[ModeCount] =
-    // //   Send = 0      , Isend = 1    , IsendTest = 2, IsendThenTest = 3, IsendTestall = 4,   Psend = 5, CustomPsend = 6, WinSingle = 7, Win = 8
-    //     {   buffer_size,   buffer_size,   buffer_size,       buffer_size,      buffer_size, buffer_size,     buffer_size,   buffer_size, buffer_size };
-
-    // 
-    SendPattern send_patterns[] = {
-        Linear,
-        // Stride128,
-        Stride16K,
-        Random,
-        // RandomBurst128,
-        RandomBurst1K,
-        //  LinearInverse,
-        //  Stride1K
-    }; 
     TestCases tests;
-    int iterations = 10;
-    test_cases_init(buffer_size, iterations, use_mode, min_partition_size, max_partition_size, send_patterns, sizeof(send_patterns) / sizeof(SendPattern), &tests);
+    test_cases_init(selection->buffer_size, selection->iterations, selection->enable_mode, selection->min_partition_size, selection->max_partition_size, selection->send_patterns, selection->num_send_patterns, &tests);
 
     //
     if (comm_rank == 0)
-        printf("Running %i tests, with buffer size %9lli, iteration count: %i: \n", test_cases_get_count(tests), buffer_size, iterations);
+        printf("Running %i tests, with buffer size %9lli, iteration count: %i: \n", test_cases_get_count(tests), selection->buffer_size, selection->iterations);
 
     // set up result file for this rank
     FILE *result_file = open_result_file(comm_rank);
