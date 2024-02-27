@@ -1,8 +1,6 @@
 #!python3
 
 import pandas as pd
-import sys
-
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 
@@ -87,3 +85,42 @@ def plot(ax, x, y, domain=None, title=None, label=None, ylabel='Bandwidth [B/s]'
 # 
 #     ax.legend()
 # 
+
+
+
+def plot_column(data, column_names = ['bandwidth'], modes=mode_names, patterns=send_pattern_names, ylabel='bandwidth [B/s]', domain=None):
+    rows = 3
+    cols = 4
+    (fig, ax) = plt.subplots(rows, cols, sharex=True, sharey=True)
+
+    num_modes = 0
+    ax_per_mode = {}
+
+    for (xValues, yValues, mode, pattern, column) in iter_results(data, modes=modes, patterns=patterns, columns=column_names):
+        # next axis
+        if not mode in ax_per_mode.keys():
+            ax_per_mode[mode] = (num_modes // cols, num_modes % cols)
+            num_modes = num_modes + 1
+
+        # 
+        if num_modes >= rows * cols:
+            break
+            
+        title = str(mode)
+        label = mode + ', ' + pattern
+        (a0, a1) = ax_per_mode[mode]
+        plot(ax[a0, a1], xValues, yValues, domain, title=title, ylabel=ylabel, label=label)
+
+    plt.show()
+
+
+def plot_column_combined(data, column_names=['bandwidth'], modes=mode_names, patterns=send_pattern_names, ylabel='bandwidth [B/s]', domain=None):
+    rows = 1
+    cols = 1
+    (fig, ax) = plt.subplots(rows, cols)
+
+    for (xValues, yValues, mode, pattern, column) in iter_results(data, modes=modes, patterns=patterns, columns=column_names):
+        title = column
+        label = mode + ', ' + pattern
+        plot(ax[0, 0], xValues, yValues, domain, title=title, ylabel=ylabel, label=label)
+
