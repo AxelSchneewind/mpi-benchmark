@@ -1,0 +1,68 @@
+
+MPI_RUN=mpirun
+MPI_CC=mpicc
+
+SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c, $(wildcard *.c))
+SRC_NOPSEND=$(filter-out $(wildcard benchmarks/bench_psen*.c), $(SRC)) benchmarks/bench_psend_custom.c
+
+CFLAGS=-fopenmp -lm -lpthread -I. -Wall -O1
+
+.phony: all bench run debug ddd deploy run-remote get put 
+all: bench
+
+bench_dbg: $(SRC) bench.h test_cases.h
+	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I. -lm
+
+.phony: bin/bench_openmpi bin/bench_mpich bin/bench_impi bin/bench_cpe bin/bench_mpt
+bin/bench_openmpi: $(SRC) bench.h test_cases.h
+	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.0 && $(MPI_CC) $(SRC) -o bin/bench_openmpi $(CFLAGS))
+	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.2 && $(MPI_CC) $(SRC) -o bin/bench_openmpi_502 $(CFLAGS))
+bin/bench_mpich: $(SRC) bench.h test_cases.h
+	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 mpich/4.1.2 && $(MPI_CC) $(SRC) -o bin/bench_mpich $(CFLAGS))
+bin/bench_impi: $(SRC_NOPSEND) bench.h test_cases.h
+	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 impi/2021.9.0 && $(MPI_CC) $(SRC_NOPSEND) -o bin/bench_impi $(CFLAGS) -DDISABLE_PSEND)
+bin/bench_cpe: $(SRC_NOPSEND) bench.h test_cases.h
+	echo $(shell module load cpe/22.11 cray-mpich-ucx/8.1.21 && $(MPI_CC) $(SRC_NOPSEND) -o bin/bench_cpe $(CFLAGS) -DDISABLE_PSEND)
+bin/bench_mpt: $(SRC_NOPSEND) bench.h test_cases.h
+	echo $(shell module load hlrs-software-stack/current gcc/10.2.0 mpt/2.28 && $(MPI_CC) $(SRC_NOPSEND) -o bin/bench_mpt $(CFLAGS) -DDISABLE_PSEND)
+
+bench: bin/bench_openmpi bin/bench_mpich bin/bench_impi bin/bench_cpe bin/bench_mpt
+
+.phony: run_bench_openmpi run_bench_mpich run_bench_impi run_bench_cpe run_bench_mpt
+run_bench_openmpi_default: bin/bench_openmpi_502
+	echo $(shell rm -r results/openmpi/5.0.2/default)
+	echo $(shell qsub pbs/bench_openmpi_502.pbs)
+run_bench_openmpi_ucx: bin/bench_openmpi_502
+	echo $(shell rm -r results/openmpi/5.0.2/ucx)
+	echo $(shell qsub pbs/bench_openmpi_502_ucx.pbs)
+run_bench_openmpi_ob1: bin/bench_openmpi_502
+	echo $(shell rm -r results/openmpi/5.0.2/ob1)
+	echo $(shell qsub pbs/bench_openmpi_502_ob1.pbs)
+run_bench_openmpi_500_default: bin/bench_openmpi 
+	echo $(shell rm -r results/openmpi/5.0.0/default)
+	echo $(shell qsub pbs/bench_openmpi.pbs)
+run_bench_openmpi_500_ob1: bin/bench_openmpi 
+	echo $(shell rm -r results/openmpi/5.0.0/ob1)
+	echo $(shell qsub pbs/bench_openmpi_ob1.pbs)
+run_bench_openmpi_500_ucx: bin/bench_openmpi 
+	echo $(shell rm -r results/openmpi/5.0.0/ucx)
+	echo $(shell qsub pbs/bench_openmpi_ucx.pbs)
+
+run_bench_openmpi: run_bench_openmpi_default run_bench_openmpi_ucx run_bench_openmpi_ob1
+run_bench_openmpi_500: run_bench_openmpi_500_default run_bench_openmpi_500_ucx run_bench_openmpi_500_ob1
+
+run_bench_mpich: bin/bench_mpich
+	echo $(shell rm -r results/mpich/*/)
+	echo $(shell qsub pbs/bench_mpich.pbs)
+run_bench_impi: bin/bench_impi
+	echo $(shell rm -r results/impi/*/)
+	echo $(shell qsub pbs/bench_impi.pbs)
+run_bench_cpe: bin/bench_cpe
+	echo $(shell rm -r results/cpe/*/)
+	echo $(shell qsub pbs/bench_cpe.pbs)
+run_bench_mpt: bin/bench_mpt
+	echo $(shell rm -r results/mpt/*/)
+	echo $(shell qsub pbs/bench_mpt.pbs)
+
+run: run_bench_openmpi run_bench_mpich run_bench_impi run_bench_cpe run_bench_mpt
+
