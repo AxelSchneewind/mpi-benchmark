@@ -1,5 +1,7 @@
 #include "bench.h"
 
+#define NUM_THREADS 8
+
 void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank)
 {
     timers timers;
@@ -7,7 +9,7 @@ void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank)
 
     MPI_Request request;
 
-    int thread_count = 8;
+    int thread_count = NUM_THREADS;
     if (test_case->partition_count < thread_count)
         thread_count = test_case->partition_count;
     int partitions_per_thread = test_case->partition_count / thread_count;
@@ -24,7 +26,7 @@ void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank)
     {
         MPI_CHECK(MPI_Start(&request));
 
-        #pragma omp parallel for num_threads(4)
+        #pragma omp parallel for num_threads(NUM_THREADS)
         for (int i = 0; i < thread_count; i++) {
             for (int p = 0; p < partitions_per_thread; p++)
             {
@@ -49,7 +51,7 @@ void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank)
             timers_start(timers, IterationStartToWait);
             MPI_Start(&request);
 
-            #pragma omp parallel for num_threads(4)
+            #pragma omp parallel for num_threads(NUM_THREADS)
             for (int i = 0; i < thread_count; i++) {
                 for (int p = 0; p < partitions_per_thread; p++)
                 {

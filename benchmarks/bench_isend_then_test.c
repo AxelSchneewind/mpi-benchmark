@@ -9,9 +9,11 @@ void bench_isend_then_test(TestCase *test_case, Result *result, int comm_rank)
 
     // warmup
     if (comm_rank == 0) {
-        MPI_CHECK(MPI_Isend(test_case->buffer, test_case->partition_size, MPI_BYTE, 1, 0, MPI_COMM_WORLD, &requests[0]));
+        MPI_CHECK(MPI_Isend(test_case->buffer, test_case->buffer_size, MPI_BYTE, 1, 0, MPI_COMM_WORLD, &requests[0]));
+		MPI_CHECK(MPI_Wait(&requests[0], MPI_STATUSES_IGNORE));
     } else {
-        MPI_CHECK(MPI_Irecv(test_case->buffer, test_case->partition_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &requests[0]));
+        MPI_CHECK(MPI_Irecv(test_case->buffer, test_case->buffer_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &requests[0]));
+		MPI_CHECK(MPI_Wait(&requests[0], MPI_STATUSES_IGNORE));
     }
 
 

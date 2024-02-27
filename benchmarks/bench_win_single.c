@@ -27,6 +27,11 @@ void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
 	if (comm_rank == 0)
 	{
 		MPI_CHECK(MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, MPI_MODE_NOCHECK, window));
+		MPI_CHECK(MPI_Put(
+			test_case->buffer, test_case->buffer_size, 
+			MPI_BYTE, 1,
+			0, test_case->buffer_size, 
+			MPI_BYTE, window));
 		MPI_CHECK(MPI_Win_unlock(1, window));
 	}
 

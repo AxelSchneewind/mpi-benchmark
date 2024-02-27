@@ -8,9 +8,9 @@ void bench_send(TestCase *test_case, Result *result, int comm_rank)
 
 	// warmup
 	if (comm_rank == 0) {
-		MPI_CHECK(MPI_Send(test_case->buffer, test_case->partition_size, MPI_BYTE, 1, 0, MPI_COMM_WORLD));
+		MPI_CHECK(MPI_Send(test_case->buffer, test_case->buffer_size, MPI_BYTE, 1, 0, MPI_COMM_WORLD));
 	} else {
-		MPI_CHECK(MPI_Recv(test_case->buffer, test_case->partition_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &result->recv_status));
+		MPI_CHECK(MPI_Recv(test_case->buffer, test_case->buffer_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &result->recv_status));
 	}
 
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
