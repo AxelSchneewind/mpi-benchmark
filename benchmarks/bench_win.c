@@ -46,6 +46,7 @@ void bench_win(TestCase *test_case, Result *result, int comm_rank)
 		if (comm_rank == 0)
 		{
 			timers_start(timers, Iteration);
+			timers_start(timers, IterationStartToWait);
 
 			for (size_t p = 0; p < test_case->partition_count; p++)
 			{
@@ -54,12 +55,12 @@ void bench_win(TestCase *test_case, Result *result, int comm_rank)
 				MPI_CHECK(MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, MPI_MODE_NOCHECK, windows[partition_num]));
 				MPI_CHECK(MPI_Put(
 					test_case->buffer + test_case->partition_size * partition_num,
-					test_case->partition_size, MPI_BYTE, 1,
-					0,
+					test_case->partition_size, MPI_BYTE, 1, 0,
 					test_case->partition_size, MPI_BYTE, windows[partition_num]));
 				MPI_CHECK(MPI_Win_unlock(1, windows[partition_num]));
 			}
 
+			timers_stop(timers, IterationStartToWait);
 			timers_stop(timers, Iteration);
 		}
 	}

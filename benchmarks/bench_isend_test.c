@@ -7,6 +7,13 @@ void bench_isend_test(TestCase *test_case, Result *result, int comm_rank)
 	timers timers;
 	timers_init(&timers, TimerCount);
 
+    // warmup
+    if (comm_rank == 0) {
+        MPI_CHECK(MPI_Isend(test_case->buffer, test_case->partition_size, MPI_BYTE, 1, 0, MPI_COMM_WORLD, &requests[0]));
+    } else {
+        MPI_CHECK(MPI_Irecv(test_case->buffer, test_case->partition_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &requests[0]));
+    }
+
 
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 	timers_start(timers, Total);
@@ -20,7 +27,8 @@ void bench_isend_test(TestCase *test_case, Result *result, int comm_rank)
 
 			for (MPI_Count p = 0; p < test_case->partition_count; p++)
 			{
-				unsigned int partition_num = test_case->send_pattern[p];				work(test_case->partition_size);
+				unsigned int partition_num = test_case->send_pattern[p];
+				work(test_case->partition_size);
 
 				MPI_CHECK(MPI_Isend(test_case->buffer + partition_num * test_case->partition_size, test_case->partition_size, MPI_BYTE, 1, 0, MPI_COMM_WORLD, &requests[partition_num]));
 				int flag;
@@ -38,7 +46,7 @@ void bench_isend_test(TestCase *test_case, Result *result, int comm_rank)
 			timers_start(timers, IterationStartToWait);
 
 			for (size_t p = 0; p < test_case->partition_count; p++) {
-				unsigned int partition_num = test_case->send_pattern[p];				
+				unsigned int partition_num = test_case->recv_pattern[p];				
 				MPI_CHECK(MPI_Irecv(test_case->buffer + partition_num * test_case->partition_size, test_case->partition_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &requests[partition_num]));
 			}
 
