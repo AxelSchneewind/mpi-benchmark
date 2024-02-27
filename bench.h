@@ -18,9 +18,9 @@ static const char* const send_pattern_identifiers[SendPatternCount] = {
     "stride (1KB)",
     "stride (16KB)",
     "random",
-    "random burst (128B at a time)",
-    "random burst (1KB at a time)",
-    "random burst (16KB at a time)"
+    "random burst (128B)",
+    "random burst (1KB)",
+    "random burst (16KB)"
 };
 
 extern void bench_send(TestCase *test_case, Result *result, int comm_rank);

@@ -16,11 +16,11 @@
 // perform some virtual work on a partition
 void work(const MPI_Count partition_size)
 {
-    struct timespec t1, t2;
-    t1.tv_sec = 0;
-    t1.tv_nsec = partition_size / 512;
-    if (t1.tv_nsec > 0)
-        nanosleep(&t1, &t2);
+    // struct timespec t1, t2;
+    // t1.tv_sec = 0;
+    // t1.tv_nsec = partition_size / 512;
+    // if (t1.tv_nsec > 0)
+    //     nanosleep(&t1, &t2);
     // int t = 13;
     // for (size_t i = 0; i < partition_size; i++)
     // {
@@ -46,7 +46,7 @@ FILE *open_result_file(int comm_rank)
         printf("no output from this rank\n");
         return NULL;
     }
-    fprintf(file, "mode,buffer_size,partition_size,partition_size_recv,send_pattern,t_local,t_start_to_wait,t_wait,t_total,bandwidth,std_dev(t_local),std_dev(t_start_to_wait),std_dev(t_total)\n");
+    fprintf(file, "mode,buffer_size,partition_size,partition_size_recv,send_pattern,t_local,t_start_to_wait,t_wait,t_total,w_wait_relative,bandwidth,std_dev(t_local),std_dev(t_start_to_wait),std_dev(t_total)\n");
     fclose(file);
 
     // open in append mode
@@ -60,7 +60,7 @@ FILE *open_result_file(int comm_rank)
 
 void record_result(TestCase *test_case, Result *result, FILE *file)
 {
-    fprintf(file, "%s,%lli,%lli,%lli,%s,%f,%f,%f,%f,%f,%f,%f,%f\n", 
+    fprintf(file, "%s,%lli,%lli,%lli,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", 
                     mode_names[test_case->mode], 
                     test_case->buffer_size, 
                     test_case->partition_size, 
@@ -70,6 +70,7 @@ void record_result(TestCase *test_case, Result *result, FILE *file)
                     result->timings[IterationStartToWait], 
                     result->timings[Iteration] - result->timings[IterationStartToWait],
                     result->timings[Total], 
+                    (result->timings[Iteration] - result->timings[IterationStartToWait]) / result->timings[Iteration],
                     result->bandwidth, 
                     result->timings_std_dev[Iteration],
                     result->timings_std_dev[IterationStartToWait],
@@ -122,7 +123,7 @@ Result bench(TestCase *test_case, int comm_rank, int comm_size)
         (*test_case->method.run)(test_case, &result, comm_rank);
 
     // compute bandwidth
-    result.bandwidth = ((double)test_case->buffer_size) / result.timings[Total];
+    result.bandwidth = ((double)test_case->buffer_size * test_case->iteration_count) / result.timings[Total];
 
     // check that data was transmitted correctly
     result.success = !memcmp(test_case->buffer, buffer_contents, test_case->buffer_size);
@@ -207,7 +208,7 @@ int main(int argc, char **argv)
         //  Stride1K
     }; 
     TestCases tests;
-    int iterations = 100;
+    int iterations = 10;
     test_cases_init(buffer_size, iterations, use_mode, min_partition_size, max_partition_size, send_patterns, sizeof(send_patterns) / sizeof(SendPattern), &tests);
 
     //
