@@ -21,8 +21,8 @@ struct setup_t {
 static const char* setup_names[] = {
     "OPENMPI_HAWK",
     "OPENMPI_LOCAL",
-    "MPICH_HAWK",
-    "MPICH_LOCAL"
+    "ALL_HAWK",
+    "ALL_LOCAL"
 };
 
 struct setup_t setups[] = {
