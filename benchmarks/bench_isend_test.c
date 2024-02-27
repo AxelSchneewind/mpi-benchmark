@@ -4,8 +4,8 @@
 void bench_isend_test(TestCase *test_case, Result *result, int comm_rank)
 {
 	MPI_Request *requests = malloc(sizeof(MPI_Request) * test_case->partition_count);
-	timer* timers;
-	timers_init(&timers);
+	timers timers;
+	timers_init(&timers, TimerCount);
 
 
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));

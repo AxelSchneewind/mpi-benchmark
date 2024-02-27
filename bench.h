@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "timer.h"
+#include "timers.h"
 #include "send_patterns.h"
 #include "test_cases.h"
 
@@ -8,8 +8,6 @@
 #include "stdlib.h"
 #include <stdio.h>
 #include <time.h>
-
-
 
 int is_psend(Mode mode);
 

@@ -25,8 +25,8 @@ void bench_win(TestCase *test_case, Result *result, int comm_rank)
 		MPI_CHECK(MPI_Win_create(test_case->buffer + p * test_case->partition_size, test_case->partition_size, 1, MPI_INFO_ENV, MPI_COMM_WORLD, &windows[p]));
 	}
 
-	timer *timers;
-	timers_init(&timers);
+	timers timers;
+	timers_init(&timers, TimerCount);
 
 	// warmup
 	if (0 == comm_rank){

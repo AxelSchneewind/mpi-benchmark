@@ -20,8 +20,8 @@ void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
 	MPI_Win window;
 	MPI_CHECK(MPI_Win_create(test_case->buffer, test_case->buffer_size, 1, MPI_INFO_ENV, MPI_COMM_WORLD, &window));
 
-	timer *timers;
-	timers_init(&timers);
+	timers timers;
+	timers_init(&timers, TimerCount);
 
 	// warmup
 	if (comm_rank == 0)

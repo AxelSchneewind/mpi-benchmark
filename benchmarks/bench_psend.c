@@ -29,8 +29,8 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank)
 	// init
 	MPI_Request request;
 
-	timer *timers;
-	timers_init(&timers);
+	timers timers;
+	timers_init(&timers, TimerCount);
 
 	if (comm_rank == 0)
 	{

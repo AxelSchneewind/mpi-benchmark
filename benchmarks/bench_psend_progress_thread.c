@@ -173,8 +173,8 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 	// init
 	MPI_Request request;
 
-	timer *timers;
-	timers_init(&timers);
+	timers timers;
+	timers_init(&timers, TimerCount);
 
 	if (comm_rank == 0)
 	{

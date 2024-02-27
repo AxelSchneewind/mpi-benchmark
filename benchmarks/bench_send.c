@@ -3,8 +3,8 @@
 
 void bench_send(TestCase *test_case, Result *result, int comm_rank)
 {
-	timer *timers;
-	timers_init(&timers);
+	timers timers;
+	timers_init(&timers, TimerCount);
 
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 	timers_start(timers, Total);

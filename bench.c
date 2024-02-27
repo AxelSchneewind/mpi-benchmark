@@ -1,7 +1,6 @@
 #include "send_patterns.h"
 #include "bench.h"
 #include "test_cases.h"
-#include "timer.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -122,11 +121,6 @@ Result bench(TestCase *test_case, int comm_rank, int comm_size)
     if (test_case->method.run != NULL)
         (*test_case->method.run)(test_case, &result, comm_rank);
 
-    // take average duration per iteration
-    for(int i = 0; i < TimerCount; i++) {
-        result.timings[i] /= test_case->iteration_count;
-    }
-
     // compute bandwidth
     result.bandwidth = ((double)test_case->buffer_size) / result.timings[Total];
 
@@ -213,7 +207,7 @@ int main(int argc, char **argv)
         //  Stride1K
     }; 
     TestCases tests;
-    int iterations = 10;
+    int iterations = 100;
     test_cases_init(buffer_size, iterations, use_mode, min_partition_size, max_partition_size, send_patterns, sizeof(send_patterns) / sizeof(SendPattern), &tests);
 
     //
@@ -240,8 +234,8 @@ int main(int argc, char **argv)
         }
 
         // if time limit was exceeded in last test, don't bench this mode any more
-        const double time_limit = 2.0;
-        if (i > 0 && test_case->mode == test_cases_get_test_case(tests, i - 1)->mode && test_cases_get_result(tests, i - 1)->timings[Total] * test_case->iteration_count > time_limit) {
+        const double time_limit = 5.0;
+        if (i > 0 && test_case->mode == test_cases_get_test_case(tests, i - 1)->mode && test_cases_get_result(tests, i - 1)->timings[Total] > time_limit) {
             *result = *test_cases_get_result(tests, i-1);
 
             if (comm_rank == 0){
@@ -252,7 +246,7 @@ int main(int argc, char **argv)
             *result = bench(test_case, comm_rank, comm_size);
 
             if (comm_rank == 1) {
-                printf("success = %i, total time: %10gs, average time: %10gμs, standard deviation = %10g\n", result->success, result->timings[Total] * test_case->iteration_count, result->timings[Total] * 1000000, result->timings_std_dev[Iteration]);
+                printf("success = %i, total time: %10gs, average time: %10gμs, standard deviation = %10g\n", result->success, result->timings[Total], result->timings[Iteration], result->timings_std_dev[Iteration]);
                 fflush(stdout);
             }
         }

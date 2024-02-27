@@ -7,6 +7,15 @@
 #include <mpi.h>
 #include <stdbool.h>
 
+enum Timer {
+    Total = 0,
+    Iteration,
+    IterationStartToWait,
+    IterationWait,
+    TimerCount
+};
+typedef enum Timer Timer;
+
 enum Mode
 {
 	Send =             0,
@@ -75,7 +84,7 @@ struct Result
 typedef struct Result Result;
 
 
-extern void timers_store(timer* timers, Result* result);
+extern void timers_store(timers timers, Result* result);
 
 struct test_cases;
 typedef struct test_cases* TestCases;

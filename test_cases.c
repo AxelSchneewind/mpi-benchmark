@@ -294,10 +294,10 @@ void test_cases_free(TestCases* tests)
 }
 
 
-void timers_store(timer *timers, Result *result)
+void timers_store(timers timers, Result *result)
 {
     for (int i = 0; i < TimerCount; i++) {
-        result->timings[i] = timers[i].sum;
-        result->timings_std_dev[i] = timer_std_dev(&timers[i]);
+        result->timings[i] = timer_mean(timers_get(timers, i));
+        result->timings_std_dev[i] = timer_std_dev(timers_get(timers,i));
     }
 }

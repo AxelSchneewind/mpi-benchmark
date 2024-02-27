@@ -2,8 +2,8 @@
 
 void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank)
 {
-    timer *timers;
-    timers_init(&timers);
+    timers timers;
+    timers_init(&timers, TimerCount);
 
     MPI_Request request;
 
