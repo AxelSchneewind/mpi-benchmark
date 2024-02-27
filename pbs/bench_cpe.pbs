@@ -13,4 +13,4 @@ setup "$IMPL"
 BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_cpe.log
-mpirun -np 2 $BIN_DIRECTORY/bench_cpe ALL_HAWK > results.log 2>&1
+mpirun -np 2 $BIN_DIRECTORY/bench_cpe FULL_HAWK > results.log 2>&1

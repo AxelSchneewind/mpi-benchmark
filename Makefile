@@ -3,7 +3,7 @@
 
 #MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
 MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
-SETUP=MPICH_LOCAL
+SETUP=FULL_LOCAL
 
 MPI_RUN=$(MPI_DIR)mpirun
 MPI_CC=$(MPI_DIR)mpicc

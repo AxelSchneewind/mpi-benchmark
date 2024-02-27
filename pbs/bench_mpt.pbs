@@ -14,4 +14,4 @@ setup "$IMPL"
 BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_mpt.log
-mpirun -np 2 -N 1 $BIN_DIRECTORY/bench_mpt ALL_HAWK > results.log 2>&1
+mpirun -np 2 -N 1 $BIN_DIRECTORY/bench_mpt FULL_HAWK > results.log 2>&1

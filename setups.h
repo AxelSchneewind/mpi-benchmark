@@ -21,8 +21,8 @@ struct setup_t {
 static const char* setup_names[] = {
     "OPENMPI_HAWK",
     "OPENMPI_LOCAL",
-    "ALL_HAWK",
-    "ALL_LOCAL"
+    "FULL_HAWK",
+    "FULL_LOCAL"
 };
 
 struct setup_t setups[] = {
@@ -43,12 +43,12 @@ struct setup_t setups[] = {
         .iterations = 10,
         //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
         .enable_mode =        {         true,      true,          true,              true,             true,           false,          true,               true,        true,              true,              false,                      false,               true},
-        .min_partition_size = {          512,       512,           512,               512,              512,             512,          2048,      8 * MB / 1024,         512,               512,                512,                        512,                512},
+        .min_partition_size = {         2048,      2048,          2048,              2048,             2048,            2048,          2048,      8 * MB / 1024,        2048,              2048,               2048,                       2048,               2048},
         .max_partition_size = {       8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
-        .send_patterns = { Linear, Stride16K, Random, RandomBurst1K },
+        .send_patterns =      { Linear, Stride16K, Random, RandomBurst1K },
         .num_send_patterns =  4
     },
-    // mpich hawk
+    // full bench on hawk
     {
         .buffer_size = 8 * MB,
         .iterations = 100,
@@ -56,18 +56,18 @@ struct setup_t setups[] = {
         .enable_mode =        {         true,      true,          true,              true,             true,           false,          true,               true,        true,              true,               true,                       true,               true},
         .min_partition_size = {          512,       512,           512,               512,              512,             512,          2048,      8 * MB / 1024,         512,               512,                512,                        512,                512},
         .max_partition_size = {       8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
-        .send_patterns = { Linear, Stride16K, Random, RandomBurst1K },
+        .send_patterns =      { Linear, Stride16K, Random, RandomBurst1K },
         .num_send_patterns =  4
     },
-    // mpich local
+    // full bench locally
     {
         .buffer_size = 8 * MB,
         .iterations = 10,
         //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
         .enable_mode =        {         true,      true,          true,              true,             true,           false,          true,               true,        true,              true,               true,                       true,               true},
-        .min_partition_size = {          512,       512,           512,               512,              512,             512,          2048,      8 * MB / 1024,         512,               512,                512,                        512,                512},
+        .min_partition_size = {         2048,      2048,          2048,              2048,             2048,            2048,          2048,      8 * MB / 1024,        2048,              2048,               2048,                       2048,               2048},
         .max_partition_size = {       8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
-        .send_patterns = { Linear, Stride16K, Random, RandomBurst1K },
+        .send_patterns =      { Linear, Stride16K, Random, RandomBurst1K },
         .num_send_patterns =  4
     }
 };
