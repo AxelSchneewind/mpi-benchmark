@@ -170,9 +170,9 @@ int main(int argc, char **argv)
         if (comm_rank == 0)
         {
             if (test_case->partition_size == test_case->partition_size_recv)
-                printf("Running test %.4li in mode %15s, partition size %7lli, send pattern %i :\n\t", i, mode_names[test_case->mode], test_case->partition_size, test_case->send_pattern_num);
+                printf("Running test %.4li in mode %15s, partition size %7lli, send pattern %s :\n\t", i, mode_names[test_case->mode], test_case->partition_size, send_pattern_identifiers[test_case->send_pattern_num]);
             else
-                printf("Running test %.4li in mode %15s, partition size %7lli -> %7lli, send pattern %i :\n\t", i, mode_names[test_case->mode], test_case->partition_size, test_case->partition_size_recv, test_case->send_pattern_num);
+                printf("Running test %.4li in mode %15s, partition size %7lli -> %7lli, send pattern %s :\n\t", i, mode_names[test_case->mode], test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num]);
             fflush(stdout);
         }
 
