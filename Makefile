@@ -1,8 +1,9 @@
 
 ### FOR LOCAL TESTING
 
-MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
-# MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
+#MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
+MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
+SETUP=MPICH_LOCAL
 
 MPI_RUN=$(MPI_DIR)mpirun
 MPI_CC=$(MPI_DIR)mpicc
@@ -20,16 +21,16 @@ bench: $(SRC) bench.h test_cases.h
 
 
 run: bench
-	$(MPI_RUN) ob1 -n 2 ./bench 
+	$(MPI_RUN) -n 2 ./bench $(SETUP)
 
 #$(MPI_RUN) --mca pml ob1 -n 2 ./bench 
 
 run_valgrind: bench
-	$(MPI_RUN) -n 2 valgrind --suppressions=$(MPI_DIR)/../share/openmpi/openmpi-valgrind.supp --leak-check=yes --log-file=valgrind-%p.txt ./bench 
+	$(MPI_RUN) -n 2 valgrind --suppressions=$(MPI_DIR)/../share/openmpi/openmpi-valgrind.supp --leak-check=yes --log-file=valgrind-%p.txt ./bench  $(SETUP)
 
 
 debug: bench_dbg
-	$(MPI_RUN) -n 2 ddd ./bench_dbg 
+	$(MPI_RUN) -n 2 ddd ./bench_dbg  $(SETUP)
 
 tree_test: send_patterns.c interval_tree.c interval_tree_test.c
 	gcc send_patterns.c interval_tree.c interval_tree_test.c -g -o tree_test
