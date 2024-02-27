@@ -46,7 +46,7 @@ FILE *open_result_file(int comm_rank)
         printf("no output from this rank\n");
         return NULL;
     }
-    fprintf(file, "mode,buffer_size,partition_size,partition_size_recv,send_pattern,t_local,t_start_to_wait,t_wait,t_total,w_wait_relative,bandwidth,std_dev(t_local),std_dev(t_start_to_wait),std_dev(t_total)\n");
+    fprintf(file, "mode,buffer_size,partition_size,partition_size_recv,send_pattern,t_local,t_start_to_wait,t_wait,t_total,t_wait_relative,bandwidth,std_dev(t_local),std_dev(t_start_to_wait),std_dev(t_total)\n");
     fclose(file);
 
     // open in append mode
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
     // init test cases
     const MPI_Count buffer_size = 8 * MB;
     //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendParrived = 9, PsendProgress = 10, PsendProgressThreaded = 11, PsendThreaded = 12
-    bool use_mode[ModeCount] = {    true,      true,          true,              true,             true,           false,          true,               true,        true,              true,              false,                      false,               true};
+    bool use_mode[ModeCount] = {    true,      true,          true,              true,             true,           false,          true,               true,        true,              true,               true,                      false,               true};
     // bool use_mode[ModeCount] = {   false,     false,         false,             false,            false,           false,         false,              false,       false,             false,               true,                      false,              false};
     //bool use_mode[ModeCount] = {   false,     false,         false,             false,            false,           false,         false,              false,       false,             false,              false,                      false,               true};
 
