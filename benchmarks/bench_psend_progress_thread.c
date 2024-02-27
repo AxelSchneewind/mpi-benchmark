@@ -185,6 +185,23 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 		MPI_CHECK(MPI_Precv_init(test_case->buffer, test_case->partition_count_recv, test_case->partition_size_recv, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_INFO_ENV, &request));
 	}
 
+    // warmup
+    if (comm_rank == 0)
+    {
+        MPI_CHECK(MPI_Start(&request));
+
+        for (size_t p = 0; p < test_case->partition_count; p++)
+        {
+            unsigned int partition_num = p;
+            MPI_CHECK(MPI_Pready(partition_num, request));
+        }
+
+        MPI_CHECK(MPI_Wait(&request, &result->send_status));
+    } else if (comm_rank == 1) {
+        MPI_CHECK(MPI_Start(&request));
+        MPI_CHECK(MPI_Wait(&request, &result->recv_status));
+    }
+
 	// run
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 	timers_start(timers, Total);
