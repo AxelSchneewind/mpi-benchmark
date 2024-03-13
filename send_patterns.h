@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-typedef unsigned int* permutation;
+typedef int* permutation;
 
 extern void permutation_create(permutation * out, size_t num_elements);
 extern void permutation_destroy(permutation * out);

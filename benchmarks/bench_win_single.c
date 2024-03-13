@@ -33,6 +33,9 @@ void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
 			0, test_case->buffer_size, 
 			MPI_BYTE, window));
 		MPI_CHECK(MPI_Win_unlock(1, window));
+	} else {
+		MPI_CHECK(MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, 0, window));
+		MPI_CHECK(MPI_Win_unlock(1, window));
 	}
 
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
@@ -40,6 +43,7 @@ void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
 
 	for (size_t i = 0; i < test_case->iteration_count; i++)
 	{
+		MPI_Barrier(MPI_COMM_WORLD);
 		if (comm_rank == 0)
 		{
 			timers_start(timers, Iteration);

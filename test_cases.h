@@ -27,6 +27,7 @@ enum Mode
 	WinSingle          ,
 	Win                ,
 	Psend              ,
+	PsendList          ,
 	PsendParrived      ,
 	PsendProgress      ,
 	PsendProgressThread,

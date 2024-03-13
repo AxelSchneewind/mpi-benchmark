@@ -111,11 +111,9 @@ void set_send_pattern_count(struct test_cases* tests, int num_partition_sizes, i
     tests->num_partition_sizes = num_partition_sizes;
     tests->num_send_patterns = num_byte_send_patterns;
     tests->partition_send_patterns = calloc(tests->num_partition_sizes, sizeof(permutation));
+    for (int size_index = 0; size_index < num_partition_sizes; size_index++)
     {
-        for (int size_index = 0; size_index < num_partition_sizes; size_index++)
-        {
-            tests->partition_send_patterns[size_index] = calloc(num_byte_send_patterns, sizeof(permutation));
-        }
+        tests->partition_send_patterns[size_index] = calloc(num_byte_send_patterns, sizeof(permutation));
     }
 }
 
@@ -139,9 +137,9 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, bool *use_mode,
     // count number of test cases
     result->test_count = 0;
     for (Mode mode = 0; mode < ModeCount; mode++) {
-
 #ifdef DISABLE_PSEND
-        use_mode[mode] &= !is_psend(mode);
+        if (is_psend(mode);)
+            continue;
 #endif
 
         if (use_mode[mode])

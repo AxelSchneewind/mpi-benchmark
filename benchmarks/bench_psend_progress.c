@@ -36,7 +36,7 @@ other error:
  6 0x000000000005c0f0 hcoll_ml_progress_impl()  ???:0
  7 0x000000000004246f hmca_coll_ml_barrier_intra()  ???:0
  8 0x000000000013cd02 mca_coll_hcoll_barrier()  ???:0
- 9 0x00000000000b3da6 MPI_Barrier()  ???:0
+ 9 0x00000000000b3da6 MPI_Barrier(MPI_COMM_WORLD)  ???:0
 10 0x0000000000402148 bench_psend_progress()  ???:0
 11 0x0000000000406951 bench()  ???:0
 12 0x00000000004018e5 main()  ???:0
@@ -88,6 +88,7 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
     {
         for (size_t i = 0; i < test_case->iteration_count; i++)
         {
+			MPI_Barrier(MPI_COMM_WORLD);
 			timers_start(timers, Iteration);
 			timers_start(timers, IterationStartToWait);
 
@@ -125,6 +126,7 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
     } else if (comm_rank == 1) {
         for (size_t i = 0; i < test_case->iteration_count; i++)
         {
+			MPI_Barrier(MPI_COMM_WORLD);
             timers_start(timers, Iteration);
             timers_start(timers, IterationStartToWait);
 

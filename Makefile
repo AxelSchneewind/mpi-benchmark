@@ -8,7 +8,7 @@ SETUP=FULL_LOCAL
 MPI_RUN=$(MPI_DIR)mpirun
 MPI_CC=$(MPI_DIR)mpicc
 
-SRC=$(wildcard benchmarks/*.c) $(filter-out interval_tree_test.c get_status.c parrived.c custom_psend_old.c, $(wildcard *.c))
+SRC=$(wildcard benchmarks/*.c) $(filter-out interval_tree_test.c get_status.c parrived.c custom_psend_old.c custom_psend_new.c, $(wildcard *.c))
 
 .phony: all run debug ddd deploy run-remote get put run_get_status run_parrived
 all: bench
