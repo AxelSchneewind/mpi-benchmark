@@ -1,9 +1,9 @@
 
 ### FOR LOCAL TESTING
 
-#MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
-MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
-SETUP=FULL_LOCAL
+MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
+#MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
+SETUP=CUSTOM_LOCAL
 
 MPI_RUN=$(MPI_DIR)mpirun
 MPI_CC=$(MPI_DIR)mpicc
@@ -21,7 +21,7 @@ bench: $(SRC) bench.h test_cases.h
 
 
 run: bench
-	$(MPI_RUN) -n 2 ./bench $(SETUP)
+	$(MPI_RUN) --mca mpi_param_check 1 --mca mpi_show_handle_leaks 1 -n 2 ./bench $(SETUP)
 
 #$(MPI_RUN) --mca pml ob1 -n 2 ./bench 
 
