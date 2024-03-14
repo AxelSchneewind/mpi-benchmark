@@ -23,7 +23,9 @@ static const char* setup_names[] = {
     "OPENMPI_LOCAL",
     "FULL_HAWK",
     "FULL_LOCAL",
-    "CUSTOM"
+    "RDMA_LOCAL",
+    "PARTITIONED_LOCAL",
+    "CUSTOM_LOCAL"
 };
 
 struct setup_t setups[] = {
@@ -31,10 +33,10 @@ struct setup_t setups[] = {
     {
         .buffer_size = 8 * MB,
         .iterations = 100,
-        //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendList = 8, PsendParrived = 10, PsendProgress = 11, PsendProgressThreaded = 12, PsendThreaded = 13
-        .enable_mode =        {         true,      true,          true,              true,             true,           false,          true,               true,        true,          true,              true,              false,                      false,               true},
-        .min_partition_size = {          512,       512,           512,               512,              512,             512,          2048,      8 * MB / 1024,         512,          2048,               512,                512,                        512,                512},
-        .max_partition_size = {       8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,        8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
+        //                          Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 3, IsendThenTest = 4, IsendTestall = 5, CustomPsend = 6, WinSingle = 7,            Win = 8,   Psend = 9, PsendList = 10, PsendParrived = 11, PsendProgress = 12, PsendProgressThreaded = 13, PsendThreaded = 14
+        .enable_mode =        {         true,         true,      true,          true,              true,             true,           false,          true,               true,        true,          true,              true,              false,                      false,               true},
+        .min_partition_size = {          512,          512,       512,           512,               512,              512,             512,          2048,       8 * MB / 128,         512,           512,               512,                512,                        512,                512},
+        .max_partition_size = {       8 * MB,       8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,        8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
         .send_patterns =      { Linear, Stride16K, Random, RandomBurst1K },
         .num_send_patterns =  4
     },
@@ -42,10 +44,10 @@ struct setup_t setups[] = {
     {
         .buffer_size = 8 * MB,
         .iterations = 10,
-        //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendList = 9, PsendParrived = 10, PsendProgress = 11, PsendProgressThreaded = 12, PsendThreaded = 13
-        .enable_mode =        {         true,      true,          true,              true,             true,           false,          true,               true,        true,          true,              true,              false,                      false,               true},
-        .min_partition_size = {         2048,      2048,          2048,              2048,             2048,            2048,          2048,      8 * MB / 1024,        2048,          2048,              2048,               2048,                       2048,               2048},
-        .max_partition_size = {       8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,        8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
+        //                          Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 3, IsendThenTest = 4, IsendTestall = 5, CustomPsend = 6, WinSingle = 7,            Win = 8,   Psend = 9, PsendList = 10, PsendParrived = 11, PsendProgress = 12, PsendProgressThreaded = 13, PsendThreaded = 14
+        .enable_mode =        {         true,               true,      true,          true,              true,             true,           false,          true,               true,        true,          true,              true,              false,                      false,               true},
+        .min_partition_size = {          512,                512,      2048,          2048,              2048,             2048,            2048,          2048,      8 * MB / 1024,        2048,          2048,              2048,               2048,                       2048,               2048},
+        .max_partition_size = {       8 * MB,             8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,        8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
         .send_patterns =      { Linear, Stride16K, Random, RandomBurst1K },
         .num_send_patterns =  4
     },
@@ -53,10 +55,10 @@ struct setup_t setups[] = {
     {
         .buffer_size = 8 * MB,
         .iterations = 100,
-        //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendList = 9, PsendParrived = 10, PsendProgress = 11, PsendProgressThreaded = 12, PsendThreaded = 13
-        .enable_mode =        {         true,      true,          true,              true,             true,           false,          true,               true,        true,          true,              true,               true,                       true,               true},
-        .min_partition_size = {          512,       512,           512,               512,              512,             512,          2048,      8 * MB / 1024,         512,          2048,               512,                512,                        512,                512},
-        .max_partition_size = {       8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,        8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
+        //                          Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 3, IsendThenTest = 4, IsendTestall = 5, CustomPsend = 6, WinSingle = 7,            Win = 8,   Psend = 9, PsendList = 10, PsendParrived = 11, PsendProgress = 12, PsendProgressThreaded = 13, PsendThreaded = 14
+        .enable_mode =        {         true,               true,      true,          true,              true,             true,           false,          true,               true,        true,          true,              true,               true,                       true,               true},
+        .min_partition_size = {          512,                512,       512,           512,               512,              512,             512,          2048,      8 * MB / 1024,         512,          2048,               512,                512,                        512,                512},
+        .max_partition_size = {       8 * MB,             8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,        8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
         .send_patterns =      { Linear, Stride16K, Random, RandomBurst1K },
         .num_send_patterns =  4
     },
@@ -64,10 +66,32 @@ struct setup_t setups[] = {
     {
         .buffer_size = 8 * MB,
         .iterations = 30,
-        //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendList = 9, PsendParrived = 10, PsendProgress = 11, PsendProgressThreaded = 12, PsendThreaded = 13
-        .enable_mode =        {         true,      true,          true,              true,             true,           false,          true,               true,        true,          true,              true,               true,                       true,               true},
-        .min_partition_size = {         2048,      2048,          2048,              2048,             2048,            2048,          2048,      8 * MB / 1024,        2048,          2048,              2048,               2048,                       2048,               2048},
-        .max_partition_size = {       8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,        8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
+        //                          Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 3, IsendThenTest = 4, IsendTestall = 5, CustomPsend = 6, WinSingle = 7,            Win = 8,   Psend = 9, PsendList = 10, PsendParrived = 11, PsendProgress = 12, PsendProgressThreaded = 13, PsendThreaded = 14
+        .enable_mode =        {         true,               true,      true,          true,              true,             true,           false,          true,               true,        true,          true,              true,               true,                       true,               true},
+        .min_partition_size = {          512,                512,      2048,          2048,              2048,             2048,            2048,          2048,      8 * MB / 1024,        2048,          2048,              2048,               2048,                       2048,               2048},
+        .max_partition_size = {       8 * MB,             8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,        8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
+        .send_patterns =      { Linear, Stride16K, Random, RandomBurst1K },
+        .num_send_patterns =  4
+    },
+    // rdma local
+    {
+        .buffer_size = 8 * MB,
+        .iterations = 10,
+        //                          Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 3, IsendThenTest = 4, IsendTestall = 5, CustomPsend = 6, WinSingle = 7,            Win = 8,   Psend = 9, PsendList = 10, PsendParrived = 11, PsendProgress = 12, PsendProgressThreaded = 13, PsendThreaded = 14
+        .enable_mode =        {         true,              false,     false,         false,             false,            false,           false,          true,               true,       false,         false,             false,              false,                      false,              false},
+        .min_partition_size = {          512,                512,      2048,          2048,              2048,             2048,            2048,          2048,      8 * MB / 1024,        2048,          2048,              2048,               2048,                       2048,               2048},
+        .max_partition_size = {       8 * MB,             8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,        8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
+        .send_patterns =      { Linear, Stride16K, Random, RandomBurst1K },
+        .num_send_patterns =  4
+    },
+    // partitioned local
+    {
+        .buffer_size = 8 * MB,
+        .iterations = 10,
+        //                          Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 3, IsendThenTest = 4, IsendTestall = 5, CustomPsend = 6, WinSingle = 7,            Win = 8,   Psend = 9, PsendList = 10, PsendParrived = 11, PsendProgress = 12, PsendProgressThreaded = 13, PsendThreaded = 14
+        .enable_mode =        {         true,              false,     false,         false,             false,            false,           false,         false,              false,        true,          true,              true,               true,                       true,               true},
+        .min_partition_size = {          512,                512,      2048,          2048,              2048,             2048,            2048,          2048,      8 * MB / 1024,        2048,          2048,              2048,               2048,                       2048,               2048},
+        .max_partition_size = {       8 * MB,             8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,        8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
         .send_patterns =      { Linear, Stride16K, Random, RandomBurst1K },
         .num_send_patterns =  4
     },
@@ -75,10 +99,10 @@ struct setup_t setups[] = {
     {
         .buffer_size = 8 * MB,
         .iterations = 10,
-        //                          Send = 0, Isend = 1, IsendTest = 2, IsendThenTest = 3, IsendTestall = 4, CustomPsend = 5, WinSingle = 6,            Win = 7,   Psend = 8, PsendList = 9, PsendParrived = 10, PsendProgress = 11, PsendProgressThreaded = 12, PsendThreaded = 13
-        .enable_mode =        {        false,     false,         false,             false,            false,            true,         false,              false,       false,          true,             false,              false,                      false,              false},
-        .min_partition_size = {         2048,      2048,          2048,              2048,             2048,            2048,          2048,      8 * MB / 1024,        2048,          2048,              2048,               2048,                       2048,               2048},
-        .max_partition_size = {       8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,        8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
+        //                          Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 3, IsendThenTest = 4, IsendTestall = 5, CustomPsend = 6, WinSingle = 7,            Win = 8,   Psend = 9, PsendList = 10, PsendParrived = 11, PsendProgress = 12, PsendProgressThreaded = 13, PsendThreaded = 14
+        .enable_mode =        {         true,               true,     false,         false,             false,            false,            true,         false,              false,       false,          true,             false,              false,                      false,              false},
+        .min_partition_size = {          512,                512,      2048,          2048,              2048,             2048,            2048,          2048,      8 * MB / 1024,        2048,          2048,              2048,               2048,                       2048,               2048},
+        .max_partition_size = {       8 * MB,             8 * MB,    8 * MB,        8 * MB,            8 * MB,           8 * MB,          8 * MB,        8 * MB,             8 * MB,      8 * MB,        8 * MB,            8 * MB,             8 * MB,                     8 * MB,             8 * MB},
         .send_patterns =      { Linear, Stride16K, Random, RandomBurst1K },
         .num_send_patterns =  4
     }

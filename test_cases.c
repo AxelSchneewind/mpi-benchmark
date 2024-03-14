@@ -138,7 +138,7 @@ void test_cases_init(MPI_Count buffer_size, int num_repetitions, bool *use_mode,
     result->test_count = 0;
     for (Mode mode = 0; mode < ModeCount; mode++) {
 #ifdef DISABLE_PSEND
-        if (is_psend(mode);)
+        if (is_psend(mode))
             continue;
 #endif
 

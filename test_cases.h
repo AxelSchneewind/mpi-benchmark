@@ -19,19 +19,20 @@ typedef enum Timer Timer;
 enum Mode
 {
 	Send =             0,
-	Isend              ,
-	IsendTest          ,
-	IsendThenTest      ,
-	IsendTestall       ,
-	CustomPsend        ,
-	WinSingle          ,
-	Win                ,
-	Psend              ,
-	PsendList          ,
-	PsendParrived      ,
-	PsendProgress      ,
-	PsendProgressThread,
-	PsendThreaded      ,
+	SendPersistent      ,
+	Isend               ,
+	IsendTest           ,
+	IsendThenTest       ,
+	IsendTestall        ,
+	CustomPsend         ,
+	WinSingle           ,
+	Win                 ,
+	Psend               ,
+	PsendList           ,
+	PsendParrived       ,
+	PsendProgress       ,
+	PsendProgressThread ,
+	PsendThreaded       ,
 	ModeCount
 };
 typedef enum Mode Mode;

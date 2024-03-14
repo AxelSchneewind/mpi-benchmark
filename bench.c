@@ -167,7 +167,7 @@ int main(int argc, char **argv)
         TestCase *test_case = test_cases_get_test_case(tests, i);
         Result *result = test_cases_get_result(tests, i);
 
-        if (comm_rank == 0)
+        if (comm_rank == 1)
         {
             if (test_case->partition_size == test_case->partition_size_recv)
                 printf("Running test %.4li in mode %15s, partition size %7lli, send pattern %s :\n\t", i, mode_names[test_case->mode], test_case->partition_size, send_pattern_identifiers[test_case->send_pattern_num]);
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
         if (i > 0 && test_case->mode == test_cases_get_test_case(tests, i - 1)->mode && test_cases_get_result(tests, i - 1)->timings[Total] > time_limit) {
             *result = *test_cases_get_result(tests, i-1);
 
-            if (comm_rank == 0){
+            if (comm_rank == 1){
                 printf("time limit exceeded in previous run, not running benchmark\n"); 
                 fflush(stdout);
             }

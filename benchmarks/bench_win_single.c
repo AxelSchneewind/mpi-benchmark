@@ -43,16 +43,17 @@ void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
 
 	for (size_t i = 0; i < test_case->iteration_count; i++)
 	{
-		MPI_Barrier(MPI_COMM_WORLD);
+		// 
+		// MPI_Barrier(MPI_COMM_WORLD);
 		if (comm_rank == 0)
 		{
 			timers_start(timers, Iteration);
 			timers_start(timers, IterationStartToWait);
 
-			MPI_CHECK(MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, MPI_MODE_NOCHECK, window));
-
 			for (size_t p = 0; p < test_case->partition_count; p++)
 			{
+				MPI_CHECK(MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, /*MPI_MODE_NOCHECK*/0, window));
+
 				unsigned int partition_num = test_case->send_pattern[p];
 				work(test_case->partition_size);
 				MPI_CHECK(MPI_Put(
@@ -60,10 +61,11 @@ void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
 					test_case->partition_size, MPI_BYTE, 1,
 					test_case->partition_size * partition_num,
 					test_case->partition_size, MPI_BYTE, window));
+
+				MPI_CHECK(MPI_Win_unlock(1, window));
 			}
 
 			timers_stop(timers, IterationStartToWait);
-			MPI_CHECK(MPI_Win_unlock(1, window));
 
 			timers_stop(timers, Iteration);
 		}

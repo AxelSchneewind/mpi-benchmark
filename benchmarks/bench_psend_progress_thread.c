@@ -72,8 +72,8 @@ void *progress(void *arguments)
 	while (1)
 	{
 		int ret_trywait = 0;
-		int flag = 0;
-		MPI_Status status;
+		// int flag = 0;
+		// MPI_Status status;
 
 		OUTPUT(sem_wait(&thread->request_available));
 		OUTPUT(sem_wait(&thread->accept_requests));

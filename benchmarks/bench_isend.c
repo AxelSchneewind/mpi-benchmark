@@ -64,5 +64,7 @@ void bench_isend(TestCase *test_case, Result *result, int comm_rank)
     timers_store(timers, result);
     timers_free(timers);
 
+    for (int p = 0; p < test_case->partition_count; p++)
+        MPI_Request_free(&requests[p]);
     free(requests);
 };
