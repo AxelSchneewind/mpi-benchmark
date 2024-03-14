@@ -5,7 +5,7 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 
 
-mode_names = [ 'Send', 'Isend', 'IsendTest', 'IsendThenTest', 'IsendTestall', 'CustomPsend', 'WinSingle', 'Win', 'Psend', 'PsendParrived', 'PsendProgress', 'PsendProgressThread', 'PsendThreaded']
+mode_names = [ 'Send', 'SendPersistent', 'Isend', 'IsendTest', 'IsendThenTest', 'IsendTestall', 'CustomPsend', 'WinSingle', 'Win', 'Psend', 'PsendParrived', 'PsendProgress', 'PsendProgressThread', 'PsendThreaded']
 send_pattern_names = [ 'linear', 'linear inverse', 'stride (128B)', 'stride (1KB)', 'stride (16KB)', 'random', 'random burst (128B at a time)', 'random burst (1KB at a time)', 'random burst (16KB at a time)' ]
 
 # returns (xValues, yValues, pattern, mode, column) all partition_size -> column plots for the given modes and patterns
@@ -88,7 +88,7 @@ def plot(ax, x, y, domain=None, title=None, label=None, ylabel='Bandwidth [B/s]'
 
 
 
-def plot_column(data, column_names = ['bandwidth'], modes=mode_names, patterns=send_pattern_names, ylabel='bandwidth [B/s]', domain=None):
+def plot_column(data, column_names = ['bandwidth'], modes=mode_names, patterns=send_pattern_names, ylabel='bandwidth [B/s]', title=None, domain=None):
     rows = 3
     cols = 4
     (fig, ax) = plt.subplots(rows, cols, sharex=True, sharey=True)
@@ -111,16 +111,16 @@ def plot_column(data, column_names = ['bandwidth'], modes=mode_names, patterns=s
         (a0, a1) = ax_per_mode[mode]
         plot(ax[a0, a1], xValues, yValues, domain, title=title, ylabel=ylabel, label=label)
 
-    plt.show()
+        if title != None:
+            ax[a0, a1].set_title(title)
 
 
-def plot_column_combined(data, column_names=['bandwidth'], modes=mode_names, patterns=send_pattern_names, ylabel='bandwidth [B/s]', domain=None):
+def plot_column_combined(data, column_names=['bandwidth'], modes=mode_names, patterns=send_pattern_names, ylabel='bandwidth [B/s]', title='', domain=None):
     rows = 1
     cols = 1
     (fig, ax) = plt.subplots(rows, cols)
 
     for (xValues, yValues, mode, pattern, column) in iter_results(data, modes=modes, patterns=patterns, columns=column_names):
-        title = column
         label = mode + ', ' + pattern
-        plot(ax[0, 0], xValues, yValues, domain, title=title, ylabel=ylabel, label=label)
+        plot(ax, xValues, yValues, domain, title=title, ylabel=ylabel, label=label)
 
