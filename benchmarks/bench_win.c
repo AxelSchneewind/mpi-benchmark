@@ -63,7 +63,7 @@ void bench_win(TestCase *test_case, Result *result, int comm_rank)
 			{
 				unsigned int partition_num = test_case->send_pattern[p];
 				work(test_case->partition_size);
-				MPI_CHECK(MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, /*MPI_MODE_NOCHECK*/0, windows[partition_num]));
+				MPI_CHECK(MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, MPI_MODE_NOCHECK, windows[partition_num]));
 				MPI_CHECK(MPI_Put(
 					test_case->buffer + test_case->partition_size * partition_num,
 					test_case->partition_size, MPI_BYTE, 1, 0,
