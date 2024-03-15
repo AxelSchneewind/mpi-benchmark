@@ -41,9 +41,11 @@ def plot(ax, x, y, domain=None, title=None, label=None, ylabel='Bandwidth [B/s]'
     if domain != None:
         (xdomain, ydomain) = domain
         if xdomain != None:
-            ax.set_xlim(xdomain)
+            l,u = xdomain
+            ax.set_xlim(l,u)
         if ydomain != None:
-            ax.set_ylim(ydomain)
+            l,u = ydomain
+            ax.set_ylim(l, u)
 
     ax.set_xscale(mpl.scale.LogScale(ax, base=2))
 
@@ -109,7 +111,7 @@ def plot_column(data, column_names = ['bandwidth'], modes=mode_names, patterns=s
         title = str(mode)
         label = mode + ', ' + pattern
         (a0, a1) = ax_per_mode[mode]
-        plot(ax[a0, a1], xValues, yValues, domain, title=title, ylabel=ylabel, label=label)
+        plot(ax[a0, a1], xValues, yValues, title=title, ylabel=ylabel, label=label, domain=domain)
 
         if title != None:
             ax[a0, a1].set_title(title)
@@ -122,5 +124,5 @@ def plot_column_combined(data, column_names=['bandwidth'], modes=mode_names, pat
 
     for (xValues, yValues, mode, pattern, column) in iter_results(data, modes=modes, patterns=patterns, columns=column_names):
         label = mode + ', ' + pattern
-        plot(ax, xValues, yValues, domain, title=title, ylabel=ylabel, label=label)
+        plot(ax, xValues, yValues, title=title, ylabel=ylabel, label=label, domain=domain)
 
