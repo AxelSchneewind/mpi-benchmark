@@ -19,7 +19,8 @@ $PLOT -f $RESULTS_OPENMPI_DEFAULT/results.csv -o 'fig_openmpi_psend.png'      -s
 $PLOT -f $RESULTS_OPENMPI_DEFAULT/results.csv -o 'fig_openmpi_win.png'        -s -c bandwidth -m Win       -p linear,random -t 'MPI_Win (one per partition)'
 $PLOT -f $RESULTS_OPENMPI_DEFAULT/results.csv -o 'fig_openmpi_win_single.png' -s -c bandwidth -m WinSingle -p linear,random -t MPI_Win
 
-$PLOT -f $RESULTS_OPENMPI_DEFAULT/results.csv -o 'fig_openmpi_tlocal.png'     -s -c t_local   -m Send,Isend,Psend,Win,WinSingle -p linear,random -t 'time per message'
+$PLOT -f $RESULTS_OPENMPI_DEFAULT/results.csv -o 'fig_openmpi_tlocal.png'     -s -c t_local   -m Send,Isend,Psend,Win,WinSingle -p linear -t 'average time per message'
+$PLOT -f $RESULTS_OPENMPI_DEFAULT/results.csv -o 'fig_openmpi_twait.png'      -s -c t_wait     -m Send,Isend,Psend,Win,WinSingle -p linear -t 'average time in MPI_Wait()'
 
 $PLOT -f $RESULTS_OPENMPI_OB1/results.csv -o 'fig_openmpi_ob1_send.png'       -s -c bandwidth -m Send      -p linear,random -t MPI_Send
 $PLOT -f $RESULTS_OPENMPI_OB1/results.csv -o 'fig_openmpi_ob1_isend.png'      -s -c bandwidth -m Isend     -p linear,random -t MPI_Isend
