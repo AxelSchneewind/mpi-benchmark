@@ -1,5 +1,6 @@
 #include "bench.h"
 #include "stdio.h"
+#include "benchmarks/benchmark.h"
 
 #define LOG(format)                                               \
 	{                                                             \

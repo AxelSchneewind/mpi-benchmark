@@ -1,4 +1,5 @@
 #include "bench.h"
+#include "benchmarks/benchmark.h"
 
 #define NUM_THREADS 8
 
@@ -47,7 +48,7 @@ void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank)
     if (0 == comm_rank) {
         for (int i = 0; i < test_case->iteration_count; i++)
         {
-            MPI_Barrier(MPI_COMM_WORLD);
+			PreIteration;
             timers_start(timers, Iteration);
             timers_start(timers, IterationStartToWait);
             MPI_Start(&request);
@@ -69,7 +70,7 @@ void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank)
     } else {
         for (int i = 0; i < test_case->iteration_count; i++)
         {
-            MPI_Barrier(MPI_COMM_WORLD);
+			PreIteration;
             timers_start(timers, Iteration);
             timers_start(timers, IterationStartToWait);
             MPI_Start(&request);

@@ -1,4 +1,5 @@
 #include "bench.h"
+#include "benchmarks/benchmark.h"
 
 #include <stdio.h>
 #include <stdatomic.h>
@@ -214,7 +215,7 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 	{
 		for (size_t i = 0; i < test_case->iteration_count; i++)
 		{
-			MPI_Barrier(MPI_COMM_WORLD);
+			PreIteration;
 			timers_start(timers, Iteration);
 			timers_start(timers, IterationStartToWait);
 
@@ -246,7 +247,7 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 	{
 		for (size_t i = 0; i < test_case->iteration_count; i++)
 		{
-			MPI_Barrier(MPI_COMM_WORLD);
+			PreIteration;
 			timers_start(timers, Iteration);
 			timers_start(timers, IterationStartToWait);
 

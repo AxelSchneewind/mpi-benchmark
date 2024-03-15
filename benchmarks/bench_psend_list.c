@@ -1,4 +1,6 @@
 #include "bench.h"
+#include "benchmarks/benchmark.h"
+
 void bench_psend_list(TestCase *test_case, Result *result, int comm_rank)
 {
 	// init
@@ -38,7 +40,7 @@ void bench_psend_list(TestCase *test_case, Result *result, int comm_rank)
 	{
 		for (size_t i = 0; i < test_case->iteration_count; i++)
 		{
-			MPI_Barrier(MPI_COMM_WORLD);
+			PreIteration;
 			timers_start(timers, Iteration);
 			timers_start(timers, IterationStartToWait);
 
@@ -61,7 +63,7 @@ void bench_psend_list(TestCase *test_case, Result *result, int comm_rank)
 	{
 		for (size_t i = 0; i < test_case->iteration_count; i++)
 		{
-			MPI_Barrier(MPI_COMM_WORLD);
+			PreIteration;
 			timers_start(timers, Iteration);
 			timers_start(timers, IterationStartToWait);
 
