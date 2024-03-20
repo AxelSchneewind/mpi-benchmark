@@ -26,6 +26,7 @@ static const char* const send_pattern_identifiers[SendPatternCount] = {
 extern void bench_send(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_send_persistent(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_isend(TestCase *test_case, Result *result, int comm_rank);
+extern void bench_isend_threaded(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_isend_test(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_isend_then_test(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_isend_testall(TestCase *test_case, Result *result, int comm_rank);
@@ -47,6 +48,7 @@ static RunMethod const mode_methods[ModeCount] = {
 	{ &bench_send },
 	{ &bench_send_persistent },
 	{ &bench_isend },
+	{ &bench_isend_threaded },
 	{ &bench_isend_test },
 	{ &bench_isend_then_test },
 	{ &bench_isend_testall },
@@ -75,6 +77,7 @@ static const char* const mode_names[ModeCount] = {
 	"Send",
 	"SendPersistent",
 	"Isend",
+	"IsendThreaded",
 	"IsendTest",
 	"IsendThenTest",
 	"IsendTestall",

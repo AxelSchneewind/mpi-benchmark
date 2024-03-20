@@ -21,6 +21,7 @@ enum Mode
 	Send =             0,
 	SendPersistent      ,
 	Isend               ,
+	IsendThreaded       ,
 	IsendTest           ,
 	IsendThenTest       ,
 	IsendTestall        ,

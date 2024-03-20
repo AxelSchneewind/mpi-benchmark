@@ -3,12 +3,12 @@
 
 MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
 #MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
-SETUP=CUSTOM_LOCAL
+SETUP=FULL_LOCAL
 
 MPI_RUN=$(MPI_DIR)mpirun
 MPI_CC=$(MPI_DIR)mpicc
 
-SRC=$(wildcard benchmarks/*.c) $(filter-out interval_tree_test.c get_status.c parrived.c custom_psend_old.c custom_psend_new.c, $(wildcard *.c))
+SRC=$(wildcard benchmarks/*.c) $(filter-out interval_tree_test.c get_status.c parrived.c custom_psend_old.c custom_psend_new.c partitioned_get_status.c win.c, $(wildcard *.c))
 
 .phony: all run debug ddd deploy run-remote get put run_get_status run_parrived
 all: bench
