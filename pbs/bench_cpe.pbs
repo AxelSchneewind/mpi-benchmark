@@ -5,8 +5,8 @@
 #PBS -l walltime=1:00:00
 cd $PBS_O_WORKDIR
 
-IMPL=cray-mpich-ucx/8.1.21
-module load cpe/22.11 cray-mpich-ucx/8.1.21
+IMPL=cpe/23.12
+module load cpe/23.12
 
 source pbs/bench.sh
 setup "$IMPL" 
