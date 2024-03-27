@@ -151,7 +151,7 @@ int main(int argc, char **argv)
         return -1;
 
     TestCases tests;
-    test_cases_init(selection->buffer_size, selection->iterations, selection->enable_mode, selection->min_partition_size, selection->max_partition_size, selection->send_patterns, selection->num_send_patterns, &tests);
+    test_cases_init(selection, &tests);
 
     //
     if (comm_rank == 0)

@@ -9,8 +9,6 @@
 #include <stdio.h>
 #include <time.h>
 
-int is_psend(Mode mode);
-
 static const char* const send_pattern_identifiers[SendPatternCount] = {
     "linear",
     "linear inverse",

@@ -2,7 +2,7 @@
 ### FOR LOCAL TESTING
 
 MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
-#MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
+# MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
 SETUP=FULL_LOCAL
 
 MPI_RUN=$(MPI_DIR)mpirun
@@ -30,7 +30,7 @@ run_valgrind: bench
 
 
 debug: bench_dbg
-	$(MPI_RUN) -n 2 ddd ./bench_dbg  $(SETUP)
+	$(MPI_RUN) -n 2 ddd --args ./bench_dbg  $(SETUP)
 
 tree_test: send_patterns.c interval_tree.c interval_tree_test.c
 	gcc send_patterns.c interval_tree.c interval_tree_test.c -g -o tree_test

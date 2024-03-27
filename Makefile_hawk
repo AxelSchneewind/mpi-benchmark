@@ -2,7 +2,7 @@
 MPI_RUN=mpirun
 MPI_CC=mpicc
 
-SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c, $(wildcard *.c))
+SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c win.c partitioned_get_status.c, $(wildcard *.c))
 SRC_NOPSEND=$(filter-out $(wildcard benchmarks/bench_psen*.c), $(SRC)) benchmarks/bench_psend_custom.c
 
 CFLAGS=-fopenmp -lm -lpthread -I. -Wall -O1

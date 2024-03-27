@@ -66,10 +66,11 @@ struct TestCase
 	enum SendPattern send_pattern_num;
 	permutation send_pattern;
 	permutation recv_pattern;
+	int thread_count;
 	size_t iteration_count;
 	MPI_Count buffer_size;
 	MPI_Count partition_size;
-	MPI_Count partition_size_recv; 		// for now, only used by Psend
+	MPI_Count partition_size_recv; 		// only used by Psend for now
 	MPI_Count partition_count;
 	MPI_Count partition_count_recv;
 };
@@ -86,9 +87,15 @@ struct Result
 };
 typedef struct Result Result;
 
+// properties of the different modes
+int is_psend(Mode mode);
+int is_threaded(Mode mode);
 
+
+// 
 extern void timers_store(timers timers, Result* result);
 
+// forward declaration for test cases struct
 struct test_cases;
 typedef struct test_cases* TestCases;
 
@@ -96,5 +103,9 @@ extern int test_cases_get_count(TestCases tests);
 extern TestCase *test_cases_get_test_case(TestCases tests, int i);
 extern Result *test_cases_get_result(TestCases tests, int i);
 
-extern void test_cases_init(MPI_Count buffer_size, int num_repetitions, bool *use_mode, const MPI_Count *min_partition_size, const MPI_Count *max_partition_size, const SendPattern *send_patterns, int byte_send_patterns_count, TestCases* tests);
+// forward declaration for setup struct
+struct setup_t;
+typedef struct setup_t* setup;
+
+extern void test_cases_init(setup setup, TestCases* tests);
 extern void test_cases_free(TestCases* tests);
