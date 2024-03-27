@@ -21,7 +21,6 @@ enum Mode
 	Send =             0,
 	SendPersistent      ,
 	Isend               ,
-	IsendThreaded       ,
 	IsendTest           ,
 	IsendThenTest       ,
 	IsendTestall        ,
@@ -33,7 +32,6 @@ enum Mode
 	PsendParrived       ,
 	PsendProgress       ,
 	PsendProgressThread ,
-	PsendThreaded       ,
 	ModeCount
 };
 typedef enum Mode Mode;
@@ -67,6 +65,7 @@ struct TestCase
 	permutation send_pattern;
 	permutation recv_pattern;
 	int thread_count;
+	int partitions_per_thread;
 	size_t iteration_count;
 	MPI_Count buffer_size;
 	MPI_Count partition_size;

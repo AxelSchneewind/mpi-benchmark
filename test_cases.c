@@ -42,7 +42,7 @@ typedef struct test_cases* TestCases;
 
 int is_psend(Mode mode)
 {
-    return (mode == Psend || mode == PsendThreaded || mode == PsendProgress || mode == PsendParrived || mode == PsendProgressThread || mode == CustomPsend);
+    return (mode == Psend || mode == PsendProgress || mode == PsendParrived || mode == PsendProgressThread || mode == CustomPsend);
 }
 
 void make_send_pattern(permutation result, size_t count, SendPattern pattern)
@@ -176,52 +176,49 @@ void test_cases_init(setup configuration, TestCases* tests)
     result->results = calloc(result->test_count, sizeof(Result));
 
     size_t index = 0;
-    for (Mode mode = 0; mode < ModeCount; mode++)
-    {
-        if (configuration->enable_mode[mode])
-        {
-            if (is_psend(mode))
-            {
-                for (MPI_Count partition_size = setup_max_partition_size(configuration, mode); partition_size > setup_min_partition_size(configuration, mode); partition_size /= 2)
-                {
-                    for (MPI_Count partition_size_recv = setup_max_partition_size(configuration, mode); partition_size_recv > setup_min_partition_size(configuration, mode); partition_size_recv /= 2)
-                    {
-                        for (int i = 0; i < configuration->num_send_patterns; i++)
-                        {
+    // iterate over modes
+    for (Mode mode = 0; mode < ModeCount; mode++) {
+        // only use enabled modes
+        if (configuration->enable_mode[mode]) {
+            // iterate over send side partition sizes
+            for (MPI_Count partition_size = setup_max_partition_size(configuration, mode); partition_size >= setup_min_partition_size(configuration, mode); partition_size /= 2) {
+                // iterate over receive side partition sizes
+                for (MPI_Count partition_size_recv = (is_psend(mode) ? setup_max_partition_size(configuration, mode) : partition_size); partition_size_recv >= (is_psend(mode) ? setup_min_partition_size(configuration, mode) : partition_size); partition_size_recv /= 2) {
+                    // iterate over send patterns
+                    for (int i = 0; i < configuration->num_send_patterns; i++) {
+                        // iterate over thread count
+                        for (int t = setup_max_thread_count(configuration, mode); t >= setup_min_thread_count(configuration, mode); t /= 2) {
+                            if (t > result->buffer_size / partition_size)
+                                continue;
+
                             TestCase *test_case = &result->test_cases[index++];
+
+                            // assign send pattern
                             test_case->send_pattern_num = configuration->send_patterns[i];
                             test_case->send_pattern = *test_cases_send_pattern(result, partition_size, i);
                             test_case->recv_pattern = *test_cases_send_pattern(result, partition_size_recv, i);
+
                             test_case->mode = mode;
                             test_case->method = mode_methods[test_case->mode];
+
                             test_case->iteration_count = configuration->iterations;
+
                             test_case->buffer_size = result->buffer_size;
                             test_case->buffer = result->buffer;
+
                             test_case->partition_size = partition_size;
                             test_case->partition_size_recv = partition_size_recv;
                             test_case->partition_count = result->buffer_size / test_case->partition_size;
                             test_case->partition_count_recv = result->buffer_size / test_case->partition_size_recv;
+
+                            // distribute threads over partitions
+                            test_case->thread_count = t;
+                            if (test_case->partition_count < test_case->thread_count) {
+                                printf("something went wrong\n");
+                                test_case->thread_count = test_case->partition_count;
+                            }
+                            test_case->partitions_per_thread = test_case->partition_count / test_case->thread_count;
                         }
-                    }
-                }
-            } else {
-                for (MPI_Count partition_size = setup_max_partition_size(configuration, mode); partition_size > setup_min_partition_size(configuration, mode); partition_size /= 2)
-                {
-                    for (int i = 0; i < configuration->num_send_patterns; i++)
-                    {
-                        TestCase *test_case = &result->test_cases[index++];
-                        test_case->send_pattern_num = configuration->send_patterns[i];
-                        test_case->send_pattern = *test_cases_send_pattern(result, partition_size, i);
-                        test_case->recv_pattern = *test_cases_send_pattern(result, partition_size, i);
-                        test_case->mode = mode;
-                        test_case->method = mode_methods[test_case->mode];
-                        test_case->iteration_count = configuration->iterations;
-                        test_case->buffer_size = result->buffer_size;
-                        test_case->buffer = result->buffer;
-                        test_case->partition_size = partition_size;
-                        test_case->partition_size_recv = partition_size;
-                        test_case->partition_count = result->buffer_size / test_case->partition_size;
-                        test_case->partition_count_recv = result->buffer_size / test_case->partition_size_recv;
                     }
                 }
             }
