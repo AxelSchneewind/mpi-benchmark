@@ -33,6 +33,9 @@ extern int num_test_cases(setup config, Mode mode);
 extern int setup_max_partition_size(setup config, Mode mode);
 extern int setup_min_partition_size(setup config, Mode mode);
 
+extern int setup_max_thread_count(setup config, Mode mode);
+extern int setup_min_thread_count(setup config, Mode mode);
+
 extern int setup_max_partition_size_total(setup config);
 extern int setup_min_partition_size_total(setup config);
 
