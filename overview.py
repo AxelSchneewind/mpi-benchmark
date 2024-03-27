@@ -31,6 +31,7 @@ def evaluate_list(list_str, all_values):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='plotter for benchmarks', description='', epilog='')
     parser.add_argument('-c', '--columns', default='bandwidth')
+    parser.add_argument('-n', '--thread-counts', action='append')
     parser.add_argument('-m', '--modes', default='all')
     parser.add_argument('-p', '--patterns', default='all')
     parser.add_argument('-y', '--ydomain', default='')
@@ -67,11 +68,13 @@ if __name__ == "__main__":
     if title == '':
         title = args.file
 
+    thread_counts = args.thread_counts
+
     # 
     if args.single_plot:
-        plots.plot_column_combined(data, columns, title=title, modes=modes, patterns=patterns, ylabel=ylabel, domain=domain)
+        plots.plot_column_combined(data, columns, title=title, modes=modes, patterns=patterns, thread_counts=thread_counts, ylabel=ylabel, domain=domain)
     else:
-        plots.plot_column(data, columns, title=title, modes=modes, patterns=patterns, ylabel=ylabel, domain=domain)
+        plots.plot_column(data, columns, title=title, modes=modes, patterns=patterns, thread_counts=thread_counts, ylabel=ylabel, domain=domain)
 
     # output depending on output file argument
     if args.output_file != None:

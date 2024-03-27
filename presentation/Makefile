@@ -39,7 +39,7 @@ fig_openmpi_twait.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
 fig_openmpi_psend_isend.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
 	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@    -c bandwidth -m Psend,Isend  -p linear -t 'Psend vs Isend' $(COMMON_FLAGS)
 fig_openmpi_psend_isend_threaded.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
-	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@    -c bandwidth -m PsendThreaded,IsendThreaded  -p linear -t 'Psend vs Isend (multithreaded)' $(COMMON_FLAGS)
+	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@    -c bandwidth -m PsendThreaded,IsendThreaded  -p linear -t 'Psend vs Isend (multithreaded)' -n 1,2,4,8,16,32,64 $(COMMON_FLAGS)
 
 fig_openmpi_psend_win.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
 	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@      -c bandwidth -m Psend,WinSingle  -p linear -t 'Psend vs Win - single' $(COMMON_FLAGS)
@@ -75,5 +75,5 @@ fig_mpich_tlocal.png: $(RESULTS_MPICH)/results.csv
 fig_mpich_psend_isend.png: $(RESULTS_MPICH)/results.csv
 	$(PLOT) -f $(RESULTS_MPICH)/results.csv -o $@     -p linear -c bandwidth -m Psend,Isend -t 'MPICH: Isend vs Psend' $(COMMON_FLAGS)
 fig_mpich_psend_isend_threaded.png: $(RESULTS_MPICH)/results.csv
-	$(PLOT) -f $(RESULTS_MPICH)/results.csv -o $@      -p linear -c bandwidth -m PsendThreaded,IsendThreaded     -t 'Psend vs Isend (multithreaded)' $(COMMON_FLAGS)
+	$(PLOT) -f $(RESULTS_MPICH)/results.csv -o $@      -p linear -c bandwidth -m PsendThreaded,IsendThreaded     -t 'Psend vs Isend (multithreaded)' -n 1,2,4,8,16,32,64 $(COMMON_FLAGS)
 	
