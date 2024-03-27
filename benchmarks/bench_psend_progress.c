@@ -98,22 +98,24 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
 
             int flag = false;
             // printf("s2\n"); fflush(stdout);
-            for (size_t p = 0; p < test_case->partition_count; p++)
-            {
-                unsigned int partition_num = test_case->send_pattern[p];
+            #pragma omp parallel for num_threads(test_case->thread_count)
+            for (int i = 0; i < test_case->thread_count; i++) {
+                for (int p = 0; p < test_case->partitions_per_thread; p++) {
+                    unsigned int partition_num = test_case->send_pattern[p + i * test_case->partitions_per_thread];
 
-                // try to trigger progress as MPI_Pready doesn't (at least for openmpi)
-                MPI_CHECK(MPI_Request_get_status(request, &flag, &result->send_status));
+                    // try to trigger progress as MPI_Pready doesn't (at least for openmpi)
+                    MPI_CHECK(MPI_Request_get_status(request, &flag, &result->send_status));
 
-                /* how can MPI_Request_get_status return true if not all Pready calls have been made?
-                 * occurs with openmpi and only for i % 2 == 1 
-                 */
-                //if (flag) {            
-                //     printf("MPI_Request_get_status() returned true before MPI_Pready done (partition %i of %i, iteration %i)\n", p, test_case->partition_count, i); 
-                //     fflush(stdout);
-                    // break;
-                //}
-                MPI_CHECK(MPI_Pready(partition_num, request));
+                    /* how can MPI_Request_get_status return true if not all Pready calls have been made?
+                     * occurs with openmpi and only for i % 2 == 1 
+                     */
+                    //if (flag) {            
+                    //     printf("MPI_Request_get_status() returned true before MPI_Pready done (partition %i of %i, iteration %i)\n", p, test_case->partition_count, i); 
+                    //     fflush(stdout);
+                        // break;
+                    //}
+                    MPI_CHECK(MPI_Pready(partition_num, request));
+                }
             }
 
             // printf("s3\n"); fflush(stdout);

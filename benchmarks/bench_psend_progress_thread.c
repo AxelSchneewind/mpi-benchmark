@@ -227,11 +227,14 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 		 	OUTPUT_RANK(progress_thread_set_request(&progress, &request));
 		 	OUTPUT_RANK(progress_thread_continue(&progress));
 
-			for (size_t p = 0; p < test_case->partition_count; p++)
-			{
-				unsigned int partition_num = test_case->send_pattern[p];
-				work(test_case->partition_size);
-				MPI_CHECK(MPI_Pready(partition_num, request));
+
+            #pragma omp parallel for num_threads(test_case->thread_count)
+            for (int i = 0; i < test_case->thread_count; i++) {
+                for (int p = 0; p < test_case->partitions_per_thread; p++) {
+                    unsigned int partition_num = test_case->send_pattern[p + i * test_case->partitions_per_thread];
+					work(test_case->partition_size);
+					MPI_CHECK(MPI_Pready(partition_num, request));
+				}
 			}
 
 

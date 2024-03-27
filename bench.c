@@ -47,7 +47,7 @@ FILE *open_result_file(int comm_rank)
         printf("no output from this rank\n");
         return NULL;
     }
-    fprintf(file, "mode,buffer_size,partition_size,partition_size_recv,send_pattern,t_local,t_start_to_wait,t_wait,t_total,t_wait_relative,bandwidth,std_dev(t_local),std_dev(t_start_to_wait),std_dev(t_total)\n");
+    fprintf(file, "mode,buffer_size,thread_count,partition_size,partition_size_recv,send_pattern,t_local,t_start_to_wait,t_wait,t_total,t_wait_relative,bandwidth,std_dev(t_local),std_dev(t_start_to_wait),std_dev(t_total)\n");
     fclose(file);
 
     // open in append mode
@@ -61,9 +61,10 @@ FILE *open_result_file(int comm_rank)
 
 void record_result(TestCase *test_case, Result *result, FILE *file)
 {
-    fprintf(file, "%s,%lli,%lli,%lli,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", 
+    fprintf(file, "%s,%lli,%i,%lli,%lli,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", 
                     mode_names[test_case->mode], 
                     test_case->buffer_size, 
+                    test_case->thread_count,
                     test_case->partition_size, 
                     test_case->partition_size_recv, 
                     send_pattern_identifiers[test_case->send_pattern_num], 
@@ -170,9 +171,9 @@ int main(int argc, char **argv)
         if (comm_rank == 1)
         {
             if (test_case->partition_size == test_case->partition_size_recv)
-                printf("Running test %.4li in mode %15s, partition size %7lli, send pattern %s :\n\t", i, mode_names[test_case->mode], test_case->partition_size, send_pattern_identifiers[test_case->send_pattern_num]);
+                printf("Running test %.4li in mode %15s, with %i threads, partition size %7lli, send pattern %s :\n\t", i, mode_names[test_case->mode], test_case->thread_count, test_case->partition_size, send_pattern_identifiers[test_case->send_pattern_num]);
             else
-                printf("Running test %.4li in mode %15s, partition size %7lli -> %7lli, send pattern %s :\n\t", i, mode_names[test_case->mode], test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num]);
+                printf("Running test %.4li in mode %15s, with %i threads, partition size %7lli -> %7lli, send pattern %s :\n\t", i, mode_names[test_case->mode], test_case->thread_count, test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num]);
             fflush(stdout);
         }
 

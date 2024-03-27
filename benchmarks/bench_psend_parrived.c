@@ -51,11 +51,13 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
 
             MPI_CHECK(MPI_Start(&request));
 
-            for (size_t p = 0; p < test_case->partition_count; p++)
-            {
-                unsigned int partition_num = test_case->send_pattern[p];
-                work(test_case->partition_size);
-                MPI_CHECK(MPI_Pready(partition_num, request));
+            #pragma omp parallel for num_threads(test_case->thread_count)
+            for (int i = 0; i < test_case->thread_count; i++) {
+                for (int p = 0; p < test_case->partitions_per_thread; p++) {
+                    unsigned int partition_num = test_case->send_pattern[p + i * test_case->partitions_per_thread];
+                    work(test_case->partition_size);
+                    MPI_CHECK(MPI_Pready(partition_num, request));
+                }
             }
 
             timers_stop(timers, IterationStartToWait);
@@ -77,15 +79,17 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
             int flag = 0;
             while (!flag)
             {
-                for (size_t p = 0; p < test_case->partition_count_recv; p++)
-                {
-                    MPI_CHECK(MPI_Request_get_status(request, &flag, &result->recv_status));
-                    // if (flag)		// enable if something goes wrong
-                    //     break;
+                #pragma omp parallel for num_threads(test_case->thread_count)
+                for (int i = 0; i < test_case->thread_count; i++) {
+                    for (int p = 0; p < test_case->partitions_per_thread; p++) {
+                        MPI_CHECK(MPI_Request_get_status(request, &flag, &result->recv_status));
+                        // if (flag)		// enable if something goes wrong
+                        //     break;
 
-                    // ignoring result of MPI_Parrived
-                    int _flag;
-                    MPI_CHECK(MPI_Parrived(request, p, &_flag));
+                        // ignoring result of MPI_Parrived
+                        int _flag;
+                        MPI_CHECK(MPI_Parrived(request, p, &_flag));
+                    }
                 }
             }
 
