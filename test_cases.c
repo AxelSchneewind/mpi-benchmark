@@ -181,7 +181,7 @@ void test_cases_init(setup configuration, TestCases* tests)
         // only use enabled modes
         if (configuration->enable_mode[mode]) {
             // iterate over thread count
-            for (int t = setup_min_thread_count(configuration, mode); t >= setup_max_thread_count(configuration, mode); t *= 2) {
+            for (int t = setup_min_thread_count(configuration, mode); t <= setup_max_thread_count(configuration, mode); t *= 2) {
                 // iterate over send side partition sizes
                 for (MPI_Count partition_size = setup_max_partition_size(configuration, mode); partition_size >= setup_min_partition_size(configuration, mode); partition_size /= 2) {
                     // iterate over receive side partition sizes
