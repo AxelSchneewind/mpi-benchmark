@@ -42,11 +42,11 @@ void bench_isend_testall(TestCase *test_case, Result *result, int comm_rank)
 				}
 			}
 
-			int flag;
-			MPI_CHECK(MPI_Testall(test_case->partition_count, requests, &flag, statuses));
-
 			timers_stop(timers, IterationStartToWait);
-			MPI_CHECK(MPI_Waitall(test_case->partition_count, requests, MPI_STATUSES_IGNORE));
+			int flag = 0;
+			while (!flag) {
+				MPI_CHECK(MPI_Testall(test_case->partition_count, requests, &flag, statuses));
+			}
 
 			timers_stop(timers, Iteration);
 		}
