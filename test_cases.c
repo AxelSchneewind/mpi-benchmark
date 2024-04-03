@@ -103,12 +103,12 @@ void partition_send_pattern_create(permutation* result_ptr, const permutation by
     make_partition_send_pattern(byte_send_pattern, *result_ptr, buffer_size, partition_size);
 }
 
-permutation* test_cases_send_pattern(struct test_cases* tests, int partition_size, int byte_send_pattern_index) {
+permutation test_cases_send_pattern(struct test_cases* tests, int partition_size, int byte_send_pattern_index) {
     int size_index = 0;
     for (MPI_Count p = tests->max_partition_size; p > partition_size; p = p / 2)
         size_index++;
     assert(size_index >= 0 && size_index < tests->num_partition_sizes);
-    return &tests->partition_send_patterns[size_index][byte_send_pattern_index];
+    return tests->partition_send_patterns[size_index][byte_send_pattern_index];
 }
 
 void set_send_pattern_count(struct test_cases* tests, int num_partition_sizes, int num_byte_send_patterns) {
@@ -152,7 +152,7 @@ void test_cases_init(setup configuration, TestCases* tests)
     permutation *byte_send_patterns = calloc(configuration->num_send_patterns, sizeof(permutation));
     for (size_t i = 0; i < configuration->num_send_patterns; i++)
     {
-        byte_send_patterns[i] = malloc(sizeof(unsigned int) * configuration->buffer_size);
+        byte_send_patterns[i] = calloc(sizeof(unsigned int), configuration->buffer_size);
         make_send_pattern(byte_send_patterns[i], configuration->buffer_size, configuration->send_patterns[i]);
         printf("Making byte send pattern %s: %d %d %d %d %d %d...\n", send_pattern_identifiers[configuration->send_patterns[i]], byte_send_patterns[i][0], byte_send_patterns[i][1], byte_send_patterns[i][2], byte_send_patterns[i][3], byte_send_patterns[i][4], byte_send_patterns[i][5]);
     }
@@ -162,11 +162,11 @@ void test_cases_init(setup configuration, TestCases* tests)
         result->num_partition_sizes = result->max_partition_size_log - result->min_partition_size_log + 1;
         set_send_pattern_count(result, result->num_partition_sizes, result->num_send_patterns);
         size_t size_index = 0;
-        for (MPI_Count partition_size = result->max_partition_size; partition_size > result->min_partition_size; partition_size /= 2)
+        for (MPI_Count partition_size = result->max_partition_size; partition_size >= result->min_partition_size; partition_size /= 2)
         {
-            for (int i = 0; i < configuration->num_send_patterns; i++)
+            for (int i = 0; i < result->num_send_patterns; i++)
             {
-                partition_send_pattern_create(&result->partition_send_patterns[size_index][i], byte_send_patterns[i], configuration->buffer_size, partition_size);
+                partition_send_pattern_create(&result->partition_send_patterns[size_index][i], byte_send_patterns[i], result->buffer_size, partition_size);
             }
             size_index++;
         }
@@ -195,8 +195,9 @@ void test_cases_init(setup configuration, TestCases* tests)
 
                             // assign send pattern
                             test_case->send_pattern_num = configuration->send_patterns[i];
-                            test_case->send_pattern = *test_cases_send_pattern(result, partition_size, i);
-                            test_case->recv_pattern = *test_cases_send_pattern(result, partition_size_recv, i);
+                            test_case->send_pattern = test_cases_send_pattern(result, partition_size, i);
+                            test_case->recv_pattern = test_cases_send_pattern(result, partition_size_recv, i);
+                            assert(NULL != test_case->send_pattern && NULL != test_case->recv_pattern);
 
                             test_case->mode = mode;
                             test_case->method = mode_methods[test_case->mode];
@@ -211,7 +212,7 @@ void test_cases_init(setup configuration, TestCases* tests)
                             test_case->partition_count = result->buffer_size / test_case->partition_size;
                             test_case->partition_count_recv = result->buffer_size / test_case->partition_size_recv;
 
-                            // distribute threads over partitions
+                            // distribute partitions over threads
                             test_case->thread_count = t;
                             if (test_case->partition_count < test_case->thread_count) {
                                 printf("something went wrong\n");
