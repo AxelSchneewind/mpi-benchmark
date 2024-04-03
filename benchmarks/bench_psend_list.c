@@ -46,11 +46,10 @@ void bench_psend_list(TestCase *test_case, Result *result, int comm_rank)
 
 			MPI_CHECK(MPI_Start(&request));
 
-			for (size_t p = 0; p < test_case->partition_count; p++)
-			{
-				unsigned int partition_num = test_case->send_pattern[p];
-				work(test_case->partition_size);
-				MPI_CHECK(MPI_Pready(partition_num, request));
+			#pragma omp parallel for
+			for (size_t t = 0; t < test_case->partition_count; t++) {
+				work(test_case->partition_size * test_case->partitions_per_thread);
+				MPI_CHECK(MPI_Pready_list(test_case->partitions_per_thread, &test_case->send_pattern[t * test_case->partitions_per_thread], request));
 			}
 
 			timers_stop(timers, IterationStartToWait);
