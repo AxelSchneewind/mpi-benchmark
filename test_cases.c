@@ -176,6 +176,7 @@ void test_cases_init(setup configuration, TestCases* tests)
     result->results = calloc(result->test_count, sizeof(Result));
 
     size_t index = 0;
+    int max_num_threads = 1;
     // iterate over modes
     for (Mode mode = 0; mode < ModeCount; mode++) {
         // only use enabled modes
@@ -218,7 +219,10 @@ void test_cases_init(setup configuration, TestCases* tests)
                                 printf("something went wrong\n");
                                 test_case->thread_count = test_case->partition_count;
                             }
+                            if (test_case->thread_count < max_num_threads)
+                                max_num_threads = test_case->thread_count;
                             test_case->partitions_per_thread = test_case->partition_count / test_case->thread_count;
+                            assert(test_case->partitions_per_thread * test_case->thread_count == test_case->partition_count);
                         }
                     }
                 }
@@ -227,6 +231,10 @@ void test_cases_init(setup configuration, TestCases* tests)
     }
 
     result->test_count = index;
+
+    // create threads
+    #pragma omp parallel for
+    for (int t = 0; t < max_num_threads; t++) { }
 
     // byte send patterns are not needed anymore
     for (size_t i = 0; i < configuration->num_send_patterns; i++)
