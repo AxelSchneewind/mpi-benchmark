@@ -52,9 +52,9 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
             MPI_CHECK(MPI_Start(&request));
 
             #pragma omp parallel for num_threads(test_case->thread_count)
-            for (int i = 0; i < test_case->thread_count; i++) {
+            for (int t = 0; t < test_case->thread_count; t++) {
                 for (int p = 0; p < test_case->partitions_per_thread; p++) {
-                    unsigned int partition_num = test_case->send_pattern[p + i * test_case->partitions_per_thread];
+                    unsigned int partition_num = test_case->send_pattern[p + t * test_case->partitions_per_thread];
                     work(test_case->partition_size);
                     MPI_CHECK(MPI_Pready(partition_num, request));
                 }
@@ -80,14 +80,16 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
             while (!flag)
             {
                 #pragma omp parallel for num_threads(test_case->thread_count)
-                for (int i = 0; i < test_case->thread_count; i++) {
+                for (int t = 0; t < test_case->thread_count; t++) {
+                    int _flag = 0;
                     for (int p = 0; p < test_case->partitions_per_thread; p++) {
-                        MPI_CHECK(MPI_Request_get_status(request, &flag, &result->recv_status));
-                        // if (flag)		// enable if something goes wrong
-                        //     break;
+                        MPI_CHECK(MPI_Request_get_status(request, &_flag, &result->recv_status));
+                        if (_flag) {		// enable if something goes wrong 
+                            flag = _flag;
+                            break;
+                        }
 
                         // ignoring result of MPI_Parrived
-                        int _flag;
                         MPI_CHECK(MPI_Parrived(request, p, &_flag));
                     }
                 }
