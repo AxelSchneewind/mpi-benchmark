@@ -99,7 +99,7 @@ def plot_column(data, column_names = ['bandwidth'], modes=mode_names, patterns=s
     num_modes = 0
     ax_per_mode = {}
 
-    for (xValues, yValues, mode, pattern, thread_count, column) in iter_results(data, modes=modes, patterns=patterns, columns=column_names):
+    for (xValues, yValues, mode, pattern, thread_count, column) in iter_results(data, modes=modes, patterns=patterns, thread_counts=thread_counts, columns=column_names):
         # next axis
         if not mode in ax_per_mode.keys():
             ax_per_mode[mode] = (num_modes // cols, num_modes % cols)
