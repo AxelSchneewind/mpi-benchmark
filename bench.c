@@ -179,7 +179,9 @@ int main(int argc, char **argv)
 
         // if time limit was exceeded in last test, don't bench this mode any more
         const double time_limit = 5.0;
-        if (i > 0 && test_case->mode == test_cases_get_test_case(tests, i - 1)->mode && test_cases_get_result(tests, i - 1)->timings[Total] > time_limit) {
+        if (i > 0 && test_case->mode == test_cases_get_test_case(tests, i - 1)->mode 
+         && test_case->thread_count == test_acses_get_result(tests, i-1)->thread_count 
+         && test_cases_get_result(tests, i - 1)->timings[Total] > time_limit) {
             *result = *test_cases_get_result(tests, i-1);
 
             if (comm_rank == 1){
