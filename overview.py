@@ -31,10 +31,11 @@ def evaluate_list(list_str, all_values):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='plotter for benchmarks', description='', epilog='')
     parser.add_argument('-c', '--columns', default='bandwidth')
-    parser.add_argument('-n', '--thread-counts', action='append')
+    parser.add_argument('-n', '--thread-counts', default='1')
     parser.add_argument('-m', '--modes', default='all')
     parser.add_argument('-p', '--patterns', default='all')
     parser.add_argument('-y', '--ydomain', default='')
+    parser.add_argument('-x', '--xdomain', default='')
     parser.add_argument('-s', '--single-plot', action='store_true')
     parser.add_argument('-t', '--title', default='')
     parser.add_argument('-f', '--file', default='results.csv')
@@ -42,6 +43,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     data = pd.read_csv(args.file)
+    data.sort_values(by=['mode', 'thread_count', 'send_pattern'], inplace=True)
+
+    # only use results where send and recv partition sizes are equal
     data = data.loc[data['partition_size'] == data['partition_size_recv']]
 
     # select column(s)
@@ -59,16 +63,27 @@ if __name__ == "__main__":
     # select patterns here
     patterns = evaluate_list(args.patterns, plots.send_pattern_names)
 
-    domain = None
+    # setup domain if given
+    ydomain = None
+    xdomain = None
     if args.ydomain != '':
         (ymin, ymax) = args.ydomain.split(',')
-        domain = (None, (float(ymin), float(ymax)))
+        ydomain = (float(ymin), float(ymax))
+    if args.xdomain != '':
+        (xmin, xmax) = args.xdomain.split(',')
+        xdomain = (float(xmin), float(xmax))
+    domain = (xdomain, ydomain)
 
     title = args.title
     if title == '':
         title = args.file
 
+    # 
     thread_counts = args.thread_counts
+    if thread_counts == None:
+        thread_counts = [1]
+    else:
+        thread_counts = [ int(t) for t in thread_counts.split(',') ]
 
     # 
     if args.single_plot:

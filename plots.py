@@ -53,45 +53,18 @@ def plot(ax, x, y, domain=None, title=None, label=None, ylabel='Bandwidth [B/s]'
     ax.legend()
 
 
-# def plot(data, ax, mode, columns, domain=None, ylabel=None):
-#     mode_data = data[data['mode'] == mode] 
-#     mode_data.describe()
-# 
-#     for pattern in data['send_pattern'].unique():
-#         # only plot run with one-to-one relation between partitions
-#         plot_data = mode_data[(mode_data['send_pattern'] == pattern) & (mode_data['partition_size'] == mode_data['partition_size_recv'])]
-#         for column in columns:
-#             xValues = plot_data['partition_size']
-#             yValues = plot_data[column]
-# 
-#             if len(yValues) > 0:
-#                 ax.plot(xValues, yValues, label=mode + ', ' + pattern)
-# 
-#     if ylabel !=None:
-#         ax.set_ylabel(ylabel)    
-#     else:
-#         ax.set_ylabel(columns[0])
-#     
-#     ax.grid()
-#     ax.set_xlabel('partition_size [B]')
-#     ax.set_xscale(mpl.scale.LogScale(ax, base=2))
-# 
-#     if domain == None:
-#         x = (min(ax.get_xlim()[0], min(xValues)), max(ax.get_xlim()[1], max(xValues)))
-#         y = (min(ax.get_ylim()[0], min(yValues)), max(ax.get_ylim()[1], max(yValues)))
-#         domain = (x, y)
-# 
-# 
-#     (xdomain, ydomain) = domain
-#     ax.set_ylim(ydomain)
-#     ax.set_xlim(xdomain)
-# 
-#     ax.legend()
-# 
-
-
 
 def plot_column(data, column_names = ['bandwidth'], modes=mode_names, patterns=send_pattern_names, thread_counts=[1], ylabel='bandwidth [B/s]', title=None, domain=None):
+    # remove duplicates
+    patterns = list(set(patterns))
+    thread_counts = list(set(thread_counts))
+    modes = list(set(modes))
+    column_names = list(set(column_names))
+
+    #
+    multiple_patterns = (len(patterns) > 1)
+    multiple_thread_counts = (len(thread_counts) > 1)
+
     rows = 3
     cols = 4
     (fig, ax) = plt.subplots(rows, cols, sharex=True, sharey=True)
@@ -110,7 +83,12 @@ def plot_column(data, column_names = ['bandwidth'], modes=mode_names, patterns=s
             break
             
         title = str(mode)
-        label = mode + ', ' + pattern + ', ' + thread_count + ' threads'
+        label = mode
+        if multiple_patterns:
+            label = label + ', ' + pattern
+        if multiple_thread_counts:
+            label = label + ', ' + str(thread_count) + ' threads'
+
         (a0, a1) = ax_per_mode[mode]
         plot(ax[a0, a1], xValues, yValues, title=title, ylabel=ylabel, label=label, domain=domain)
 
@@ -119,11 +97,25 @@ def plot_column(data, column_names = ['bandwidth'], modes=mode_names, patterns=s
 
 
 def plot_column_combined(data, column_names=['bandwidth'], modes=mode_names, patterns=send_pattern_names, thread_counts=[1], ylabel='bandwidth [B/s]', title='', domain=None):
+    # remove duplicates
+    patterns = list(set(patterns))
+    thread_counts = list(set(thread_counts))
+    modes = list(set(modes))
+    column_names = list(set(column_names))
+
+    #
+    multiple_patterns = (len(patterns) > 1)
+    multiple_thread_counts = (len(thread_counts) > 1)
+
     rows = 1
     cols = 1
     (fig, ax) = plt.subplots(rows, cols)
 
     for (xValues, yValues, mode, pattern, thread_count, column) in iter_results(data, modes=modes, patterns=patterns, thread_counts=thread_counts, columns=column_names):
-        label = mode + ', ' + pattern + ', ' + thread_count + ' threads'
+        label = mode
+        if multiple_patterns:
+            label = label + ', ' + pattern
+        if multiple_thread_counts:
+            label = label + ', ' + str(thread_count) + ' threads'
         plot(ax, xValues, yValues, title=title, ylabel=ylabel, label=label, domain=domain)
 
