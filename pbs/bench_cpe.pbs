@@ -2,11 +2,11 @@
 
 #PBS -N bench_cpe
 #PBS -l select=2:node_type=rome:mpiprocs=2
-#PBS -l walltime=1:00:00
+#PBS -l walltime=4:00:00
 cd $PBS_O_WORKDIR
 
 IMPL=cpe/23.12
-module load cpe/23.12
+module load gcc/10.2.0 cpe/23.12
 
 source pbs/bench.sh
 setup "$IMPL" 
