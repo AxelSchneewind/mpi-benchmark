@@ -181,12 +181,12 @@ void test_cases_init(setup configuration, TestCases* tests)
     for (Mode mode = 0; mode < ModeCount; mode++) {
         // only use enabled modes
         if (configuration->enable_mode[mode]) {
-            // iterate over thread count
-            for (int t = setup_min_thread_count(configuration, mode); t <= setup_max_thread_count(configuration, mode); t *= 2) {
-                // iterate over send side partition sizes
-                for (MPI_Count partition_size = setup_max_partition_size(configuration, mode); partition_size >= setup_min_partition_size(configuration, mode); partition_size /= 2) {
-                    // iterate over receive side partition sizes
-                    for (MPI_Count partition_size_recv = (is_psend(mode) ? setup_max_partition_size(configuration, mode) : partition_size); partition_size_recv >= (is_psend(mode) ? setup_min_partition_size(configuration, mode) : partition_size); partition_size_recv /= 2) {
+            // iterate over send side partition sizes
+            for (MPI_Count partition_size = setup_max_partition_size(configuration, mode); partition_size >= setup_min_partition_size(configuration, mode); partition_size /= 2) {
+                // iterate over receive side partition sizes
+                for (MPI_Count partition_size_recv = (is_psend(mode) ? setup_max_partition_size(configuration, mode) : partition_size); partition_size_recv >= (is_psend(mode) ? setup_min_partition_size(configuration, mode) : partition_size); partition_size_recv /= 2) {
+                    // iterate over thread count
+                    for (int t = setup_min_thread_count(configuration, mode); t <= setup_max_thread_count(configuration, mode); t *= 2) {
                         // iterate over send patterns
                         for (int i = 0; i < configuration->num_send_patterns; i++) {
                             if (t > result->buffer_size / partition_size)
@@ -219,7 +219,7 @@ void test_cases_init(setup configuration, TestCases* tests)
                                 printf("something went wrong\n");
                                 test_case->thread_count = test_case->partition_count;
                             }
-                            if (test_case->thread_count < max_num_threads)
+                            if (test_case->thread_count > max_num_threads)
                                 max_num_threads = test_case->thread_count;
                             test_case->partitions_per_thread = test_case->partition_count / test_case->thread_count;
                             assert(test_case->partitions_per_thread * test_case->thread_count == test_case->partition_count);
