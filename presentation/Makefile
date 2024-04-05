@@ -28,6 +28,8 @@ fig_openmpi_isend.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
 	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@ -m Isend        -p linear -t MPI_Isend $(COMMON_FLAGS)
 fig_openmpi_psend.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
 	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@ -m Psend        -p linear -t MPI_Psend $(COMMON_FLAGS)
+fig_openmpi_psend_threaded.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
+	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@ -m Psend        -p linear -t MPI_Psend -n 2,4,8,16,32,64 $(COMMON_FLAGS)
 fig_openmpi_win.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
 	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@ -m Win          -p linear -t 'MPI_Win (one per partition)' $(COMMON_FLAGS)
 fig_openmpi_win_single.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
@@ -43,7 +45,7 @@ fig_openmpi_twait.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
 fig_openmpi_psend_isend.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
 	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@ -m Psend,Isend  -p linear -t 'Psend vs Isend' $(COMMON_FLAGS)
 fig_openmpi_psend_isend_threaded.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
-	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@ -m Psend,Isend  -p linear -t 'Psend vs Isend (multithreaded)' -n 2,4,8 $(COMMON_FLAGS)
+	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@ -m Psend,Isend  -p linear -t 'Psend vs Isend (multithreaded)' -n 2,4,8,16,32,64 $(COMMON_FLAGS)
 fig_openmpi_psend_win.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
 	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@ -m Psend,WinSingle  -p linear -t 'Psend vs Win - single' $(COMMON_FLAGS)
       
@@ -70,6 +72,8 @@ fig_mpich_isend.png: $(RESULTS_MPICH)/results.csv
 	$(PLOT) -f $(RESULTS_MPICH)/results.csv -o $@ -p linear -m Isend     -t MPI_Isend $(COMMON_FLAGS)
 fig_mpich_psend.png: $(RESULTS_MPICH)/results.csv
 	$(PLOT) -f $(RESULTS_MPICH)/results.csv -o $@ -p linear -m Psend     -t MPI_Psend $(COMMON_FLAGS)
+fig_mpich_psend_threaded.png: $(RESULTS_MPICH)/results.csv
+	$(PLOT) -f $(RESULTS_MPICH)/results.csv -o $@ -p linear -m Psend     -t MPI_Psend -n 2,4,8,16,32,64 $(COMMON_FLAGS)
 fig_mpich_win.png: $(RESULTS_MPICH)/results.csv
 	$(PLOT) -f $(RESULTS_MPICH)/results.csv -o $@ -p linear -m Win       -t 'MPI_Win (one per partition)' $(COMMON_FLAGS)
 fig_mpich_win_single.png: $(RESULTS_MPICH)/results.csv
@@ -83,5 +87,5 @@ fig_mpich_tlocal.png: $(RESULTS_MPICH)/results.csv
 fig_mpich_psend_isend.png: $(RESULTS_MPICH)/results.csv
 	$(PLOT) -f $(RESULTS_MPICH)/results.csv -o $@ -p linear -m Psend,Isend -t 'MPICH: Isend vs Psend' $(COMMON_FLAGS)
 fig_mpich_psend_isend_threaded.png: $(RESULTS_MPICH)/results.csv
-	$(PLOT) -f $(RESULTS_MPICH)/results.csv -o $@ -p linear -m Psend,Isend -t 'MPICH: Psend vs Isend (multithreaded)' -n 1,2,4,8 $(COMMON_FLAGS)
+	$(PLOT) -f $(RESULTS_MPICH)/results.csv -o $@ -p linear -m Psend,Isend -t 'MPICH: Psend vs Isend (multithreaded)' -n 2,4,8 $(COMMON_FLAGS)
 	
