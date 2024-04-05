@@ -48,7 +48,7 @@ void bench_isend_then_test(TestCase *test_case, Result *result, int comm_rank)
                 for (int t = 0; t < test_case->thread_count; t++) {
                     for (size_t p = 0; p < test_case->partitions_per_thread; p++) {
                         unsigned int partition_num = p; 
-                        MPI_CHECK(MPI_Test(&requests[partition_num], &flag, &result->send_status));
+                        MPI_CHECK(MPI_Request_get_status(requests[partition_num], &flag, &result->send_status));
                     }
                 }
             }
