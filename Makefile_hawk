@@ -22,7 +22,7 @@ bin/bench_mpich: $(SRC) bench.h test_cases.h
 bin/bench_impi: $(SRC_NOPSEND) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 impi/2021.9.0 && $(MPI_CC) $(SRC_NOPSEND) -o bin/bench_impi $(CFLAGS) -DDISABLE_PSEND)
 bin/bench_cpe: $(SRC_NOPSEND) bench.h test_cases.h
-	echo $(shell module load CPE/23.12 cray-mpich-ucx/8.1.21 && $(MPI_CC) $(SRC_NOPSEND) -o bin/bench_cpe $(CFLAGS) -DDISABLE_PSEND)
+	echo $(shell module load CPE/23.12 && $(MPI_CC) $(SRC_NOPSEND) -o bin/bench_cpe $(CFLAGS) -DDISABLE_PSEND)
 bin/bench_mpt: $(SRC_NOPSEND) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/10.2.0 mpt/2.28 && $(MPI_CC) $(SRC_NOPSEND) -o bin/bench_mpt $(CFLAGS) -DDISABLE_PSEND)
 
