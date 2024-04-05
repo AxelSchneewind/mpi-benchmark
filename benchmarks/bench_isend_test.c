@@ -40,7 +40,7 @@ void bench_isend_test(TestCase *test_case, Result *result, int comm_rank)
 
                     MPI_CHECK(MPI_Isend(test_case->buffer + partition_num * test_case->partition_size, test_case->partition_size, MPI_BYTE, 1, partition_num, MPI_COMM_WORLD, &requests[partition_num]));
                     int flag;
-                    MPI_CHECK(MPI_Request_get_status(&requests[partition_num], &flag, &result->send_status));
+                    MPI_CHECK(MPI_Request_get_status(requests[partition_num], &flag, &result->send_status));
                 }
             }
 

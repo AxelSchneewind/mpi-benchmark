@@ -26,10 +26,10 @@ void bench_psend_list(TestCase *test_case, Result *result, int comm_rank)
 
 		MPI_Pready_list(test_case->partition_count, test_case->send_pattern, request);
 
-        MPI_CHECK(MPI_Wait(&request, &result->send_status));
+        MPI_CHECK(MPI_Wait(&request, MPI_STATUS_IGNORE));
     } else if (comm_rank == 1) {
         MPI_CHECK(MPI_Start(&request));
-        MPI_CHECK(MPI_Wait(&request, &result->recv_status));
+        MPI_CHECK(MPI_Wait(&request, MPI_STATUS_IGNORE));
     }
 
 	// run
@@ -47,7 +47,7 @@ void bench_psend_list(TestCase *test_case, Result *result, int comm_rank)
 			MPI_CHECK(MPI_Start(&request));
 
 			#pragma omp parallel for num_threads(test_case->thread_count)
-			for (size_t t = 0; t < test_case->partition_count; t++) {
+			for (size_t t = 0; t < test_case->thread_count; t++) {
 				work(test_case->partition_size * test_case->partitions_per_thread);
 				MPI_CHECK(MPI_Pready_list(test_case->partitions_per_thread, &test_case->send_pattern[t * test_case->partitions_per_thread], request));
 			}
