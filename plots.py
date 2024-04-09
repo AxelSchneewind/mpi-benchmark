@@ -15,6 +15,8 @@ def iter_results(data, modes = None, patterns = None, columns = None, thread_cou
 
     if filter != None:
         data = filter(data)
+
+    data.sort_values(by=['partition_size', 'thread_count', 'send_pattern'], inplace=True)
     
     for pattern in patterns:
         for mode in modes:
@@ -49,7 +51,7 @@ def plot(ax, x, y, domain=None, title=None, label=None, ylabel='Bandwidth [B/s]'
 
     ax.set_xscale(mpl.scale.LogScale(ax, base=2))
 
-    ax.grid()
+    ax.grid(visible=True)
     ax.legend()
 
 
@@ -102,6 +104,8 @@ def plot_column_combined(data, column_names=['bandwidth'], modes=mode_names, pat
     thread_counts = list(set(thread_counts))
     modes = list(set(modes))
     column_names = list(set(column_names))
+
+    thread_counts.sort()
 
     #
     multiple_patterns = (len(patterns) > 1)
