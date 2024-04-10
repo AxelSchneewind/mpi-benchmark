@@ -47,7 +47,7 @@ fig_openmpi_win_single_threaded.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
 
 # with completion testing
 fig_openmpi_psend_parrived.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
-	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@ -m PsendParrived        -p linear -t MPI_Psend $(COMMON_FLAGS)
+	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@ -m PsendParrived,Psend  -p linear -t 'MPI_Psend with/without completion test' $(COMMON_FLAGS)
 fig_openmpi_psend_parrived_threaded.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
 	$(PLOT) -f $(RESULTS_OPENMPI_DEFAULT)/results.csv -o $@ -m PsendParrived        -p linear -t MPI_Psend -n $(THREAD_COUNTS) $(COMMON_FLAGS)
 fig_openmpi_isend_get_status.png: $(RESULTS_OPENMPI_DEFAULT)/results.csv
