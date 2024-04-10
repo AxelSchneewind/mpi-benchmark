@@ -79,7 +79,7 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
             int flag = 0;
             while (!flag)
             {
-                // TODO fix
+                // TODO fix by computing partitions_per_threads for receive side too
                 // #pragma omp parallel for num_threads(test_case->thread_count)
                 // for (int t = 0; t < test_case->thread_count; t++) {
                     int _flag = 0;

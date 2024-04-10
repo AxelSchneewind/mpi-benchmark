@@ -10,6 +10,7 @@
 
 #include <assert.h>
 
+// enable/disables status messages
 #define ENABLE_STATUS 0
 
 #if ENABLE_STATUS == 1
@@ -73,8 +74,7 @@ void *progress(void *arguments)
 	while (1)
 	{
 		int ret_trywait = 0;
-		// int flag = 0;
-		// MPI_Status status;
+		int flag;
 
 		OUTPUT(sem_wait(&thread->request_available));
 		OUTPUT(sem_wait(&thread->accept_requests));
@@ -85,7 +85,7 @@ void *progress(void *arguments)
 		ret_trywait = sem_trywait(&thread->signal_done);
 		while (ret_trywait != 0) // exit if signal_done is posted
 		{
-			// MPI_Request_get_status(*thread->request, &flag, &status);
+			MPI_Request_get_status(*thread->request, &flag, MPI_STATUS_IGNORE);
 			usleep(100);
 			ret_trywait = sem_trywait(&thread->signal_done);
 		}
@@ -150,25 +150,27 @@ void progress_thread_destroy(progress_thread *thread)
 }
 
 /*
-In openmpi on hawk and ucx, crashes with error: 
-	[r40c1t8n1:3249792:0:3249792] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x1)
-	==== backtrace (tid:3249792) ====
-	 0 0x0000000000012cf0 __funlockfile()  :0
-	 1 0x00000000002796be mca_pml_ucx_psend_completion()  ???:0
-	 2 0x000000000007606d ucp_rndv_ats_handler()  ???:0
-	 3 0x000000000003f319 uct_rc_mlx5_iface_check_rx_completion()  ???:0
-	 4 0x000000000004890a ucp_worker_progress()  ???:0
-	 5 0x00000000000276e3 opal_progress()  ???:0
-	 6 0x000000000005fb25 ompi_sync_wait_mt()  ???:0
-	 7 0x000000000009795f ompi_request_default_wait()  ???:0
-	 8 0x00000000000e8ffe MPI_Wait()  ???:0
-	 9 0x0000000000403cbb bench_psend_progress_thread()  ???:0
-	10 0x0000000000406931 bench()  ???:0
-	11 0x0000000000401905 main()  ???:0
-	12 0x000000000003ad85 __libc_start_main()  ???:0
-	13 0x0000000000401c7e _start()  ???:0
-	=================================
-*/
+ * In openmpi on hawk and ucx, crashed with error (single-threaded): 
+ *  [r40c1t8n1:3249792:0:3249792] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x1)
+ *  ==== backtrace (tid:3249792) ====
+ *   0 0x0000000000012cf0 __funlockfile()  :0
+ *   1 0x00000000002796be mca_pml_ucx_psend_completion()  ???:0
+ *   2 0x000000000007606d ucp_rndv_ats_handler()  ???:0
+ *   3 0x000000000003f319 uct_rc_mlx5_iface_check_rx_completion()  ???:0
+ *   4 0x000000000004890a ucp_worker_progress()  ???:0
+ *   5 0x00000000000276e3 opal_progress()  ???:0
+ *   6 0x000000000005fb25 ompi_sync_wait_mt()  ???:0
+ *   7 0x000000000009795f ompi_request_default_wait()  ???:0
+ *   8 0x00000000000e8ffe MPI_Wait()  ???:0
+ *   9 0x0000000000403cbb bench_psend_progress_thread()  ???:0
+ *  10 0x0000000000406931 bench()  ???:0
+ *  11 0x0000000000401905 main()  ???:0
+ *  12 0x000000000003ad85 __libc_start_main()  ???:0
+ *  13 0x0000000000401c7e _start()  ???:0
+ *  =================================
+ *
+ * has not been tested in multithreaded execution
+ */
 void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_rank)
 {
 	// init
@@ -215,18 +217,12 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 	{
 		for (size_t i = 0; i < test_case->iteration_count; i++)
 		{
-			
 			timers_start(timers, Iteration);
 			timers_start(timers, IterationStartToWait);
 
 			MPI_CHECK(MPI_Start(&request));
-#if ENABLE_STATUS == 1
-			printf("%d, R0: MPI_Start(&request);        iteration %d\n", __LINE__, i);
-			assert(0 == fflush(stdout));
-#endif
 		 	OUTPUT_RANK(progress_thread_set_request(&progress, &request));
 		 	OUTPUT_RANK(progress_thread_continue(&progress));
-
 
             #pragma omp parallel for num_threads(test_case->thread_count)
             for (int t = 0; t < test_case->thread_count; t++) {
@@ -236,7 +232,6 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 					MPI_CHECK(MPI_Pready(partition_num, request));
 				}
 			}
-
 
 			OUTPUT_RANK(progress_thread_pause(&progress));
 			timers_stop(timers, IterationStartToWait);
@@ -255,16 +250,6 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
 			timers_start(timers, IterationStartToWait);
 
 			MPI_CHECK(MPI_Start(&request));
-#if ENABLE_STATUS == 1
-			printf("%d, R1: MPI_Start(&request);        iteration %d\n", __LINE__, i);
-			assert(0 == fflush(stdout));
-#endif
-
-            int flag = false;
-            while(!flag)
-            {
-                MPI_CHECK(MPI_Request_get_status(request, &flag, MPI_STATUS_IGNORE));
-            }
 
 			timers_stop(timers, IterationStartToWait);
 			OUTPUT_RANK(MPI_CHECK(MPI_Wait(&request, &result->recv_status)));

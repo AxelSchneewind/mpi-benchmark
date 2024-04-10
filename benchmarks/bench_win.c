@@ -1,19 +1,4 @@
 #include "bench.h"
-#include "stdio.h"
-
-
-#define LOG(format)                                               \
-	{                                                             \
-		printf("(R%i) [%s:%i]: ", comm_rank, __FILE__, __LINE__); \
-		printf(format);                                           \
-		printf("\n");                                             \
-	}
-#define LOGF(format, args...)                                     \
-	{                                                             \
-		printf("(R%i) [%s:%i]: ", comm_rank, __FILE__, __LINE__); \
-		printf(format, args);                                     \
-		printf("\n");                                             \
-	}
 
 void bench_win(TestCase *test_case, Result *result, int comm_rank)
 {

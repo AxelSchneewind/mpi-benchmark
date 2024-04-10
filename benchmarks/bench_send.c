@@ -19,7 +19,6 @@ void bench_send(TestCase *test_case, Result *result, int comm_rank)
 
     for (size_t i = 0; i < test_case->iteration_count; i++)
     {
-        
         if (comm_rank == 0)
         {
             MPI_Barrier(MPI_COMM_WORLD);

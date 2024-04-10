@@ -13,19 +13,17 @@ void bench_isend(TestCase *test_case, Result *result, int comm_rank)
     if (comm_rank == 0) {
         #pragma omp parallel for num_threads(test_case->thread_count)
         for (int t = 0; t < test_case->thread_count; t++) {
-            for (size_t p = 0; p < test_case->partitions_per_thread; p++)
-            {
-                // MPI_CHECK(MPI_Isend(test_case->buffer, test_case->partition_size, MPI_BYTE, 1, p, MPI_COMM_WORLD, &requests[p]));
-		        // MPI_CHECK(MPI_Wait(&requests[p], MPI_STATUS_IGNORE));
+            for (size_t p = 0; p < test_case->partitions_per_thread; p++) {
+                MPI_CHECK(MPI_Isend(test_case->buffer, test_case->partition_size, MPI_BYTE, 1, p, MPI_COMM_WORLD, &requests[p]));
+                MPI_CHECK(MPI_Wait(&requests[p], MPI_STATUS_IGNORE));
             }
         }
     } else {
         #pragma omp parallel for num_threads(test_case->thread_count)
         for (int t = 0; t < test_case->thread_count; t++) {
-            for (size_t p = 0; p < test_case->partitions_per_thread; p++)
-            {
-                // MPI_CHECK(MPI_Irecv(test_case->buffer, test_case->partition_size, MPI_BYTE, 0, p, MPI_COMM_WORLD, &requests[p]));
-		        // MPI_CHECK(MPI_Wait(&requests[p], MPI_STATUS_IGNORE));
+            for (size_t p = 0; p < test_case->partitions_per_thread; p++) {
+                MPI_CHECK(MPI_Irecv(test_case->buffer, test_case->partition_size, MPI_BYTE, 0, p, MPI_COMM_WORLD, &requests[p]));
+                MPI_CHECK(MPI_Wait(&requests[p], MPI_STATUS_IGNORE));
             }
         }
     }
@@ -35,7 +33,6 @@ void bench_isend(TestCase *test_case, Result *result, int comm_rank)
 
     for (size_t i = 0; i < test_case->iteration_count; i++)
     {
-        
         if (comm_rank == 0)
         {
             timers_start(timers, Iteration);

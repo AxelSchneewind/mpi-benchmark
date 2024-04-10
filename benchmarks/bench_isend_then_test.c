@@ -23,7 +23,6 @@ void bench_isend_then_test(TestCase *test_case, Result *result, int comm_rank)
 
     for (size_t i = 0; i < test_case->iteration_count; i++)
     {
-        
         if (comm_rank == 0)
         {
             timers_start(timers, Iteration);

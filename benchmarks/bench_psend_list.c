@@ -40,7 +40,6 @@ void bench_psend_list(TestCase *test_case, Result *result, int comm_rank)
 	{
 		for (size_t i = 0; i < test_case->iteration_count; i++)
 		{
-			
 			timers_start(timers, Iteration);
 			timers_start(timers, IterationStartToWait);
 
