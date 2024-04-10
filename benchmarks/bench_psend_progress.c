@@ -1,5 +1,5 @@
 #include "bench.h"
-#include "benchmarks/benchmark.h"
+
 #include <stdbool.h>
 #include <assert.h>
 #include <stdio.h>
@@ -89,7 +89,7 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
     {
         for (size_t i = 0; i < test_case->iteration_count; i++)
         {
-			PreIteration;
+			
 			timers_start(timers, Iteration);
 			timers_start(timers, IterationStartToWait);
 
@@ -129,7 +129,7 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
     } else if (comm_rank == 1) {
         for (size_t i = 0; i < test_case->iteration_count; i++)
         {
-			PreIteration;
+			
             timers_start(timers, Iteration);
             timers_start(timers, IterationStartToWait);
 

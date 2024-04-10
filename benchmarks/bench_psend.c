@@ -1,5 +1,5 @@
 #include "bench.h"
-#include "benchmarks/benchmark.h"
+
 
 void bench_psend(TestCase *test_case, Result *result, int comm_rank)
 {
@@ -40,7 +40,7 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank)
     if (0 == comm_rank) {
         for (int i = 0; i < test_case->iteration_count; i++)
         {
-			PreIteration;
+			
             timers_start(timers, Iteration);
             timers_start(timers, IterationStartToWait);
             MPI_Start(&request);
@@ -61,7 +61,7 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank)
     } else {
         for (int i = 0; i < test_case->iteration_count; i++)
         {
-			PreIteration;
+			
             timers_start(timers, Iteration);
             timers_start(timers, IterationStartToWait);
             MPI_Start(&request);

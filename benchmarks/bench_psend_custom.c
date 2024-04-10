@@ -1,7 +1,7 @@
 #include "bench.h"
 #include "stdio.h"
 #include "custom_psend.h"
-#include "benchmarks/benchmark.h"
+
 
 
 void bench_custom_psend(TestCase *test_case, Result *result, int comm_rank)
@@ -46,7 +46,7 @@ void bench_custom_psend(TestCase *test_case, Result *result, int comm_rank)
 
 	for (size_t i = 0; i < test_case->iteration_count; i++)
 	{
-		PreIteration;
+		
 		if (comm_rank == 0)
 		{
 			timers_start(timers, Iteration);
