@@ -2,25 +2,36 @@
 
 #include "bench.h"
 #include "send_patterns.h"
+#include "timers.h"
 
 #include <mpi.h>
 #include <stdbool.h>
 
+enum Timer {
+    Total = 0,
+    Iteration,
+    IterationStartToWait,
+    IterationWait,
+    TimerCount
+};
+typedef enum Timer Timer;
+
 enum Mode
 {
 	Send =             0,
-	Isend              ,
-	IsendTest          ,
-	IsendThenTest      ,
-	IsendTestall       ,
-	CustomPsend        ,
-	WinSingle          ,
-	Win                ,
-	Psend              ,
-	PsendParrived      ,
-	PsendProgress      ,
-	PsendProgressThread,
-	PsendThreaded      ,
+	SendPersistent      ,
+	Isend               ,
+	IsendTest           ,
+	IsendThenTest       ,
+	IsendTestall        ,
+	CustomPsend         ,
+	WinSingle           ,
+	Win                 ,
+	Psend               ,
+	PsendList           ,
+	PsendParrived       ,
+	PsendProgress       ,
+	PsendProgressThread ,
 	ModeCount
 };
 typedef enum Mode Mode;
@@ -30,15 +41,16 @@ enum SendPattern {
 	LinearInverse,
 	Stride128,
 	Stride1K,
+	Stride16K,
 	Random,
     RandomBurst128,
     RandomBurst1K,
+    RandomBurst16K,
 	SendPatternCount
 };
 typedef enum SendPattern SendPattern;
 
 extern void make_send_pattern(permutation result, size_t count, SendPattern pattern);
-
 
 struct TestCase;
 struct Result;
@@ -52,10 +64,12 @@ struct TestCase
 	enum SendPattern send_pattern_num;
 	permutation send_pattern;
 	permutation recv_pattern;
+	int thread_count;
+	int partitions_per_thread;
 	size_t iteration_count;
 	MPI_Count buffer_size;
 	MPI_Count partition_size;
-	MPI_Count partition_size_recv; 		// for now, only used by Psend
+	MPI_Count partition_size_recv; 		// only used by Psend for now
 	MPI_Count partition_count;
 	MPI_Count partition_count_recv;
 };
@@ -64,17 +78,23 @@ typedef struct TestCase TestCase;
 struct Result
 {
 	int success;
-	double t_local;			// in seconds
-	double t_total;			// in seconds
-	double t_total_std_dev; // standard deviation in seconds (over each run)
-	double t_local_std_dev; // standard deviation in seconds (over each run)
-	double bandwidth;		// in bytes per second
+    double timings[TimerCount];             // in seconds
+    double timings_std_dev[TimerCount];     // standard deviation in seconds (over each run)
+	double bandwidth;                       // in bytes per second
 	MPI_Status send_status;
 	MPI_Status recv_status;
 };
 typedef struct Result Result;
 
+// properties of the different modes
+int is_psend(Mode mode);
+int is_threaded(Mode mode);
 
+
+// 
+extern void timers_store(timers timers, Result* result);
+
+// forward declaration for test cases struct
 struct test_cases;
 typedef struct test_cases* TestCases;
 
@@ -82,5 +102,9 @@ extern int test_cases_get_count(TestCases tests);
 extern TestCase *test_cases_get_test_case(TestCases tests, int i);
 extern Result *test_cases_get_result(TestCases tests, int i);
 
-extern void test_cases_init(MPI_Count buffer_size, int num_repetitions, const bool *use_mode, const MPI_Count *min_partition_size, const MPI_Count *max_partition_size, const SendPattern *send_patterns, int byte_send_patterns_count, TestCases* tests);
+// forward declaration for setup struct
+struct setup_t;
+typedef struct setup_t* setup;
+
+extern void test_cases_init(setup setup, TestCases* tests);
 extern void test_cases_free(TestCases* tests);

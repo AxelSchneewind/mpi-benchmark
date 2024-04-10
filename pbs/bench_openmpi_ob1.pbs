@@ -2,7 +2,7 @@
 
 #PBS -N bench_openmpi_ob1
 #PBS -l select=2:node_type=rome:mpiprocs=2
-#PBS -l walltime=1:00:00
+#PBS -l walltime=4:00:00
 cd $PBS_O_WORKDIR
 
 IMPL=openmpi/5.0.0/ob1 
@@ -16,4 +16,4 @@ BIN_DIRECTORY=$(bin_directory)
 
 mpirun --version > version_openmpi.log
 # mpirun --mca prte_allocation_required 0 --mca mpi_show_mca_params all ./bench > params.txt
-mpirun --mca pml ob1 -np 2 -N 1 $BIN_DIRECTORY/bench_openmpi > results.log 2>&1
+mpirun --mca pml ob1 --mca mpi_show_mca_params all -np 2 -N 1 $BIN_DIRECTORY/bench_openmpi OPENMPI_HAWK > results.log 2>&1

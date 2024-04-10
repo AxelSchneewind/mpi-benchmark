@@ -1,12 +1,11 @@
 #include "send_patterns.h"
-#include "bench.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
 
-void make_linear_pattern(unsigned int *result, size_t count)
+void make_linear_pattern(int *result, size_t count)
 {
     for (size_t i = 0; i < count; i++)
     {
@@ -14,7 +13,7 @@ void make_linear_pattern(unsigned int *result, size_t count)
     }
 }
 
-void make_linear_inverse_pattern(unsigned int *result, size_t count)
+void make_linear_inverse_pattern(int *result, size_t count)
 {
     for (size_t i = 0; i < count; i++)
     {
@@ -22,7 +21,7 @@ void make_linear_inverse_pattern(unsigned int *result, size_t count)
     }
 }
 
-void make_stride_pattern(unsigned int *result, size_t count, size_t gap)
+void make_stride_pattern(int *result, size_t count, size_t gap)
 {
     int index = 0;
     for (size_t j = 0; j < gap; j++)
@@ -34,10 +33,10 @@ void make_stride_pattern(unsigned int *result, size_t count, size_t gap)
     }
 }
 
-void shuffle(unsigned int *output, size_t count) {
+void shuffle(int *output, size_t count) {
     size_t remaining_values_count = count;
-    unsigned int* remaining_values = malloc(sizeof(unsigned int) * count);
-    memcpy(remaining_values, output, count * sizeof(unsigned int));
+    int* remaining_values = malloc(sizeof(int) * count);
+    memcpy(remaining_values, output, count * sizeof(int));
 
     for (size_t i = 0; i < count; i++)
     {
@@ -51,7 +50,7 @@ void shuffle(unsigned int *output, size_t count) {
     free(remaining_values);
 }
 
-void make_random_pattern(unsigned int *result, size_t count) {
+void make_random_pattern(int *result, size_t count) {
     srand(0xC0FFEE);
 
     for (size_t i = 0; i < count; i++)
@@ -60,11 +59,11 @@ void make_random_pattern(unsigned int *result, size_t count) {
     shuffle(result, count);
 } 
 
-void make_random_burst_pattern(unsigned int *result, size_t count, size_t burst_size) {
+void make_random_burst_pattern(int *result, size_t count, size_t burst_size) {
     srand(0xC0FFEE);
 
     size_t offset_count = count / burst_size;
-    unsigned int* offsets = malloc(sizeof(unsigned int) * offset_count);
+    int* offsets = malloc(sizeof(int) * offset_count);
     for (size_t i = 0; i < offset_count; i++)
     {
         offsets[i] = i * burst_size;
@@ -105,7 +104,7 @@ void make_partition_send_pattern(const permutation byte_send_pattern, permutatio
 }
 
 void permutation_create(permutation * out, size_t num_elements) {
-    *out = calloc(num_elements, sizeof(unsigned int));
+    *out = calloc(num_elements, sizeof(int));
 };
 
 void permutation_destroy(permutation * out) {

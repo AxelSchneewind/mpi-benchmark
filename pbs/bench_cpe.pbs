@@ -2,15 +2,15 @@
 
 #PBS -N bench_cpe
 #PBS -l select=2:node_type=rome:mpiprocs=2
-#PBS -l walltime=1:00:00
+#PBS -l walltime=4:00:00
 cd $PBS_O_WORKDIR
 
-IMPL=cray-mpich-ucx/8.1.21
-module load cpe/22.11 cray-mpich-ucx/8.1.21
+IMPL=cpe/23.12
+module load gcc/10.2.0 cpe/23.12
 
 source pbs/bench.sh
 setup "$IMPL" 
 BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_cpe.log
-mpirun -np 2 $BIN_DIRECTORY/bench_cpe > results.log 2>&1
+mpirun -np 2 $BIN_DIRECTORY/bench_cpe FULL_HAWK > results.log 2>&1

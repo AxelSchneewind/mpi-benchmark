@@ -2,7 +2,7 @@
 
 #PBS -N bench_mpich
 #PBS -l select=2:node_type=rome:mpiprocs=2
-#PBS -l walltime=1:00:00
+#PBS -l walltime=4:00:00
 cd $PBS_O_WORKDIR
 
 IMPL=mpich/4.1.2
@@ -15,4 +15,4 @@ setup "$IMPL"
 BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_mpich.log
-mpirun -np 2 -ppn 1 $BIN_DIRECTORY/bench_mpich > results.log 2>&1
+mpirun -np 2 -ppn 1 $BIN_DIRECTORY/bench_mpich FULL_HAWK > results.log 2>&1

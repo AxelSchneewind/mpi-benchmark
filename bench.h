@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "timer.h"
+#include "timers.h"
 #include "send_patterns.h"
 #include "test_cases.h"
 
@@ -9,21 +9,20 @@
 #include <stdio.h>
 #include <time.h>
 
-
-
-int is_psend(Mode mode);
-
 static const char* const send_pattern_identifiers[SendPatternCount] = {
     "linear",
     "linear inverse",
     "stride (128B)",
     "stride (1KB)",
+    "stride (16KB)",
     "random",
-    "random burst (128B at a time)",
-    "random burst (1KB at a time)"
+    "random burst (128B)",
+    "random burst (1KB)",
+    "random burst (16KB)"
 };
 
 extern void bench_send(TestCase *test_case, Result *result, int comm_rank);
+extern void bench_send_persistent(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_isend(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_isend_test(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_isend_then_test(TestCase *test_case, Result *result, int comm_rank);
@@ -31,6 +30,7 @@ extern void bench_isend_testall(TestCase *test_case, Result *result, int comm_ra
 
 #ifndef DISABLE_PSEND
 extern void bench_psend(TestCase *test_case, Result *result, int comm_rank);
+extern void bench_psend_list(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_rank);
@@ -43,6 +43,7 @@ extern void bench_win(TestCase *test_case, Result *result, int comm_rank);
 
 static RunMethod const mode_methods[ModeCount] = {
 	{ &bench_send },
+	{ &bench_send_persistent },
 	{ &bench_isend },
 	{ &bench_isend_test },
 	{ &bench_isend_then_test },
@@ -52,10 +53,10 @@ static RunMethod const mode_methods[ModeCount] = {
 	{ &bench_win },
 #ifndef DISABLE_PSEND
 	{ &bench_psend },
+	{ &bench_psend_list },
 	{ &bench_psend_parrived },
 	{ &bench_psend_progress },
 	{ &bench_psend_progress_thread },
-	{ &bench_psend_threaded }
 #else 
 	{ &bench_send },
 	{ &bench_send },
@@ -68,31 +69,24 @@ static RunMethod const mode_methods[ModeCount] = {
 
 static const char* const mode_names[ModeCount] = {
 	"Send",
+	"SendPersistent",
 	"Isend",
 	"IsendTest",
 	"IsendThenTest",
 	"IsendTestall",
-	"Psendcustom",
+	"PsendCustom",
 	"WinSingle",
 	"Win",
 	"Psend",
+	"PsendList",
 	"PsendParrived",
 	"PsendProgress",
 	"PsendProgressThreaded",
-	"PsendThreaded"
 };
 
 
 
 extern void work(const MPI_Count partition_size);
-
-extern void timers_init(timer** timers, TestCase* test_case, Result* result);
-extern void timers_start_global(timer* timers);
-extern void timers_start_local(timer* timers);
-extern void timers_stop_global(timer* timers);
-extern void timers_stop_local(timer* timers);
-extern void timers_free(timer* timers);
-extern void timers_store(timer* timers, Result* result);
 
 extern Result bench(TestCase *test_case, int comm_rank, int comm_size);
 
