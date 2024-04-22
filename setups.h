@@ -1,6 +1,9 @@
 #pragma once
 
 #include "bench.h"
+
+#include "cmdline.h"
+
 #include <mpi.h>
 #include <memory.h>
 #include <stdbool.h>
@@ -25,19 +28,19 @@ struct setup_t {
 };
 typedef struct setup_t* setup;
 
-extern setup select_setup(const char* name);
+extern setup select_setup(struct gengetopt_args_info* args);
 
 
-extern int num_test_cases(setup config, Mode mode);
+extern int config_num_test_cases(setup config, Mode mode);
 
-extern int setup_max_partition_size(setup config, Mode mode);
-extern int setup_min_partition_size(setup config, Mode mode);
+extern int config_max_partition_size(setup config, Mode mode);
+extern int config_min_partition_size(setup config, Mode mode);
 
-extern int setup_max_thread_count(setup config, Mode mode);
-extern int setup_min_thread_count(setup config, Mode mode);
+extern int config_max_thread_count(setup config, Mode mode);
+extern int config_min_thread_count(setup config, Mode mode);
 
-extern int setup_max_partition_size_total(setup config);
-extern int setup_min_partition_size_total(setup config);
+extern int config_max_partition_size_total(setup config);
+extern int config_min_partition_size_total(setup config);
 
-extern int setup_min_partition_size_log_total(setup config);
-extern int setup_max_partition_size_log_total(setup config);
+extern int config_min_partition_size_log_total(setup config);
+extern int config_max_partition_size_log_total(setup config);

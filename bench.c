@@ -3,6 +3,8 @@
 #include "test_cases.h"
 #include "setups.h"
 
+#include "cmdline.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -144,10 +146,18 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
-    if (comm_size != 2)
-        return -1;
+    if (comm_size != 2) {
+        exit(1);
+    }
 
-    setup selection = select_setup(argv[1]);
+    struct gengetopt_args_info args;
+    if (cmdline_parser (argc, argv, &args) != 0) {
+        cmdline_parser_print_help();
+        exit(1);
+    }
+
+
+    setup selection = select_setup(&args);
     if (NULL == selection) 
         return -1;
 
@@ -192,7 +202,7 @@ int main(int argc, char **argv)
             *result = bench(test_case, comm_rank, comm_size);
 
             if (comm_rank == 1) {
-                printf("success = %i, total time: %10gs, average time: %10gμs, standard deviation = %10g\n", result->success, result->timings[Total], result->timings[Iteration], result->timings_std_dev[Iteration]);
+                printf("success = %i, total time: %10gs, average time: %10gμs, standard deviation = %10g\n", result->success, result->timings[Total], result->timings[Iteration], result->timings_std_dev[Iteration] / result->timings[Iteration]);
                 fflush(stdout);
             }
         }

@@ -15,4 +15,4 @@ setup "$IMPL"
 BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_mpich.log
-mpirun -np 2 -ppn 1 $BIN_DIRECTORY/bench_mpich FULL_HAWK > results.log 2>&1
+mpirun -np 2 -ppn 1 $BIN_DIRECTORY/bench_mpich $(make_bench_args) > results.log 2>&1
