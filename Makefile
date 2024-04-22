@@ -3,25 +3,42 @@
 
 MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
 # MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
+
+# arguments for running benchmarks
+BENCH_BUFFER_SIZE=18
+BENCH_ITERATION_COUNT=100
+BENCH_MODES=Send,SendPersistent,Isend,Psend,PsendParrived,PsendProgress
+BENCH_MIN_THREAD_COUNTS=0
+BENCH_MAX_THREAD_COUNTS=6
+BENCH_MIN_PARTITION_SIZES=8
+BENCH_MAX_PARTITION_SIZES=23
+BENCH_SEND_PATTERNS=0
+BENCH_ARGS=-b $(BENCH_BUFFER_SIZE) -i $(BENCH_ITERATION_COUNT) -m $(BENCH_MODES) -t $(BENCH_MIN_THREAD_COUNTS) -T $(BENCH_MAX_THREAD_COUNTS) -p $(BENCH_MIN_PARTITION_SIZES) -P $(BENCH_MAX_PARTITION_SIZES)
+
 SETUP=FULL_LOCAL
 
 MPI_RUN=$(MPI_DIR)mpirun
 MPI_CC=$(MPI_DIR)mpicc
 
-SRC=$(wildcard benchmarks/*.c) $(filter-out interval_tree_test.c get_status.c parrived.c custom_psend_old.c custom_psend_new.c partitioned_get_status.c win.c, $(wildcard *.c))
-
 .phony: all run debug ddd deploy run-remote get put run_get_status run_parrived
 all: bench
 
-bench_dbg: $(SRC) bench.h test_cases.h
+cmdline.c: cmdline.ggo
+	gengetopt -i cmdline.ggo
+
+
+SRC=$(wildcard benchmarks/*.c) $(wildcard *.c)
+
+
+bench_dbg: $(SRC) cmdline.c bench.h test_cases.h
 	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I. -lm -fopenmp
 
-bench: $(SRC) bench.h test_cases.h
+bench: $(SRC) cmdline.c bench.h test_cases.h
 	$(MPI_CC) $(SRC) -o bench -lm -lpthread -I. -Wall -O2 -DNDEBUG -fopenmp
 
 
 run: bench
-	$(MPI_RUN) --mca mpi_param_check 1 --mca mpi_show_handle_leaks 1 -n 2 ./bench $(SETUP)
+	$(MPI_RUN) --mca mpi_param_check 1 --mca mpi_show_handle_leaks 1 -n 2 ./bench $(SETUP) $(BENCH_ARGS)
 
 #$(MPI_RUN) --mca pml ob1 -n 2 ./bench 
 
@@ -51,8 +68,9 @@ run_parrived: parrived
 
 put:
 	scp -r pbs benchmarks *.c *.h hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark
+	scp Makefile_hawk hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark/Makefile
 
 get: 
-	rm -r results/
+	rm -rf results/
 	scp -r hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark/results .
 	scp hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark/Makefile Makefile_hawk
