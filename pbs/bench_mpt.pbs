@@ -3,6 +3,9 @@
 #PBS -N bench_mpt
 #PBS -l select=2:node_type=rome:mpiprocs=2
 #PBS -l walltime=4:00:00
+
+BENCH_MODES=Send,SendPersistent,Isend
+
 cd $PBS_O_WORKDIR
 
 IMPL=mpt/2.28
