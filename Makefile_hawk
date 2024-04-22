@@ -1,6 +1,6 @@
 
 MPI_RUN=mpirun
-MPI_CC=mpicc
+MPI_CC=scorep-mpicc
 
 SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c win.c partitioned_get_status.c, $(wildcard *.c))
 SRC_NOPSEND=$(filter-out $(wildcard benchmarks/bench_psen*.c), $(SRC)) benchmarks/bench_psend_custom.c
