@@ -141,17 +141,17 @@ void test_cases_init(setup configuration, TestCases* tests)
     // here minimum and maximum over all partition sizes are stored 
     result->min_partition_size = config_min_partition_size_total(configuration);
     result->max_partition_size = config_max_partition_size_total(configuration);
-    if (0 < result->min_partition_size
-      || result->min_partition_size <= result->max_partition_size
-      || result->max_partition_size <= result->buffer_size) {
-        printf("invalid partition sizes");
-        exit(1);
-    }
 
     result->min_partition_size_log = config_min_partition_size_log_total(configuration);
     result->max_partition_size_log = config_max_partition_size_log_total(configuration);
 
-    printf("Initializing test cases:\nlog(p) in [%i,%i]\n", result->min_partition_size_log, result->max_partition_size_log);
+    // check partition sizes
+    if (0 > result->min_partition_size
+      || result->min_partition_size > result->max_partition_size
+      || result->max_partition_size > result->buffer_size) {
+        printf("invalid partition sizes");
+        exit(1);
+    }
 
     // count number of test cases
     result->test_count = 0;

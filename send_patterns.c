@@ -82,9 +82,9 @@ void make_random_burst_pattern(int *result, size_t count, size_t burst_size) {
 
 
 void make_partition_send_pattern(const permutation byte_send_pattern, permutation partition_send_pattern, size_t byte_count, size_t partition_size) {
-    size_t partition_count = byte_count / partition_size;
-    size_t *num_ready = calloc(partition_count, sizeof(size_t));
-    // memset(num_ready, 0, sizeof(size_t) * partition_count);
+    int partition_count = byte_count / partition_size;
+    int *num_ready = calloc(partition_count, sizeof(int));
+    memset(num_ready, 0, sizeof(int) * partition_count);
 
     size_t j = 0;
     for (size_t i = 0; i < byte_count; i++)
@@ -105,6 +105,7 @@ void make_partition_send_pattern(const permutation byte_send_pattern, permutatio
 
 void permutation_create(permutation * out, size_t num_elements) {
     *out = calloc(num_elements, sizeof(int));
+    memset(*out, 0, sizeof(int) * num_elements);
 };
 
 void permutation_destroy(permutation * out) {
