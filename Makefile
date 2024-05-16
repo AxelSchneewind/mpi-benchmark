@@ -5,7 +5,7 @@ MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
 # MPI_DIR=/home/axel/software/mpich-4.2.0rc1/build/bin/
 
 # arguments for running benchmarks
-BENCH_BUFFER_SIZE=18
+BENCH_BUFFER_SIZE=23
 BENCH_ITERATION_COUNT=100
 BENCH_MODES=Send,SendPersistent,Isend,Psend,PsendParrived,PsendProgress
 BENCH_MIN_THREAD_COUNTS=0
