@@ -5,9 +5,9 @@ MPI_CC=scorep-mpicc
 SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c win.c partitioned_get_status.c, $(wildcard *.c))
 SRC_NOPSEND=$(filter-out $(wildcard benchmarks/bench_psen*.c), $(SRC)) benchmarks/bench_psend_custom.c
 
-CFLAGS=-fopenmp -lm -lpthread -I. -Wall -O1
+CFLAGS=-fopenmp -lm -lpthread -I. -Wall -O3
 
-.phony: all bench run debug ddd deploy run-remote get put 
+.phony: all bench run
 all: bench
 
 bench_dbg: $(SRC) bench.h test_cases.h
@@ -16,6 +16,7 @@ bench_dbg: $(SRC) bench.h test_cases.h
 .phony: bin/bench_openmpi bin/bench_mpich bin/bench_impi bin/bench_cpe bin/bench_mpt
 bin/bench_openmpi: $(SRC) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.0 && $(MPI_CC) $(SRC) -o bin/bench_openmpi $(CFLAGS))
+bin/bench_openmpi_502: $(SRC) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.2 && $(MPI_CC) $(SRC) -o bin/bench_openmpi_502 $(CFLAGS))
 bin/bench_mpich: $(SRC) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 mpich/4.1.2 && $(MPI_CC) $(SRC) -o bin/bench_mpich $(CFLAGS))
