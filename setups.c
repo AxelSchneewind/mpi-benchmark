@@ -109,6 +109,7 @@ struct setup_t setups[] = {
     }
 };
 
+// TODO rename
 setup select_setup(struct gengetopt_args_info* args) {
     setup result = malloc(sizeof(struct setup_t));
 
@@ -116,7 +117,7 @@ setup select_setup(struct gengetopt_args_info* args) {
     const int num_send_patterns = args->send_patterns_given;
     int mode[ModeCount];
 
-    memset(&result->enable_mode, 0, sizeof(result->enable_mode));
+    memset(result, 0, sizeof(struct setup_t));
     memset(mode, 0, sizeof(int) * ModeCount);
     result->iterations = args->iteration_count_arg;
     result->buffer_size = (1 << args->buffer_size_arg);
@@ -171,8 +172,9 @@ setup select_setup(struct gengetopt_args_info* args) {
         result->send_patterns[i] = args->send_patterns_arg[i];
     }
 
-    if (0 == num_send_patterns)
+    if (0 == num_send_patterns) {
         result->send_patterns[0] = 0; // TODO use default from ggo file
+    }
 
 
     // for (int i = 0; i < sizeof(setups)/ sizeof(setups[0]); i++)

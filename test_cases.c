@@ -99,9 +99,10 @@ Result *test_cases_get_result(TestCases tests, int i)
 }
 
 void partition_send_pattern_create(permutation* result_ptr, const permutation byte_send_pattern, int buffer_size, int partition_size) {
-    assert(byte_count >= partition_count);
-    assert(0 <= partition_count);
-    assert(0 <= byte_count);
+    assert(buffer_size >= partition_size);
+    assert(0 <= partition_size);
+    assert(0 <= buffer_size);
+
     permutation_create(result_ptr, buffer_size / partition_size);
     make_partition_send_pattern(byte_send_pattern, *result_ptr, buffer_size, partition_size);
 }
@@ -140,9 +141,17 @@ void test_cases_init(setup configuration, TestCases* tests)
     // here minimum and maximum over all partition sizes are stored 
     result->min_partition_size = config_min_partition_size_total(configuration);
     result->max_partition_size = config_max_partition_size_total(configuration);
+    if (0 < result->min_partition_size
+      || result->min_partition_size <= result->max_partition_size
+      || result->max_partition_size <= result->buffer_size) {
+        printf("invalid partition sizes");
+        exit(1);
+    }
 
     result->min_partition_size_log = config_min_partition_size_log_total(configuration);
     result->max_partition_size_log = config_max_partition_size_log_total(configuration);
+
+    printf("Initializing test cases:\nlog(p) in [%i,%i]\n", result->min_partition_size_log, result->max_partition_size_log);
 
     // count number of test cases
     result->test_count = 0;
@@ -154,7 +163,7 @@ void test_cases_init(setup configuration, TestCases* tests)
     permutation *byte_send_patterns = calloc(configuration->num_send_patterns, sizeof(permutation));
     for (size_t i = 0; i < configuration->num_send_patterns; i++)
     {
-        byte_send_patterns[i] = calloc(sizeof(unsigned int), configuration->buffer_size);
+        byte_send_patterns[i] = calloc(sizeof(int), configuration->buffer_size);
         make_send_pattern(byte_send_patterns[i], configuration->buffer_size, configuration->send_patterns[i]);
         // printf("Making byte send pattern %s: %d %d %d %d %d %d...\n", send_pattern_identifiers[configuration->send_patterns[i]], byte_send_patterns[i][0], byte_send_patterns[i][1], byte_send_patterns[i][2], byte_send_patterns[i][3], byte_send_patterns[i][4], byte_send_patterns[i][5]);
     }
