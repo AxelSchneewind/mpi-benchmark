@@ -190,7 +190,7 @@ int config_num_test_cases(setup config, Mode mode) {
             return 0;
 #endif
 
-    printf("%i,%i,%i,%i,%i,%i\n", config->enable_mode[mode], 
+    printf("mode %i enabled: %i, lp_max: %i, lp_min: %i, lt_max: %i, lt_min: %i, num send patterns: %i\n", mode, config->enable_mode[mode], 
     config->max_partition_size_log[mode], config->min_partition_size_log[mode], 
     config->max_thread_count_log[mode], config->min_thread_count_log[mode],
     config->num_send_patterns);
@@ -204,7 +204,7 @@ int config_num_test_cases(setup config, Mode mode) {
 int config_min_partition_size_log_total(setup config) {
     int result = config->min_partition_size_log[0];
     for (int i = 0; i < ModeCount; ++i) {
-        if (config->min_partition_size_log[i] < result) {
+        if (config->enable_mode[i] && config->min_partition_size_log[i] < result) {
             result = config->min_partition_size_log[i];
         }
     }
@@ -214,7 +214,7 @@ int config_min_partition_size_log_total(setup config) {
 int config_max_partition_size_log_total(setup config) {
     int result = config->max_partition_size_log[0];
     for (int i = 0; i < ModeCount; ++i) {
-        if (config->max_partition_size_log[i] > result) {
+        if (config->enable_mode[i] && config->max_partition_size_log[i] > result) {
             result = config->max_partition_size_log[i];
         }
     }
