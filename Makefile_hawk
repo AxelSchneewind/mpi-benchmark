@@ -23,7 +23,7 @@ bin/trace_openmpi_502: $(SRC) bench.h test_cases.h
 bin/bench_mpich: $(SRC) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 mpich/4.1.2 && $(MPI_CC) $(SRC) -o bin/bench_mpich $(CFLAGS))
 bin/trace_mpich: $(SRC) bench.h test_cases.h
-	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 mpich/4.1.2 && source ~/tracing-env-mpich.sh && scorep-mpicc $(SRC) -o bin/bench_mpich $(CFLAGS))
+	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 mpich/4.1.2 && source ~/tracing-env-mpich.sh && scorep-mpicc $(SRC) -o bin/trace_mpich $(CFLAGS))
 bin/bench_impi: $(SRC_NOPSEND) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 impi/2021.9.0 && $(MPI_CC) $(SRC_NOPSEND) -o bin/bench_impi $(CFLAGS) -DDISABLE_PSEND)
 bin/bench_cpe: $(SRC_NOPSEND) bench.h test_cases.h
