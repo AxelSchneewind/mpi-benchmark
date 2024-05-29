@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#PBS -N bench_mpich
+#PBS -N trace_mpich
 #PBS -l select=2:node_type=rome:mpiprocs=2
 #PBS -l walltime=4:00:00
 cd $PBS_O_WORKDIR
@@ -18,4 +18,4 @@ setup "$IMPL"
 BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_mpich.log
-scalasca -analyze -t mpirun -np 2 -ppn 1 $BIN_DIRECTORY/trace_mpich $(make_bench_args) > results.log 2>&1
+scalasca -analyze -t mpirun -np 2 -ppn 1 $BIN_DIRECTORY/trace_mpich $(make_trace_args) > results.log 2>&1
