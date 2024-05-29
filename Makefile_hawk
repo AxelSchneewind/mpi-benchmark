@@ -5,7 +5,7 @@ MPI_CC=scorep-mpicc
 SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c win.c partitioned_get_status.c, $(wildcard *.c))
 SRC_NOPSEND=$(filter-out $(wildcard benchmarks/bench_psen*.c), $(SRC)) benchmarks/bench_psend_custom.c
 
-CFLAGS=-fopenmp -lm -lpthread -I. -Wall -O3
+CFLAGS=-fopenmp -lm -lpthread -I. -Wall -O1
 
 .phony: all bench run
 all: bench
@@ -34,6 +34,9 @@ bench: bin/bench_openmpi bin/bench_mpich bin/bench_impi bin/bench_cpe bin/bench_
 run_bench_openmpi_default: bin/bench_openmpi_502
 	echo $(shell rm -r results/openmpi/5.0.2/default)
 	echo $(shell qsub pbs/bench_openmpi_502.pbs)
+run_trace_openmpi_default: bin/bench_openmpi_502
+	echo $(shell rm -r results/openmpi/5.0.2/default)
+	echo $(shell qsub pbs/trace_openmpi_502.pbs)
 run_bench_openmpi_ucx: bin/bench_openmpi_502
 	echo $(shell rm -r results/openmpi/5.0.2/ucx)
 	echo $(shell qsub pbs/bench_openmpi_502_ucx.pbs)
@@ -56,6 +59,9 @@ run_bench_openmpi_500: run_bench_openmpi_500_default run_bench_openmpi_500_ucx r
 run_bench_mpich: bin/bench_mpich
 	echo $(shell rm -r results/mpich/*/)
 	echo $(shell qsub pbs/bench_mpich.pbs)
+run_trace_mpich: bin/bench_mpich
+	echo $(shell rm -r results/mpich/*/)
+	echo $(shell qsub pbs/trace_mpich.pbs)
 run_bench_impi: bin/bench_impi
 	echo $(shell rm -r results/impi/*/)
 	echo $(shell qsub pbs/bench_impi.pbs)
