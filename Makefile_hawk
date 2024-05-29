@@ -1,6 +1,6 @@
 
 MPI_RUN=mpirun
-MPI_CC=scorep-mpicc
+MPI_CC=mpicc
 
 SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c win.c partitioned_get_status.c, $(wildcard *.c))
 SRC_NOPSEND=$(filter-out $(wildcard benchmarks/bench_psen*.c), $(SRC)) benchmarks/bench_psend_custom.c
@@ -18,8 +18,12 @@ bin/bench_openmpi: $(SRC) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.0 && $(MPI_CC) $(SRC) -o bin/bench_openmpi $(CFLAGS))
 bin/bench_openmpi_502: $(SRC) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.2 && $(MPI_CC) $(SRC) -o bin/bench_openmpi_502 $(CFLAGS))
+bin/trace_openmpi_502: $(SRC) bench.h test_cases.h
+	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.2 && source ~/tracing-env.sh && scorep-mpicc $(SRC) -o bin/trace_openmpi_502 $(CFLAGS))
 bin/bench_mpich: $(SRC) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 mpich/4.1.2 && $(MPI_CC) $(SRC) -o bin/bench_mpich $(CFLAGS))
+bin/trace_mpich: $(SRC) bench.h test_cases.h
+	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 mpich/4.1.2 && source ~/tracing-env-mpich.sh && scorep-mpicc $(SRC) -o bin/bench_mpich $(CFLAGS))
 bin/bench_impi: $(SRC_NOPSEND) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 impi/2021.9.0 && $(MPI_CC) $(SRC_NOPSEND) -o bin/bench_impi $(CFLAGS) -DDISABLE_PSEND)
 bin/bench_cpe: $(SRC_NOPSEND) bench.h test_cases.h
@@ -34,8 +38,8 @@ bench: bin/bench_openmpi bin/bench_mpich bin/bench_impi bin/bench_cpe bin/bench_
 run_bench_openmpi_default: bin/bench_openmpi_502
 	echo $(shell rm -r results/openmpi/5.0.2/default)
 	echo $(shell qsub pbs/bench_openmpi_502.pbs)
-run_trace_openmpi_default: bin/bench_openmpi_502
-	echo $(shell rm -r results/openmpi/5.0.2/default)
+run_trace_openmpi_default: bin/trace_openmpi_502
+	echo $(shell rm -r results/openmpi/5.0.2/trace-default)
 	echo $(shell qsub pbs/trace_openmpi_502.pbs)
 run_bench_openmpi_ucx: bin/bench_openmpi_502
 	echo $(shell rm -r results/openmpi/5.0.2/ucx)
@@ -59,8 +63,8 @@ run_bench_openmpi_500: run_bench_openmpi_500_default run_bench_openmpi_500_ucx r
 run_bench_mpich: bin/bench_mpich
 	echo $(shell rm -r results/mpich/*/)
 	echo $(shell qsub pbs/bench_mpich.pbs)
-run_trace_mpich: bin/bench_mpich
-	echo $(shell rm -r results/mpich/*/)
+run_trace_mpich: bin/trace_mpich
+	echo $(shell rm -r results/mpich-trace/)
 	echo $(shell qsub pbs/trace_mpich.pbs)
 run_bench_impi: bin/bench_impi
 	echo $(shell rm -r results/impi/*/)
