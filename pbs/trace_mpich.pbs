@@ -5,15 +5,17 @@
 #PBS -l walltime=4:00:00
 cd $PBS_O_WORKDIR
 
-IMPL=mpich/4.1.2
+IMPL=mpich/4.1.2-trace
 
 module load hlrs-software-stack/current gcc/13.1.0
 module load mpich/4.1.2
 
+source ~/tracing-env-mpich.sh
 source ./pbs/bench.sh
+source ./pbs/scorep-config.sh
 
 setup "$IMPL"
 BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_mpich.log
-mpirun -np 2 -ppn 1 $BIN_DIRECTORY/bench_mpich $(make_bench_args) > results.log 2>&1
+scalasca -analyze -t mpirun -np 2 -ppn 1 $BIN_DIRECTORY/bench_mpich $(make_bench_args) > results.log 2>&1

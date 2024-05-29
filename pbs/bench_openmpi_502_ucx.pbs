@@ -9,7 +9,10 @@ IMPL=openmpi/5.0.2/ucx
 module load hlrs-software-stack/current gcc/13.1.0
 module load openmpi/5.0.2
 
+source ~/tracing-env.sh
 source ./pbs/bench.sh
+source ./pbs/scorep-config.sh
+
 setup "$IMPL"
 BIN_DIRECTORY=$(bin_directory) 
 
