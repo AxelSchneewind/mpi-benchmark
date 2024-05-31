@@ -1,7 +1,9 @@
 SCOREP_REGION_NAMES_BEGIN
     EXCLUDE
         MPI_Init_thread
+	MPI_Init
         make_send_pattern
+	make_partition_send_pattern
         permutation_at
         work
 SCOREP_REGION_NAMES_END
