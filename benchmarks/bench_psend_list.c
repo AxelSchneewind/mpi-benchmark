@@ -31,6 +31,7 @@ void bench_psend_list(TestCase *test_case, Result *result, int comm_rank)
         MPI_CHECK(MPI_Start(&request));
         MPI_CHECK(MPI_Wait(&request, MPI_STATUS_IGNORE));
     }
+    usleep(POST_WARMUP_SLEEP_US);
 
 	// run
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));

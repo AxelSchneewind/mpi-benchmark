@@ -65,7 +65,7 @@ typedef struct
 #define progress_thread_check(thread) ;
 #endif
 
-void *progress(void *arguments)
+void *run_progress(void *arguments)
 {
 	progress_thread *thread = (progress_thread *)arguments;
 	sem_post(&thread->accept_requests);
@@ -104,7 +104,7 @@ void progress_thread_create(progress_thread *thread)
 	sem_init(&thread->accept_requests, 0, 0);
 	sem_init(&thread->signal_done, 0, 0);
 
-	pthread_create(&thread->thread, 0, progress, thread);
+	pthread_create(&thread->thread, 0, run_progress, thread);
 	progress_thread_check(thread);
 };
 
@@ -204,6 +204,7 @@ void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_r
         MPI_CHECK(MPI_Start(&request));
         MPI_CHECK(MPI_Wait(&request, &result->recv_status));
     }
+    usleep(POST_WARMUP_SLEEP_US);
 
 	// run
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));

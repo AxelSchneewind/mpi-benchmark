@@ -35,6 +35,7 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
         MPI_CHECK(MPI_Start(&request));
         MPI_CHECK(MPI_Wait(&request, &result->recv_status));
     }
+    usleep(POST_WARMUP_SLEEP_US);
 
 
     // run
@@ -56,6 +57,8 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
                 for (int p = 0; p < test_case->partitions_per_thread; p++) {
                     unsigned int partition_num = test_case->send_pattern[p + t * test_case->partitions_per_thread];
                     work(test_case->partition_size);
+
+                    // 
                     MPI_CHECK(MPI_Pready(partition_num, request));
                 }
             }

@@ -4,50 +4,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-
-/*
- * Has not been tested with multiple threads.
- * In openMPI on hawk with ucx (single threaded), crashes with error:
- *   [r33c2t5n1:2168273:0:2168273] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x1)
- *   ==== backtrace (tid:2168273) ====
- *    0 0x0000000000012cf0 __funlockfile()  :0
- *    1 0x00000000002796be mca_pml_ucx_psend_completion()  ???:0
- *    2 0x000000000007606d ucp_rndv_ats_handler()  ???:0
- *    3 0x000000000003f319 uct_rc_mlx5_iface_check_rx_completion()  ???:0
- *    4 0x000000000004890a ucp_worker_progress()  ???:0
- *    5 0x00000000000276e3 opal_progress()  ???:0
- *    6 0x000000000005fb25 ompi_sync_wait_mt()  ???:0
- *    7 0x000000000009795f ompi_request_default_wait()  ???:0
- *    8 0x00000000000e8ffe MPI_Wait()  ???:0
- *    9 0x0000000000403cbb bench_psend_progress_thread()  ???:0
- *   10 0x0000000000406931 bench()  ???:0
- *   11 0x0000000000401905 main()  ???:0
- *   12 0x000000000003ad85 __libc_start_main()  ???:0
- *   13 0x0000000000401c7e _start()  ???:0
- *   =================================
- * 
- * other error:
- *         [r35c4t7n2:64741:0:64741] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x1)
- *  ==== backtrace (tid:  64741) ====
- *  0 0x0000000000012cf0 __funlockfile()  :0
- *  1 0x000000000027946e mca_pml_ucx_psend_completion()  ???:0
- *  2 0x000000000007606d ucp_rndv_ats_handler()  ???:0
- *  3 0x000000000003f319 uct_rc_mlx5_iface_check_rx_completion()  ???:0
- *  4 0x000000000004890a ucp_worker_progress()  ???:0
- *  5 0x00000000000277b3 opal_progress()  ???:0
- *  6 0x000000000005c0f0 hcoll_ml_progress_impl()  ???:0
- *  7 0x000000000004246f hmca_coll_ml_barrier_intra()  ???:0
- *  8 0x000000000013cd02 mca_coll_hcoll_barrier()  ???:0
- *  9 0x00000000000b3da6 MPI_Barrier(MPI_COMM_WORLD)  ???:0
- * 10 0x0000000000402148 bench_psend_progress()  ???:0
- * 11 0x0000000000406951 bench()  ???:0
- * 12 0x00000000004018e5 main()  ???:0
- * 13 0x000000000003ad85 __libc_start_main()  ???:0
- * 14 0x0000000000401c4e _start()  ???:0
- * =================================
- * 
- */
-
 void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
 {
     // init request and timer
@@ -81,6 +37,7 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
         MPI_CHECK(MPI_Start(&request));
         MPI_CHECK(MPI_Wait(&request, &result->recv_status));
     }
+    usleep(POST_WARMUP_SLEEP_US);
 
     // run
     MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
@@ -96,9 +53,9 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
             // printf("s1\n"); fflush(stdout);
             MPI_CHECK(MPI_Start(&request));
 
-            int flag = false;
             #pragma omp parallel for num_threads(test_case->thread_count)
             for (int t = 0; t < test_case->thread_count; t++) {
+                int flag = false;
                 for (int p = 0; p < test_case->partitions_per_thread; p++) {
                     unsigned int partition_num = test_case->send_pattern[p + t * test_case->partitions_per_thread];
 
@@ -131,11 +88,11 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
 
             MPI_CHECK(MPI_Start(&request));
 
-            int flag = false;
-            while(!flag)
-            {
-                MPI_CHECK(MPI_Request_get_status(request, &flag, MPI_STATUS_IGNORE));
-            }
+            // int flag = false;
+            // while(!flag)
+            // {
+            //     MPI_CHECK(MPI_Request_get_status(request, &flag, MPI_STATUS_IGNORE));
+            // }
 
 			timers_stop(timers, IterationStartToWait);
             MPI_CHECK(MPI_Wait(&request, MPI_STATUS_IGNORE));

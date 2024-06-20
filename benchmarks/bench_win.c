@@ -33,6 +33,7 @@ void bench_win(TestCase *test_case, Result *result, int comm_rank)
 			MPI_CHECK(MPI_Win_unlock(1, windows[p]));
 		}
 	}
+    usleep(POST_WARMUP_SLEEP_US);
 
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 	timers_start(timers, Total);

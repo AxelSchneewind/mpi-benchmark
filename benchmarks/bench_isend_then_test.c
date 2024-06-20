@@ -16,6 +16,7 @@ void bench_isend_then_test(TestCase *test_case, Result *result, int comm_rank)
         MPI_CHECK(MPI_Irecv(test_case->buffer, test_case->buffer_size, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &requests[0]));
         MPI_CHECK(MPI_Wait(&requests[0], MPI_STATUSES_IGNORE));
     }
+    usleep(POST_WARMUP_SLEEP_US);
 
 
     MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));

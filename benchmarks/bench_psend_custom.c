@@ -8,7 +8,7 @@ void bench_custom_psend(TestCase *test_case, Result *result, int comm_rank)
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 
 	// init
-	struct custom_MPI_Request request;
+	custom_MPI_Request request;
 
 	timers timers;
 	timers_init(&timers, TimerCount);
@@ -38,6 +38,7 @@ void bench_custom_psend(TestCase *test_case, Result *result, int comm_rank)
         MPI_CHECK(custom_MPI_Start(request));
         MPI_CHECK(custom_MPI_Wait(request, &result->recv_status));
     }
+    usleep(POST_WARMUP_SLEEP_US);
 
 	// run
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
