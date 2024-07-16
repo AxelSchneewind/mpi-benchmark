@@ -11,6 +11,12 @@
 #include <assert.h>
 #include <math.h>
 
+
+int send_pattern_partition_dependent(SendPattern pattern)
+{
+	return (pattern == GridBoundary);
+}
+
 struct test_cases {
     char *buffer;
     MPI_Count buffer_size;
@@ -45,6 +51,7 @@ int is_psend(Mode mode)
     return (mode == Psend || mode == PsendProgress || mode == PsendParrived || mode == PsendProgressThread || mode == CustomPsend);
 }
 
+// byte-wise patterns
 void make_send_pattern(permutation result, size_t count, SendPattern pattern)
 {
     switch (pattern)
@@ -53,16 +60,19 @@ void make_send_pattern(permutation result, size_t count, SendPattern pattern)
         make_linear_pattern(result, count);
         break;
     case LinearInverse:
-        make_linear_inverse_pattern(result, count);
+        make_linear_reverse_pattern(result, count);
+        break;
+    case Stride2:
+        make_stride_pattern(result, count, 2);
+        break;
+    case Stride128:
+        make_stride_pattern(result, count, 128);
         break;
     case Stride1K:
         make_stride_pattern(result, count, 1024);
         break;
     case Stride16K:
         make_stride_pattern(result, count, 16*1024);
-        break;
-    case Stride128:
-        make_stride_pattern(result, count, 128);
         break;
     case Random:
         make_random_pattern(result, count);
@@ -76,11 +86,39 @@ void make_send_pattern(permutation result, size_t count, SendPattern pattern)
     case RandomBurst16K:
         make_random_burst_pattern(result, count, 16*1024);
         break;
-    
     default:
+        printf("No implementation for make_send_pattern with pattern=%i\n", pattern);
         break;
     }
 }
+
+// partition-wise patterns
+void partition_send_pattern_create(permutation* result_ptr, SendPattern pattern, int buffer_size, int partition_size)
+{
+    permutation_create(result_ptr, buffer_size / partition_size);
+
+    switch (pattern) {
+        case GridBoundary:
+            // compute logarithm
+            int logarithm = 0;
+            for (int b = buffer_size/partition_size; b > 1; b = (b >> 1))
+                logarithm++;
+
+            size_t width = 1 << (logarithm/2);
+            size_t height = 1 << ((logarithm + 1)/2);
+            //printf("%i=2^%i factored into %li * %li\n", buffer_size, logarithm, width, height);
+            assert(width * height == buffer_size/partition_size);
+            make_grid_boundary_pattern(*result_ptr, width, height, NULL, NULL);
+            break;
+
+    default:
+        printf("No implementation for make_send_pattern with pattern=%i\n", pattern);
+        break;
+    }
+
+}
+
+
 
 
 
@@ -98,13 +136,18 @@ Result *test_cases_get_result(TestCases tests, int i)
     return &tests->results[i];
 }
 
-void partition_send_pattern_create(permutation* result_ptr, const permutation byte_send_pattern, int buffer_size, int partition_size) {
+void partition_send_pattern_from_bytes(permutation* result_ptr, const permutation byte_send_pattern, int buffer_size, int partition_size) {
     assert(buffer_size >= partition_size);
     assert(0 <= partition_size);
     assert(0 <= buffer_size);
 
     permutation_create(result_ptr, buffer_size / partition_size);
     make_partition_send_pattern(byte_send_pattern, *result_ptr, buffer_size, partition_size);
+
+    for (int i = 0; i < buffer_size/partition_size; ++i) {
+        assert(*permutation_at(*result_ptr, i) >= 0);
+        assert(*permutation_at(*result_ptr, i) < buffer_size/partition_size);
+    }
 }
 
 permutation test_cases_send_pattern(struct test_cases* tests, int partition_size, int byte_send_pattern_index) {
@@ -126,9 +169,8 @@ void set_send_pattern_count(struct test_cases* tests, int num_partition_sizes, i
 }
 
 /**
- * @brief
+ * @brief creates a list of benchmarks, based on the configuration given
  *
- * @param buffer_size size of the buffer in bytes
  */
 void test_cases_init(setup configuration, TestCases* tests)
 {
@@ -163,8 +205,13 @@ void test_cases_init(setup configuration, TestCases* tests)
     permutation *byte_send_patterns = calloc(configuration->num_send_patterns, sizeof(permutation));
     for (size_t i = 0; i < configuration->num_send_patterns; i++)
     {
-        byte_send_patterns[i] = calloc(sizeof(int), configuration->buffer_size);
-        make_send_pattern(byte_send_patterns[i], configuration->buffer_size, configuration->send_patterns[i]);
+        SendPattern pattern_id = configuration->send_patterns[i];
+        if (!send_pattern_partition_dependent(pattern_id)) {
+            byte_send_patterns[i] = calloc(sizeof(int), configuration->buffer_size);
+            make_send_pattern(byte_send_patterns[i], configuration->buffer_size, configuration->send_patterns[i]);
+        } else {
+            byte_send_patterns[i] = NULL;
+        }
         // printf("Making byte send pattern %s: %d %d %d %d %d %d...\n", send_pattern_identifiers[configuration->send_patterns[i]], byte_send_patterns[i][0], byte_send_patterns[i][1], byte_send_patterns[i][2], byte_send_patterns[i][3], byte_send_patterns[i][4], byte_send_patterns[i][5]);
     }
 
@@ -177,12 +224,18 @@ void test_cases_init(setup configuration, TestCases* tests)
         {
             for (int i = 0; i < result->num_send_patterns; i++)
             {
-                partition_send_pattern_create(&result->partition_send_patterns[size_index][i], byte_send_patterns[i], result->buffer_size, partition_size);
+                SendPattern pattern_id = configuration->send_patterns[i];
+                if (send_pattern_partition_dependent(pattern_id)) {
+                    partition_send_pattern_create(&result->partition_send_patterns[size_index][i], pattern_id, result->buffer_size, partition_size);
+                } else {
+                    partition_send_pattern_from_bytes(&result->partition_send_patterns[size_index][i], byte_send_patterns[i], result->buffer_size, partition_size);
+                }
             }
             size_index++;
         }
     }
 
+    // allocate memory for list of test cases and their results
     result->test_cases = calloc(result->test_count, sizeof(TestCase));
     result->results = calloc(result->test_count, sizeof(Result));
 
@@ -243,11 +296,12 @@ void test_cases_init(setup configuration, TestCases* tests)
     #pragma omp parallel for
     for (int t = 0; t < max_num_threads; t++) { }
 
-    // byte send patterns are not needed anymore
+    // byte-level send patterns are not needed anymore
     for (size_t i = 0; i < configuration->num_send_patterns; i++)
         free(byte_send_patterns[i]);
     free(byte_send_patterns);
 
+    // store result
     *tests = result;
 }
 

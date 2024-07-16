@@ -28,7 +28,7 @@ struct setup_t {
 };
 typedef struct setup_t* setup;
 
-extern setup select_setup(struct gengetopt_args_info* args);
+extern setup config_from_args(struct gengetopt_args_info* args);
 
 
 extern int config_num_test_cases(setup config, Mode mode);

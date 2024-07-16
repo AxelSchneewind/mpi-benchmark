@@ -2,6 +2,10 @@
 
 #include <mpi.h>
 
+struct custom_request {
+    MPI_Request req;
+};
+
 int custom_MPI_Start(custom_MPI_Request request) {
     return MPI_Start(&request.req);
 }

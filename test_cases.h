@@ -7,6 +7,7 @@
 #include <mpi.h>
 #include <stdbool.h>
 
+// different timers
 enum Timer {
     Total = 0,
     Iteration,
@@ -16,6 +17,7 @@ enum Timer {
 };
 typedef enum Timer Timer;
 
+// different sending modes
 enum Mode
 {
 	Send =             0,
@@ -36,9 +38,11 @@ enum Mode
 };
 typedef enum Mode Mode;
 
+// different send patterns
 enum SendPattern {
 	Linear = 0,
 	LinearInverse,
+	Stride2,
 	Stride128,
 	Stride1K,
 	Stride16K,
@@ -46,16 +50,18 @@ enum SendPattern {
     RandomBurst128,
     RandomBurst1K,
     RandomBurst16K,
+	GridBoundary,
 	SendPatternCount
 };
 typedef enum SendPattern SendPattern;
 
-extern void make_send_pattern(permutation result, size_t count, SendPattern pattern);
+int send_pattern_partition_dependent(SendPattern pattern);
 
 struct TestCase;
 struct Result;
-typedef struct {void (*run)(struct TestCase* test_case, struct Result *result, int comm_rank); } RunMethod;
+typedef struct { void (*run)(struct TestCase* test_case, struct Result *result, int comm_rank); } RunMethod;
 
+// 
 struct TestCase
 {
 	Mode mode;
@@ -69,7 +75,7 @@ struct TestCase
 	size_t iteration_count;
 	MPI_Count buffer_size;
 	MPI_Count partition_size;
-	MPI_Count partition_size_recv; 		// only used by Psend for now
+	MPI_Count partition_size_recv; 		// only used by Psend
 	MPI_Count partition_count;
 	MPI_Count partition_count_recv;
 };
@@ -89,7 +95,6 @@ typedef struct Result Result;
 // properties of the different modes
 int is_psend(Mode mode);
 int is_threaded(Mode mode);
-
 
 // 
 extern void timers_store(timers timers, Result* result);

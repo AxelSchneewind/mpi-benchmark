@@ -33,30 +33,56 @@ void work(const MPI_Count partition_size)
     return;
 }
 
+char* result_file_paths[2] = {
+    "./R0.csv",
+    "./R1.csv"
+};
+ 
+const char* result_file_name(int comm_rank) {
+    if (comm_rank < sizeof(result_file_paths) / sizeof(char*)) {
+        return result_file_paths[comm_rank];
+    } else {
+        return NULL;
+    }
+}
 
+int result_file_exists(int comm_rank) {
+    const char* fname = result_file_name(comm_rank);
 
-FILE *open_result_file(int comm_rank)
-{
+    if (NULL != fname) {        // check for file existence
+        return (-1 != access(fname, F_OK));
+    } else {
+        return 0;
+    }
+}
+
+void result_file_create(int comm_rank) {
     FILE *file;
 
     // open file and overwrite with header line
-    if (comm_rank == 0)
-        file = fopen("./R0.csv", "w");
-    else if (comm_rank == 1)
-        file = fopen("./R1.csv", "w");
-    else
-    {
+    if (comm_rank == 0 || comm_rank == 1) {
+        file = fopen(result_file_name(comm_rank), "w");
+
+        fprintf(file, "mode,buffer_size,thread_count,partition_size,partition_size_recv,send_pattern,t_local,t_start_to_wait,t_wait,t_total,t_wait_relative,bandwidth,std_dev(t_local),std_dev(t_start_to_wait),std_dev(t_total)\n");
+        fclose(file);
+    } else {
         printf("no output from this rank\n");
-        return NULL;
     }
-    fprintf(file, "mode,buffer_size,thread_count,partition_size,partition_size_recv,send_pattern,t_local,t_start_to_wait,t_wait,t_total,t_wait_relative,bandwidth,std_dev(t_local),std_dev(t_start_to_wait),std_dev(t_total)\n");
-    fclose(file);
+}
+
+
+FILE *result_file_open(int comm_rank)
+{
+    FILE* file = NULL;
+
+    // if file does not exist yet, create it and write header
+    if (!result_file_exists(comm_rank)) {
+        result_file_create(comm_rank);
+    }
 
     // open in append mode
-    if (comm_rank == 0)
-        file = fopen("./R0.csv", "a");
-    else if (comm_rank == 1)
-        file = fopen("./R1.csv", "a");
+    if (comm_rank == 0 || comm_rank == 1) 
+        file = fopen(result_file_name(comm_rank), "a");
 
     return file;
 }
@@ -82,7 +108,7 @@ void record_result(TestCase *test_case, Result *result, FILE *file)
     fflush(file);
 }
 
-void close_result_file(FILE *file)
+void result_file_close(FILE *file)
 {
     fclose(file);
 }
@@ -157,7 +183,7 @@ int main(int argc, char **argv)
     }
 
 
-    setup selection = select_setup(&args);
+    setup selection = config_from_args(&args);
     if (NULL == selection) 
         return -1;
 
@@ -169,8 +195,8 @@ int main(int argc, char **argv)
         printf("Running %i tests, with buffer size %9lli, iteration count: %i: \n", test_cases_get_count(tests), selection->buffer_size, selection->iterations);
 
     // set up result file for this rank
-    FILE *result_file = open_result_file(comm_rank);
-    bool success = (comm_rank == 1);  // don't use success value on rank 1
+    FILE *result_file = result_file_open(comm_rank);
+    bool success = (comm_rank == 1);    // don't use success value on rank 1
 
     // run test cases
     for (size_t i = 0; i < test_cases_get_count(tests); i++)
@@ -200,9 +226,10 @@ int main(int argc, char **argv)
             }
         } else {    // otherwise, run benchmark
             *result = bench(test_case, comm_rank, comm_size);
+            usleep(10000); // sleep 10 ms
 
             if (comm_rank == 1) {
-                printf("success = %i, total time: %10gs, average time: %10gμs, standard deviation = %10g\n", result->success, result->timings[Total], result->timings[Iteration], result->timings_std_dev[Iteration] / result->timings[Iteration]);
+                printf("success = %i, total time: %10gs, average time: %10gms, standard deviation = %10g\n", result->success, result->timings[Total], result->timings[Iteration] * 1000, result->timings_std_dev[Iteration] / result->timings[Iteration]);
                 fflush(stdout);
             }
         }
@@ -212,7 +239,7 @@ int main(int argc, char **argv)
         success &= result->success;
     }
 
-    close_result_file(result_file);
+    result_file_close(result_file);
     test_cases_free(&tests);
 
     MPI_Finalize();

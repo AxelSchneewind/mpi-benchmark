@@ -5,22 +5,30 @@
 #include "test_cases.h"
 
 #include "mpi.h"
-#include "stdlib.h"
+
+#include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <time.h>
+
+#define POST_WARMUP_SLEEP_US 5000
 
 static const char* const send_pattern_identifiers[SendPatternCount] = {
     "linear",
     "linear inverse",
+    "stride (2B)",
     "stride (128B)",
     "stride (1KB)",
     "stride (16KB)",
     "random",
     "random burst (128B)",
     "random burst (1KB)",
-    "random burst (16KB)"
+    "random burst (16KB)",
+	"GridBoundary"
 };
 
+
+// benchmarking functions
 extern void bench_send(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_send_persistent(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_isend(TestCase *test_case, Result *result, int comm_rank);

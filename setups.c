@@ -2,115 +2,8 @@
 
 #include <math.h>
 
-static const char* setup_names[] = {
-    "OPENMPI_HAWK",
-    "OPENMPI_LOCAL",
-    "FULL_HAWK",
-    "FULL_LOCAL",
-    "RDMA_LOCAL",
-    "PARTITIONED_LOCAL",
-    "CUSTOM_LOCAL"
-};
 
-#define DEFAULT_BUFFER_SIZE (MPI_Count)(8 * MB)
-
-
-struct setup_t setups[] = {
-    // openmpi
-    {
-        .buffer_size = 8 * MB,
-        .iterations = 100,
-        //                              Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 4, IsendThenTest = 5, IsendTestall = 6, CustomPsend = 7, WinSingle = 8,            Win = 9,   Psend = 10, PsendList = 11, PsendParrived = 12, PsendProgress = 13, PsendProgressThreaded = 14
-        .enable_mode =            {         true,               true,      true,          true,             false,            false,           false,          true,               true,         true,           true,               true,              false,                      false},
-        .min_partition_size_log = {            8,                  8,         8,             8,                 8,                8,               8,            10,             23 - 4,            8,              8,                  8,                  8,                          8},
-        .max_partition_size_log = {           23,                 23,        23,            23,                23,               23,              23,            23,                 23,           23,             23,                 23,                 23,                         23},
-        .min_thread_count_log=    {            0,                  0,         0,             0,                 0,                0,               0,             0,                  0,            0,              0,                  0,                  0,                          0},
-        .max_thread_count_log=    {            4,                  6,         6,             6,                 4,                4,               4,             4,                  4,            6,              6,                  0,                  4,                          6},
-        .send_patterns =          { Linear, /*Stride16K,*/ Random/*, RandomBurst1K*/ },
-        .num_send_patterns =      2
-    },
-    // openmpi local
-    {
-        .buffer_size = 8 * MB,
-        .iterations = 10,
-        //                              Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 4, IsendThenTest = 5, IsendTestall = 6, CustomPsend = 7, WinSingle = 8,            Win = 9,   Psend = 10, PsendList = 11, PsendParrived = 12, PsendProgress = 13, PsendProgressThreaded = 14
-        .enable_mode =            {         true,               true,      true,          true,              true,             true,           false,          true,               true,         true,           true,               true,              false,                      false},
-        .min_partition_size_log = {           10,                 10,        10,            10,                10,               10,              10,            10,            23 - 10,           10,             10,                 10,                 10,                         10},
-        .max_partition_size_log = {           23,                 23,        23,            23,                23,               23,              23,            23,                 23,           23,             23,                 23,                 23,                         23},
-        .min_thread_count_log=    {            0,                  0,         0,             0,                 0,                0,               0,             0,                  0,            0,              0,                  0,                  0,                          0},
-        .max_thread_count_log=    {            4,                  4,         4,             4,                 4,                4,               4,             4,                  4,            4,              4,                  0,                  4,                          6},
-        .send_patterns =          { Linear, Stride16K, Random, RandomBurst1K },
-        .num_send_patterns =  4
-    },
-    // full bench on hawk
-    {
-        .buffer_size = 8 * MB,
-        .iterations = 100,
-        //                              Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 4, IsendThenTest = 5, IsendTestall = 6, CustomPsend = 7, WinSingle = 8,            Win = 9,   Psend = 10, PsendList = 11, PsendParrived = 12, PsendProgress = 13, PsendProgressThreaded = 14
-        .enable_mode =            {         true,               true,      true,          true,             false,            false,           false,          true,               true,         true,           true,               true,               true,                       true},
-        .min_partition_size_log = {            9,                  9,         9,             9,                 9,                9,               9,            10,            23 - 10,            9,             10,                  9,                  9,                          9},
-        .max_partition_size_log = {           23,                 23,        23,            23,                23,               23,              23,            23,                 23,           23,             23,                 23,                 23,                         23},
-        .min_thread_count_log=    {            0,                  0,         0,             0,                 0,                0,               0,             0,                  0,            0,              0,                  0,                  0,                          0},
-        .max_thread_count_log=    {            4,                  6,         6,             6,                 4,                4,               4,             4,                  4,            6,              6,                  0,                  4,                          6},
-        .send_patterns =          { Linear, /*Stride16K,*/ Random/*, RandomBurst1K*/ },
-        .num_send_patterns =  2
-    },
-    // full bench locally
-    {
-        .buffer_size = 8 * MB,
-        .iterations = 30,
-        //                              Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 4, IsendThenTest = 5, IsendTestall = 6, CustomPsend = 7, WinSingle = 8,            Win = 9,   Psend = 10, PsendList = 11, PsendParrived = 12, PsendProgress = 13, PsendProgressThreaded = 14
-        .enable_mode =            {         true,               true,      true,          true,              true,             true,           false,          true,               true,         true,            true,               true,              false,                       true},
-        .min_partition_size_log = {           12,                 12,        12,            12,                12,               12,              12,            12,            23 - 10,           12,              12,                 12,                 12,                         12},
-        .max_partition_size_log = {           23,                 23,        23,            23,                23,               23,              23,            23,                 23,           23,              23,                 23,                 23,                         23},
-        .min_thread_count_log=    {            0,                  0,         0,             0,                 0,                0,               0,             0,                  0,            0,               0,                  0,                  0,                          0},
-        .max_thread_count_log=    {            4,                  4,         4,             4,                 4,                4,               4,             4,                  4,            4,               4,                  0,                  4,                          6},
-        .send_patterns =          { Linear, Stride16K, Random, RandomBurst1K },
-        .num_send_patterns =  4
-    },
-    // rdma local
-    {
-        .buffer_size = 8 * MB,
-        .iterations = 10,
-        //                              Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 4, IsendThenTest = 5, IsendTestall = 6, CustomPsend = 7, WinSingle = 8,            Win = 9,   Psend = 10, PsendList = 11, PsendParrived = 12, PsendProgress = 13, PsendProgressThreaded = 14
-        .enable_mode =            {         true,              false,      true,         false,             false,            false,           false,          true,               true,        false,          false,              false,              false,                      false},
-        .min_partition_size_log = {            9,                  9,         9,            10,                10,               10,              10,            10,            23 - 10,           10,             10,                 10,                 10,                         10},
-        .max_partition_size_log = {           23,                 23,        23,            23,                23,               23,              23,            23,                 23,           23,             23,                 23,                 23,                         23},
-        .min_thread_count_log=    {            0,                  0,         0,             0,                 0,                0,               0,             0,                  0,            0,              0,                  0,                  0,                          0},
-        .max_thread_count_log=    {            4,                  4,         4,             4,                 4,                4,               4,             4,                  4,            4,              4,                  0,                  4,                          6},
-        .send_patterns =          { Linear, Stride16K, Random, RandomBurst1K },
-        .num_send_patterns =  4
-    },
-    // partitioned local
-    {
-        .buffer_size = 8 * MB,
-        .iterations = 10,
-        //                              Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 4, IsendThenTest = 5, IsendTestall = 6, CustomPsend = 7, WinSingle = 8,            Win = 9,   Psend = 10, PsendList = 11, PsendParrived = 12, PsendProgress = 13, PsendProgressThreaded = 14
-        .enable_mode =            {         true,              false,      true,         false,             false,            false,           false,         false,              false,         true,           true,               true,               true,                       true},
-        .min_partition_size_log = {            9,                  9,         9,            10,                10,               10,              10,            10,            23 - 10,           10,             10,                 10,                 10,                         10},
-        .max_partition_size_log = {           23,                 23,        23,            23,                23,               23,              23,            23,                 23,           23,             23,                 23,                 23,                         23},
-        .min_thread_count_log=    {            0,                  0,         0,             0,                 0,                0,               0,             0,                  0,            0,              0,                  0,                  0,                          0},
-        .max_thread_count_log=    {            4,                  4,         4,             4,                 4,                4,               4,             4,                  4,            4,              4,                  0,                  4,                          6},
-        .send_patterns =          { Linear, Stride16K, Random, RandomBurst1K },
-        .num_send_patterns =  4
-    },
-    // custom local
-    {
-        .buffer_size = 8 * MB,
-        .iterations = 10,
-        //                              Send = 0, SendPersistent = 1, Isend = 2, IsendTest = 4, IsendThenTest = 5, IsendTestall = 6, CustomPsend = 7, WinSingle = 8,            Win = 9,   Psend = 10, PsendList = 11, PsendParrived = 12, PsendProgress = 13, PsendProgressThreaded = 14
-        .enable_mode =            {         true,               true,      true,         false,             false,            false,            true,         false,              false,        false,           true,              false,              false,                      false},
-        .min_partition_size_log = {            9,                  9,         9,            10,                10,               10,              10,            10,            23 - 10,           10,             10,                 10,                 10,                         10},
-        .max_partition_size_log = {           23,                 23,        23,            23,                23,               23,              23,            23,                 23,           23,             23,                 23,                 23,                         23},
-        .min_thread_count_log =   {            0,                  0,         0,             0,                 0,                0,               0,             0,                  0,            0,              0,                  0,                  0,                          0},
-        .max_thread_count_log =   {            4,                  4,         4,             4,                 4,                4,               4,             4,                  4,            4,              4,                  0,                  4,                          6},
-        .send_patterns =          { Linear, Stride16K, Random, RandomBurst1K },
-        .num_send_patterns =  4
-    }
-};
-
-// TODO rename
-setup select_setup(struct gengetopt_args_info* args) {
+setup config_from_args(struct gengetopt_args_info* args) {
     setup result = malloc(sizeof(struct setup_t));
 
     const int num_modes = args->modes_given;
@@ -121,7 +14,7 @@ setup select_setup(struct gengetopt_args_info* args) {
     memset(mode, 0, sizeof(int) * ModeCount);
     result->iterations = args->iteration_count_arg;
     result->buffer_size = (1 << args->buffer_size_arg);
-    result->num_send_patterns = (0 == num_send_patterns) ? 1 : num_send_patterns;
+    result->num_send_patterns = (0 >= num_send_patterns) ? 1 : num_send_patterns;
 
     // check which modes are selected
     for (int i = 0; i < num_modes; i++) {
@@ -176,13 +69,6 @@ setup select_setup(struct gengetopt_args_info* args) {
         result->send_patterns[0] = 0; // TODO use default from ggo file
     }
 
-
-    // for (int i = 0; i < sizeof(setups)/ sizeof(setups[0]); i++)
-    // {
-    //     if (0 == strcasecmp(name, setup_names[i])) {
-    //         return &setups[i];
-    //     }
-    // }
     return result;
 }
 
@@ -192,10 +78,10 @@ int config_num_test_cases(setup config, Mode mode) {
             return 0;
 #endif
 
-    printf("mode %i enabled: %i, lp_max: %i, lp_min: %i, lt_max: %i, lt_min: %i, num send patterns: %i\n", mode, config->enable_mode[mode], 
-    config->max_partition_size_log[mode], config->min_partition_size_log[mode], 
-    config->max_thread_count_log[mode], config->min_thread_count_log[mode],
-    config->num_send_patterns);
+    // printf("mode %i enabled: %i, lp_max: %i, lp_min: %i, lt_max: %i, lt_min: %i, num send patterns: %i\n", mode, config->enable_mode[mode], 
+    // config->max_partition_size_log[mode], config->min_partition_size_log[mode], 
+    // config->max_thread_count_log[mode], config->min_thread_count_log[mode],
+    // config->num_send_patterns);
     return ((int)config->enable_mode[mode])
      * (config->num_send_patterns)
       * (is_psend(mode) ? (config->max_partition_size_log[mode] - config->min_partition_size_log[mode] + 1) : 1)
