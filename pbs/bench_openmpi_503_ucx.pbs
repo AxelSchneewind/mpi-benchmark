@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#PBS -N openmpi_502_ucx
+#PBS -N openmpi_503_ucx
 #PBS -l select=2:node_type=rome:mpiprocs=2
 #PBS -l walltime=4:00:00
 cd $PBS_O_WORKDIR
 
-IMPL=openmpi/5.0.2/ucx
+IMPL=openmpi/5.0.3/ucx
 module load hlrs-software-stack/current gcc/13.1.0
-module load openmpi/5.0.2
+module load openmpi/5.0.3
 
 source ~/tracing-env.sh
 source ./pbs/bench.sh
@@ -17,4 +17,4 @@ setup "$IMPL"
 BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_openmpi.log
-mpirun --mca pml ucx --mca mpi_show_mca_params all --mca mpi_show_mca_param_file mca_params.txt -np 2 -N 1 $BIN_DIRECTORY/bench_openmpi_502 $(make_bench_args) > results.log 2>&1
+mpirun --mca pml ucx --mca mpi_show_mca_params all --mca mpi_show_mca_param_file mca_params.txt -np 2 -N 1 $BIN_DIRECTORY/bench_openmpi_503 $(make_bench_args) > results.log 2>&1

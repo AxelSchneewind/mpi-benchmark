@@ -1,18 +1,16 @@
 #!/bin/bash
 
-#PBS -N trace_openmpi_503
+#PBS -N openmpi_503
 #PBS -l select=2:node_type=rome:mpiprocs=2
-#PBS -l walltime=0:10:00
+#PBS -l walltime=4:00:00
 
 cd $PBS_O_WORKDIR
 
-IMPL=openmpi/5.0.3/trace-default
+IMPL=openmpi/5.0.3/default
 module load hlrs-software-stack/current gcc/13.1.0
 module load openmpi/5.0.3
 
-source ~/tracing-env.sh
 source ./pbs/bench.sh
-source ./pbs/scorep-config.sh
 
 setup "$IMPL"
 BIN_DIRECTORY=$(bin_directory) 
@@ -20,5 +18,5 @@ BIN_DIRECTORY=$(bin_directory)
 which mpirun > version_openmpi.log
 mpirun --version >> version_openmpi.log
 
-scalasca -analyze -t mpirun -np 2 -N 1 $BIN_DIRECTORY/trace_openmpi_503 $(make_trace_args) > results.log 2>&1
+mpirun -np 2 -N 1 $BIN_DIRECTORY/bench_openmpi_503 $(make_bench_args) >> results.log 2>&1
 # mpirun --mca mpi_show_mca_params all --mca mpi_show_mca_param_file mca_params.txt -np 2 -N 1 $BIN_DIRECTORY/bench_openmpi_503 $(make_bench_args) > results.log 2>&1
