@@ -1,7 +1,5 @@
 #pragma once 
 
-#include "timers.h"
-#include "send_patterns.h"
 #include "test_cases.h"
 
 #include "mpi.h"
@@ -10,8 +8,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <time.h>
-
-#define POST_WARMUP_SLEEP_US 5000
 
 static const char* const send_pattern_identifiers[SendPatternCount] = {
     "linear",
@@ -94,21 +90,5 @@ static const char* const mode_names[ModeCount] = {
 
 
 
-extern void work(const MPI_Count partition_size);
+Result bench(TestCase *test_case, int comm_rank, int comm_size);
 
-extern Result bench(TestCase *test_case, int comm_rank, int comm_size);
-
-
-
-// macro for checking that mpi call was successfull
-#define MPI_CHECK(x)                                                           \
-  do {                                                                         \
-    int __ret = (x);                                                           \
-    if (MPI_SUCCESS != __ret) {                                                \
-      char err_string[MPI_MAX_ERROR_STRING];                                   \
-      int err_string_len = 0;                                                  \
-      MPI_Error_string(__ret, err_string, &err_string_len);                    \
-      fprintf(stderr, "(%s:%d) ERROR: MPI call returned error code %d (%s)",   \
-              __FILE__, __LINE__, __ret, err_string);                          \
-    }                                                                          \
-  } while (0)

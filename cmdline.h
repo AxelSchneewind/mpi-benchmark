@@ -34,6 +34,8 @@ extern "C" {
 #define CMDLINE_PARSER_VERSION "0.1"
 #endif
 
+enum enum_send_patterns { send_patterns__NULL = -1, send_patterns_arg_Linear = 0, send_patterns_arg_LinearInverse, send_patterns_arg_Stride2, send_patterns_arg_Stride128, send_patterns_arg_Stride1K, send_patterns_arg_Stride16K, send_patterns_arg_Random, send_patterns_arg_RandomBurst128, send_patterns_arg_RandomBurst1K, send_patterns_arg_RandomBurst16K, send_patterns_arg_GridBoundary };
+
 /** @brief Where the command line options are stored */
 struct gengetopt_args_info
 {
@@ -70,11 +72,16 @@ struct gengetopt_args_info
   unsigned int max_thread_count_min; /**< @brief log2 of the maximal thread counts for each mode's minimum occurreces */
   unsigned int max_thread_count_max; /**< @brief log2 of the maximal thread counts for each mode's maximum occurreces */
   const char *max_thread_count_help; /**< @brief log2 of the maximal thread counts for each mode help description.  */
-  int* send_patterns_arg;	/**< @brief send patterns to use for all test cases (default='0').  */
+  enum enum_send_patterns *send_patterns_arg;	/**< @brief send patterns to use for all test cases (default='Linear').  */
   char ** send_patterns_orig;	/**< @brief send patterns to use for all test cases original value given at command line.  */
   unsigned int send_patterns_min; /**< @brief send patterns to use for all test cases's minimum occurreces */
   unsigned int send_patterns_max; /**< @brief send patterns to use for all test cases's maximum occurreces */
   const char *send_patterns_help; /**< @brief send patterns to use for all test cases help description.  */
+  char ** output_file_arg;	/**< @brief list of files (corresponding to the respective rank) that the results will be written to (csv format).  */
+  char ** output_file_orig;	/**< @brief list of files (corresponding to the respective rank) that the results will be written to (csv format) original value given at command line.  */
+  unsigned int output_file_min; /**< @brief list of files (corresponding to the respective rank) that the results will be written to (csv format)'s minimum occurreces */
+  unsigned int output_file_max; /**< @brief list of files (corresponding to the respective rank) that the results will be written to (csv format)'s maximum occurreces */
+  const char *output_file_help; /**< @brief list of files (corresponding to the respective rank) that the results will be written to (csv format) help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -86,6 +93,7 @@ struct gengetopt_args_info
   unsigned int min_thread_count_given ;	/**< @brief Whether min-thread-count was given.  */
   unsigned int max_thread_count_given ;	/**< @brief Whether max-thread-count was given.  */
   unsigned int send_patterns_given ;	/**< @brief Whether send-patterns was given.  */
+  unsigned int output_file_given ;	/**< @brief Whether output-file was given.  */
 
 } ;
 
@@ -209,6 +217,8 @@ void cmdline_parser_free (struct gengetopt_args_info *args_info);
  */
 int cmdline_parser_required (struct gengetopt_args_info *args_info,
   const char *prog_name);
+
+extern const char *cmdline_parser_send_patterns_values[];  /**< @brief Possible values for send-patterns. */
 
 
 #ifdef __cplusplus

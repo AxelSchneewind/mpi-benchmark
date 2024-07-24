@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <assert.h>
 #include <time.h>
 
@@ -100,7 +99,6 @@ void make_grid_boundary_pattern(int* result, size_t width, size_t height, int* b
     // permute inner grid cells
     if (NULL != inner_permutation)
         permutation_apply(result + boundary_size, inner_permutation, numbers_put - boundary_size);
-
     assert(permutation_is_valid(result, width * height));
 };
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "bench.h"
 #include "send_patterns.h"
 #include "timers.h"
 
@@ -38,6 +37,11 @@ enum Mode
 };
 typedef enum Mode Mode;
 
+// properties of the different modes
+int is_psend(Mode mode);
+
+
+
 // different send patterns
 enum SendPattern {
 	Linear = 0,
@@ -54,6 +58,7 @@ enum SendPattern {
 	SendPatternCount
 };
 typedef enum SendPattern SendPattern;
+
 
 int send_pattern_partition_dependent(SendPattern pattern);
 
@@ -85,31 +90,30 @@ struct Result
 {
 	int success;
     double timings[TimerCount];             // in seconds
-    double timings_std_dev[TimerCount];     // standard deviation in seconds (over each run)
+    double timings_std_dev[TimerCount];     // standard deviation in seconds (over the iterations)
 	double bandwidth;                       // in bytes per second
 	MPI_Status send_status;
 	MPI_Status recv_status;
 };
 typedef struct Result Result;
 
-// properties of the different modes
-int is_psend(Mode mode);
-int is_threaded(Mode mode);
-
 // 
-extern void timers_store(timers timers, Result* result);
+void timers_store(timers timers, Result* result);
 
 // forward declaration for test cases struct
 struct test_cases;
 typedef struct test_cases* TestCases;
 
-extern int test_cases_get_count(TestCases tests);
-extern TestCase *test_cases_get_test_case(TestCases tests, int i);
-extern Result *test_cases_get_result(TestCases tests, int i);
+int test_cases_get_count(TestCases tests);
+TestCase *test_cases_get_test_case(TestCases tests, int i);
+Result *test_cases_get_result(TestCases tests, int i);
 
 // forward declaration for setup struct
 struct setup_t;
 typedef struct setup_t* setup;
 
-extern void test_cases_init(setup setup, TestCases* tests);
-extern void test_cases_free(TestCases* tests);
+/// @brief computes a list of test cases from a given configuration
+/// @param setup 
+/// @param tests 
+void test_cases_init(setup setup, TestCases* tests);
+void test_cases_free(TestCases* tests);

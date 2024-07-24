@@ -43,13 +43,15 @@ const char *gengetopt_args_info_help[] = {
   "  -P, --max-partition-size=INT  the logs of the maximal partition sizes for\n                                  each mode  (default=`0')",
   "  -t, --min-thread-count=INT    log2 of the minimal thread counts for each mode\n                                  (default=`0')",
   "  -T, --max-thread-count=INT    log2 of the maximal thread counts for each mode\n                                  (default=`0')",
-  "  -s, --send-patterns=INT       send patterns to use for all test cases\n                                  (default=`0')",
+  "  -s, --send-patterns=ENUM      send patterns to use for all test cases\n                                  (possible values=\"Linear\",\n                                  \"LinearInverse\", \"Stride2\",\n                                  \"Stride128\", \"Stride1K\", \"Stride16K\",\n                                  \"Random\", \"RandomBurst128\",\n                                  \"RandomBurst1K\", \"RandomBurst16K\",\n                                  \"GridBoundary\" default=`Linear')",
+  "  -o, --output-file[=FILE]      list of files (corresponding to the respective\n                                  rank) that the results will be written to\n                                  (csv format)",
     0
 };
 
 typedef enum {ARG_NO
   , ARG_STRING
   , ARG_INT
+  , ARG_ENUM
 } cmdline_parser_arg_type;
 
 static
@@ -63,6 +65,8 @@ cmdline_parser_internal (int argc, char **argv, struct gengetopt_args_info *args
 
 static int
 cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *prog_name, const char *additional_error);
+
+const char *cmdline_parser_send_patterns_values[] = {"Linear", "LinearInverse", "Stride2", "Stride128", "Stride1K", "Stride16K", "Random", "RandomBurst128", "RandomBurst1K", "RandomBurst16K", "GridBoundary", 0}; /*< Possible values for send-patterns. */
 
 static char *
 gengetopt_strdup (const char *s);
@@ -80,6 +84,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->min_thread_count_given = 0 ;
   args_info->max_thread_count_given = 0 ;
   args_info->send_patterns_given = 0 ;
+  args_info->output_file_given = 0 ;
 }
 
 static
@@ -102,6 +107,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->max_thread_count_orig = NULL;
   args_info->send_patterns_arg = NULL;
   args_info->send_patterns_orig = NULL;
+  args_info->output_file_arg = NULL;
+  args_info->output_file_orig = NULL;
   
 }
 
@@ -132,6 +139,9 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->send_patterns_help = gengetopt_args_info_help[9] ;
   args_info->send_patterns_min = 0;
   args_info->send_patterns_max = 0;
+  args_info->output_file_help = gengetopt_args_info_help[10] ;
+  args_info->output_file_min = 0;
+  args_info->output_file_max = 0;
   
 }
 
@@ -297,19 +307,61 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   args_info->max_thread_count_arg = 0;
   free_multiple_field (args_info->send_patterns_given, (void *)(args_info->send_patterns_arg), &(args_info->send_patterns_orig));
   args_info->send_patterns_arg = 0;
+  free_multiple_string_field (args_info->output_file_given, &(args_info->output_file_arg), &(args_info->output_file_orig));
   
   
 
   clear_given (args_info);
 }
 
+/**
+ * @param val the value to check
+ * @param values the possible values
+ * @return the index of the matched value:
+ * -1 if no value matched,
+ * -2 if more than one value has matched
+ */
+static int
+check_possible_values(const char *val, const char *values[])
+{
+  int i, found, last;
+  size_t len;
+
+  if (!val)   /* otherwise strlen() crashes below */
+    return -1; /* -1 means no argument for the option */
+
+  found = last = 0;
+
+  for (i = 0, len = strlen(val); values[i]; ++i)
+    {
+      if (strncmp(val, values[i], len) == 0)
+        {
+          ++found;
+          last = i;
+          if (strlen(values[i]) == len)
+            return i; /* exact macth no need to check more */
+        }
+    }
+
+  if (found == 1) /* one match: OK */
+    return last;
+
+  return (found ? -2 : -1); /* return many values or none matched */
+}
+
 
 static void
 write_into_file(FILE *outfile, const char *opt, const char *arg, const char *values[])
 {
-  FIX_UNUSED (values);
+  int found = -1;
   if (arg) {
-    fprintf(outfile, "%s=\"%s\"\n", opt, arg);
+    if (values) {
+      found = check_possible_values(arg, values);      
+    }
+    if (found >= 0)
+      fprintf(outfile, "%s=\"%s\" # %s\n", opt, arg, values[found]);
+    else
+      fprintf(outfile, "%s=\"%s\"\n", opt, arg);
   } else {
     fprintf(outfile, "%s\n", opt);
   }
@@ -348,7 +400,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
   write_multiple_into_file(outfile, args_info->max_partition_size_given, "max-partition-size", args_info->max_partition_size_orig, 0);
   write_multiple_into_file(outfile, args_info->min_thread_count_given, "min-thread-count", args_info->min_thread_count_orig, 0);
   write_multiple_into_file(outfile, args_info->max_thread_count_given, "max-thread-count", args_info->max_thread_count_orig, 0);
-  write_multiple_into_file(outfile, args_info->send_patterns_given, "send-patterns", args_info->send_patterns_orig, 0);
+  write_multiple_into_file(outfile, args_info->send_patterns_given, "send-patterns", args_info->send_patterns_orig, cmdline_parser_send_patterns_values);
+  write_multiple_into_file(outfile, args_info->output_file_given, "output-file", args_info->output_file_orig, 0);
   
 
   i = EXIT_SUCCESS;
@@ -648,6 +701,15 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
   if (check_multiple_option_occurrences(prog_name, args_info->send_patterns_given, args_info->send_patterns_min, args_info->send_patterns_max, "'--send-patterns' ('-s')"))
      error_occurred = 1;
   
+  if (! args_info->output_file_given)
+    {
+      fprintf (stderr, "%s: '--output-file' ('-o') option required%s\n", prog_name, (additional_error ? additional_error : ""));
+      error_occurred = 1;
+    }
+  
+  if (check_multiple_option_occurrences(prog_name, args_info->output_file_given, args_info->output_file_min, args_info->output_file_max, "'--output-file' ('-o')"))
+     error_occurred = 1;
+  
   
   /* checks for dependences among options */
 
@@ -708,7 +770,18 @@ int update_arg(void *field, char **orig_field,
       return 1; /* failure */
     }
 
-  FIX_UNUSED (default_value);
+  if (possible_values && (found = check_possible_values((value ? value : default_value), possible_values)) < 0)
+    {
+      if (short_opt != '-')
+        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s' (`-%c')%s\n", 
+          package_name, (found == -2) ? "ambiguous" : "invalid", value, long_opt, short_opt,
+          (additional_error ? additional_error : ""));
+      else
+        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s'%s\n", 
+          package_name, (found == -2) ? "ambiguous" : "invalid", value, long_opt,
+          (additional_error ? additional_error : ""));
+      return 1; /* failure */
+    }
     
   if (field_given && *field_given && ! override)
     return 0;
@@ -722,6 +795,9 @@ int update_arg(void *field, char **orig_field,
   switch(arg_type) {
   case ARG_INT:
     if (val) *((int *)field) = strtol (val, &stop_char, 0);
+    break;
+  case ARG_ENUM:
+    if (val) *((int *)field) = found;
     break;
   case ARG_STRING:
     if (val) {
@@ -850,6 +926,7 @@ void update_multiple_arg(void *field, char ***orig_field,
 
     switch(arg_type) {
     case ARG_INT:
+    case ARG_ENUM:
       *((int **)field) = (int *)realloc (*((int **)field), (field_given + prev_given) * sizeof (int)); break;
     case ARG_STRING:
       *((char ***)field) = (char **)realloc (*((char ***)field), (field_given + prev_given) * sizeof (char *)); break;
@@ -864,6 +941,8 @@ void update_multiple_arg(void *field, char ***orig_field,
         switch(arg_type) {
         case ARG_INT:
           (*((int **)field))[i + field_given] = tmp->arg.int_arg; break;
+        case ARG_ENUM:
+          (*((int **)field))[i + field_given] = tmp->arg.int_arg; break;
         case ARG_STRING:
           (*((char ***)field))[i + field_given] = tmp->arg.string_arg; break;
         default:
@@ -877,6 +956,7 @@ void update_multiple_arg(void *field, char ***orig_field,
     if (default_value && ! field_given) {
       switch(arg_type) {
       case ARG_INT:
+      case ARG_ENUM:
         if (! *((int **)field)) {
           *((int **)field) = (int *)malloc (sizeof (int));
           (*((int **)field))[0] = default_value->int_arg; 
@@ -912,6 +992,7 @@ cmdline_parser_internal (
   struct generic_list * min_thread_count_list = NULL;
   struct generic_list * max_thread_count_list = NULL;
   struct generic_list * send_patterns_list = NULL;
+  struct generic_list * output_file_list = NULL;
   int error_occurred = 0;
   struct gengetopt_args_info local_args_info;
   
@@ -958,10 +1039,11 @@ cmdline_parser_internal (
         { "min-thread-count",	1, NULL, 't' },
         { "max-thread-count",	1, NULL, 'T' },
         { "send-patterns",	1, NULL, 's' },
+        { "output-file",	2, NULL, 'o' },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVb:i:m:p:P:t:T:s:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVb:i:m:p:P:t:T:s:o::", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -1049,8 +1131,17 @@ cmdline_parser_internal (
         case 's':	/* send patterns to use for all test cases.  */
         
           if (update_multiple_arg_temp(&send_patterns_list, 
-              &(local_args_info.send_patterns_given), optarg, 0, "0", ARG_INT,
+              &(local_args_info.send_patterns_given), optarg, cmdline_parser_send_patterns_values, "Linear", ARG_ENUM,
               "send-patterns", 's',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'o':	/* list of files (corresponding to the respective rank) that the results will be written to (csv format).  */
+        
+          if (update_multiple_arg_temp(&output_file_list, 
+              &(local_args_info.output_file_given), optarg, 0, 0, ARG_STRING,
+              "output-file", 'o',
               additional_error))
             goto failure;
         
@@ -1089,10 +1180,15 @@ cmdline_parser_internal (
     &(args_info->max_thread_count_orig), args_info->max_thread_count_given,
     local_args_info.max_thread_count_given, 0,
     ARG_INT, max_thread_count_list);
+  multiple_default_value.int_arg = send_patterns_arg_Linear;
   update_multiple_arg((void *)&(args_info->send_patterns_arg),
     &(args_info->send_patterns_orig), args_info->send_patterns_given,
-    local_args_info.send_patterns_given, 0,
-    ARG_INT, send_patterns_list);
+    local_args_info.send_patterns_given, &multiple_default_value,
+    ARG_ENUM, send_patterns_list);
+  update_multiple_arg((void *)&(args_info->output_file_arg),
+    &(args_info->output_file_orig), args_info->output_file_given,
+    local_args_info.output_file_given, 0,
+    ARG_STRING, output_file_list);
 
   args_info->modes_given += local_args_info.modes_given;
   local_args_info.modes_given = 0;
@@ -1106,6 +1202,8 @@ cmdline_parser_internal (
   local_args_info.max_thread_count_given = 0;
   args_info->send_patterns_given += local_args_info.send_patterns_given;
   local_args_info.send_patterns_given = 0;
+  args_info->output_file_given += local_args_info.output_file_given;
+  local_args_info.output_file_given = 0;
   
   if (check_required)
     {
@@ -1126,6 +1224,7 @@ failure:
   free_list (min_thread_count_list, 0 );
   free_list (max_thread_count_list, 0 );
   free_list (send_patterns_list, 0 );
+  free_list (output_file_list, 1 );
   
   cmdline_parser_release (&local_args_info);
   return (EXIT_FAILURE);

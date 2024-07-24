@@ -1,6 +1,10 @@
 #include "setups.h"
 
+#include "bench.h"
+
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 setup config_from_args(struct gengetopt_args_info* args) {
@@ -62,7 +66,7 @@ setup config_from_args(struct gengetopt_args_info* args) {
 
     // set send patterns
     for (int i = 0; i < num_send_patterns; i++) {
-        result->send_patterns[i] = args->send_patterns_arg[i];
+        result->send_patterns[i] = (SendPattern)args->send_patterns_arg[i];
     }
 
     if (0 == num_send_patterns) {

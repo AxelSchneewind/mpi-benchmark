@@ -4,13 +4,13 @@
 
 #include "permutation.h"
 
-// identity
+// left to right
 void make_linear_pattern(permutation result, size_t count);
 
-// permutation that inverts order
+// right to left
 void make_linear_reverse_pattern(permutation result, size_t count);
 
-// basic stride pattern (marks all p[i*gap] first, then p[i*gap + 1] and so on...)
+// basic stride pattern (marks all p[i*gap] first, then p[1 + i*gap] and so on...)
 void make_stride_pattern(permutation result, size_t count, size_t gap);
 
 // pattern that mimics the transfer of the boundary of a square grid
