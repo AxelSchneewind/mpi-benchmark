@@ -82,14 +82,14 @@ void make_grid_boundary_pattern(int* result, size_t width, size_t height, int* b
     if (height > 3 && width > 3) {
         size_t inner_index = 0;
         while(inner_index < (width - 2) * (height - 2)) {
-            size_t i = inner_index;
+            size_t i = inner_index++;
 
             // coordinates in inner grid
             size_t x = i % (width - 2);
-            size_t y = i / (height - 2);
+            size_t y = i / (width - 2);
 
             // translate to index in entire grid
-            size_t global_index = (y+1) * width + (x + 1);
+            size_t global_index = (y + 1) * width + (x + 1);
 
             result[numbers_put++] = global_index;
         }
@@ -182,14 +182,4 @@ void make_partition_send_pattern(const permutation byte_send_pattern, permutatio
     }
 
     free(num_ready);
-};
-
-void permutation_create(int** out, size_t num_elements) {
-    *out = calloc(num_elements, sizeof(int));
-    memset(*out, 0, sizeof(int) * num_elements);
-};
-
-void permutation_destroy(int** out) {
-    free(*out);
-    *out = NULL;
 };

@@ -6,14 +6,15 @@ MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
 
 # arguments for running benchmarks
 BENCH_BUFFER_SIZE=23
-BENCH_ITERATION_COUNT=100
-BENCH_MODES=Send,SendPersistent,Isend,Psend,PsendParrived,PsendProgress
+BENCH_ITERATION_COUNT=1
+BENCH_MODES=Send,SendPersistent,Isend,Psend,PsendParrived,PsendProgress# ,PsendCustom
+#BENCH_MODES=PsendCustom
 BENCH_MIN_THREAD_COUNTS=0
-BENCH_MAX_THREAD_COUNTS=6
+BENCH_MAX_THREAD_COUNTS=4
 BENCH_MIN_PARTITION_SIZES=8
 BENCH_MAX_PARTITION_SIZES=23
-BENCH_SEND_PATTERNS=0
-BENCH_ARGS=-b $(BENCH_BUFFER_SIZE) -i $(BENCH_ITERATION_COUNT) -m $(BENCH_MODES) -t $(BENCH_MIN_THREAD_COUNTS) -T $(BENCH_MAX_THREAD_COUNTS) -p $(BENCH_MIN_PARTITION_SIZES) -P $(BENCH_MAX_PARTITION_SIZES)
+BENCH_SEND_PATTERNS=0,1,10
+BENCH_ARGS=-b $(BENCH_BUFFER_SIZE) -i $(BENCH_ITERATION_COUNT) -m $(BENCH_MODES) -t $(BENCH_MIN_THREAD_COUNTS) -T $(BENCH_MAX_THREAD_COUNTS) -p $(BENCH_MIN_PARTITION_SIZES) -P $(BENCH_MAX_PARTITION_SIZES) -s $(BENCH_SEND_PATTERNS)
 
 SETUP=FULL_LOCAL
 
@@ -27,27 +28,30 @@ cmdline.c: cmdline.ggo
 	gengetopt -i cmdline.ggo
 
 
-SRC=$(wildcard benchmarks/*.c) $(wildcard *.c)
+SRC=$(wildcard benchmarks/*.c) $(filter-out custom_psend_dummy.c, $(wildcard *.c)) message-aggregation/custom_psend.c message-aggregation/intervals.c
 
 
 bench_dbg: $(SRC) cmdline.c bench.h test_cases.h
-	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I. -lm -fopenmp
+	$(MPI_CC) $(SRC) -o bench_dbg -lm -lpthread -I. -Wall -g -fopenmp
 
 bench: $(SRC) cmdline.c bench.h test_cases.h
-	$(MPI_CC) $(SRC) -o bench -lm -lpthread -I. -Wall -O2 -DNDEBUG -fopenmp
+	$(MPI_CC) $(SRC) -o bench -lm -lpthread -I. -Wall -O2 -fopenmp
+# -DNDEBUG
 
 
 run: bench
-	$(MPI_RUN) --mca mpi_param_check 1 --mca mpi_show_handle_leaks 1 -n 2 ./bench $(SETUP) $(BENCH_ARGS)
+	$(MPI_RUN) --mca mpi_param_check 1 --mca mpi_show_handle_leaks 1 -n 2 ./bench $(BENCH_ARGS) 
+#2> /dev/null
 
 #$(MPI_RUN) --mca pml ob1 -n 2 ./bench 
 
-run_valgrind: bench
-	$(MPI_RUN) -n 2 valgrind --suppressions=$(MPI_DIR)/../share/openmpi/openmpi-valgrind.supp --leak-check=yes --log-file=valgrind-%p.txt ./bench  $(SETUP)
+run_valgrind: bench_dbg
+	$(MPI_RUN) -n 2 valgrind --leak-check=yes --log-file=valgrind-%p.txt ./bench_dbg $(BENCH_ARGS)
+# --suppressions=$(MPI_DIR)/../share/openmpi/openmpi-valgrind.supp 
 
 
 debug: bench_dbg
-	$(MPI_RUN) -n 2 ddd --args ./bench_dbg  $(SETUP)
+	$(MPI_RUN) -n 2 ddd --args ./bench_dbg $(BENCH_ARGS)
 
 tree_test: send_patterns.c interval_tree.c interval_tree_test.c
 	gcc send_patterns.c interval_tree.c interval_tree_test.c -g -o tree_test
@@ -67,7 +71,7 @@ run_parrived: parrived
 	$(MPI_RUN) -n 2 ./parrived
 
 put:
-	scp -r pbs benchmarks *.c *.h hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark
+	scp -r pbs benchmarks *.c *.h message-aggregation hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark
 	scp Makefile_hawk hawk:/zhome/academic/HLRS/hlrs/hpcschne/benchmark/Makefile
 
 get: 

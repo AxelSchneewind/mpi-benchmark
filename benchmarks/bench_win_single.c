@@ -55,7 +55,7 @@ void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
 			{
 				MPI_CHECK(MPI_Win_lock(MPI_LOCK_EXCLUSIVE, 1, MPI_MODE_NOCHECK, window));
 
-				unsigned int partition_num = test_case->send_pattern[p];
+				unsigned int partition_num = *permutation_at(test_case->send_pattern, p);
 				work(test_case->partition_size);
 				MPI_CHECK(MPI_Put(
 					test_case->buffer + test_case->partition_size * partition_num,

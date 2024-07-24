@@ -34,7 +34,7 @@ void bench_isend_test(TestCase *test_case, Result *result, int comm_rank)
             #pragma omp parallel for num_threads(test_case->thread_count)
             for (int t = 0; t < test_case->thread_count; t++) {
                 for (size_t p = 0; p < test_case->partitions_per_thread; p++) {
-                    unsigned int partition_num = test_case->send_pattern[p + t * test_case->partitions_per_thread];
+                    unsigned int partition_num = *permutation_at(test_case->send_pattern, p + t * test_case->partitions_per_thread);
                     assert(partition_num >= 0 && partition_num < test_case->partition_count);
                     work(test_case->partition_size);
 
@@ -58,7 +58,7 @@ void bench_isend_test(TestCase *test_case, Result *result, int comm_rank)
             for (int t = 0; t < test_case->thread_count; t++) {
                 for (size_t p = 0; p < test_case->partitions_per_thread; p++)
                 {
-                    unsigned int partition_num = test_case->recv_pattern[p + t * test_case->partitions_per_thread];
+                    unsigned int partition_num = *permutation_at(test_case->recv_pattern, p + t * test_case->partitions_per_thread);
                     MPI_CHECK(MPI_Irecv(test_case->buffer + partition_num * test_case->partition_size, test_case->partition_size, MPI_BYTE, 0, partition_num, MPI_COMM_WORLD, &requests[partition_num]));
                 }
             }

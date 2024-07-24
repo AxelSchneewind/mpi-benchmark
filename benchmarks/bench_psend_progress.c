@@ -57,7 +57,7 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
             for (int t = 0; t < test_case->thread_count; t++) {
                 int flag = false;
                 for (int p = 0; p < test_case->partitions_per_thread; p++) {
-                    unsigned int partition_num = test_case->send_pattern[p + t * test_case->partitions_per_thread];
+                    unsigned int partition_num = *permutation_at(test_case->send_pattern, p + t * test_case->partitions_per_thread);
 
                     // try to trigger progress as MPI_Pready doesn't (at least for openmpi)
                     MPI_CHECK(MPI_Request_get_status(request, &flag, &result->send_status));

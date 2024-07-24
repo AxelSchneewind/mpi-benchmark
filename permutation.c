@@ -3,6 +3,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+void permutation_create(int** out, size_t num_elements) {
+    *out = calloc(num_elements, sizeof(int));
+    // initialize identity
+    for (size_t i = 0; i < num_elements; i++)
+        (*out)[i] = i;
+};
+
+void permutation_destroy(int** out) {
+    free(*out);
+    *out = NULL;
+};
+
 
 int* permutation_at(int* p, size_t index) {
     if (NULL == p)
@@ -25,8 +37,8 @@ int permutation_is_identity(int* p, size_t size)
     return 1;
 };
 
-// TODO check that each entry only appears once
-int permutation_is_valid(int* p, size_t size) {
+// check that each entry only appears once
+int permutation_is_injective(int* p, size_t size) {
     char* const number_found = calloc(sizeof(int), size);
     memset(number_found, 0, size * sizeof(int));
 
@@ -43,6 +55,10 @@ int permutation_is_valid(int* p, size_t size) {
     }
 
     return 1;
+}
+
+int permutation_is_valid(int* p, size_t size) {
+    return permutation_is_injective(p, size);
 };
 
 int permutation_apply(int* target, int* perm, size_t len)
