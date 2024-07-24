@@ -1,4 +1,4 @@
-#include "bench.h"
+#include "benchmarks/bench.h"
 
 #include <stdbool.h>
 #include <assert.h>

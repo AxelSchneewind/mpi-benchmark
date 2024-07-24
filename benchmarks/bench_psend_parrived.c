@@ -1,4 +1,4 @@
-#include "bench.h"
+#include "benchmarks/bench.h"
 
 
 void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
@@ -60,6 +60,8 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
 
                     // 
                     MPI_CHECK(MPI_Pready(partition_num, request));
+                    int flag;
+                    MPI_CHECK(MPI_Request_get_status(request, &flag, &result->send_status));
                 }
             }
 

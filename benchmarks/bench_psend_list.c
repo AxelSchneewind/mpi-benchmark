@@ -1,4 +1,4 @@
-#include "bench.h"
+#include "benchmarks/bench.h"
 
 
 void bench_psend_list(TestCase *test_case, Result *result, int comm_rank)
