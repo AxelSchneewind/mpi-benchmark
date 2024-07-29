@@ -16,6 +16,7 @@ setup config_from_args(struct gengetopt_args_info* args) {
 
     memset(result, 0, sizeof(struct setup_t));
     memset(mode, 0, sizeof(int) * ModeCount);
+    memset(result->different_partition_sizes, args->different_partition_sizes_flag, sizeof(bool) * ModeCount);
     result->iterations = args->iteration_count_arg;
     result->buffer_size = (1 << args->buffer_size_arg);
     result->num_send_patterns = (0 >= num_send_patterns) ? 1 : num_send_patterns;
@@ -92,6 +93,11 @@ int config_num_test_cases(setup config, Mode mode) {
        * (config->max_partition_size_log[mode] - config->min_partition_size_log[mode] + 1)
         * (config->max_thread_count_log[mode] - config->min_thread_count_log[mode] + 1);
 }
+
+int config_allow_different_partition_sizes(setup config, Mode mode) {
+    return config->different_partition_sizes[mode];
+}
+
 
 int config_min_partition_size_log_total(setup config) {
     int result = config->min_partition_size_log[0];

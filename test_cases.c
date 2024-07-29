@@ -15,7 +15,7 @@
 
 int send_pattern_partition_dependent(SendPattern pattern)
 {
-	return (pattern == GridBoundary);
+    return (pattern == GridBoundary);
 }
 
 int is_psend(Mode mode)
@@ -245,8 +245,9 @@ void test_cases_init(setup configuration, TestCases* tests)
         if (configuration->enable_mode[mode]) {
             // iterate over send side partition sizes
             for (MPI_Count partition_size = config_max_partition_size(configuration, mode); partition_size >= config_min_partition_size(configuration, mode); partition_size /= 2) {
+                bool allow_different_partition_sizes = config_allow_different_partition_sizes(configuration, mode);
                 // iterate over receive side partition sizes
-                for (MPI_Count partition_size_recv = (is_psend(mode) ? config_max_partition_size(configuration, mode) : partition_size); partition_size_recv >= (is_psend(mode) ? config_min_partition_size(configuration, mode) : partition_size); partition_size_recv /= 2) {
+                for (MPI_Count partition_size_recv = (allow_different_partition_sizes ? config_max_partition_size(configuration, mode) : partition_size); partition_size_recv >= (allow_different_partition_sizes ? config_min_partition_size(configuration, mode) : partition_size); partition_size_recv /= 2) {
                     // iterate over thread count
                     for (int t = config_min_thread_count(configuration, mode); t <= config_max_thread_count(configuration, mode); t *= 2) {
                         // iterate over send patterns

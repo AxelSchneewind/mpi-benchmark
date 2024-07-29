@@ -7,6 +7,7 @@ option "iteration-count" i "the number of iterations per test case" int default=
 option "modes" m "a comma separated list containing the benchmarks to run" string default="all" multiple
 option "min-partition-size" p "the logs of the minimal partition sizes for each mode" int default="0" multiple
 option "max-partition-size" P "the logs of the maximal partition sizes for each mode" int default="0" multiple
+option "different-partition-sizes" c "flag to enable different partition sizes for send and receive sides" flag off
 
 option "min-thread-count" t "log2 of the minimal thread counts for each mode" int default="0" multiple
 option "max-thread-count" T "log2 of the maximal thread counts for each mode" int default="0" multiple
