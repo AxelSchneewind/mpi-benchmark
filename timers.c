@@ -5,48 +5,48 @@
 #include <math.h>
 
 struct timer {
-	double sum;
-	int count;
-	double average;
-	double standard_deviation;
-	double running_since;
+    double sum;
+    int count;
+    double average;
+    double standard_deviation;
+    double running_since;
 };
 
 void timer_init(struct timer* t) {
-	t->running_since = 0;
+    t->running_since = 0;
 
-	// initialize statistics
-	t->sum = 0;
-	t->count = 0;
-	t->average = 0;
+    // initialize statistics
+    t->sum = 0;
+    t->count = 0;
+    t->average = 0;
 
-	// not the actual standard deviation (can be derived by dividing by count)
-	t->standard_deviation = 0;
+    // not the actual standard deviation (can be derived by dividing by count)
+    t->standard_deviation = 0;
 }
 
 void timer_start(struct timer* t) {
-	t->running_since = MPI_Wtime();
+    t->running_since = MPI_Wtime();
 }
 
 void timer_stop(struct timer* t) {
-	double delta = MPI_Wtime() - t->running_since;
+    double delta = MPI_Wtime() - t->running_since;
 
-	t->count += 1;
-	t->sum += delta;
+    t->count++;
+    t->sum += delta;
 
-	double new_average = t->average + (delta / (double)t->count);
+    double new_average = ((delta - t->average) / (double)t->count) + t->average;
 
-	// compute standard deviation (https://www.johndcook.com/blog/standard_deviation/)
-	t->standard_deviation += (delta - t->average) * (delta - new_average);
-	t->average = new_average;
+    // compute standard deviation (https://www.johndcook.com/blog/standard_deviation/)
+    t->standard_deviation += (delta - t->average) * (delta - new_average);
+    t->average = new_average;
 }
 
 double timer_mean(struct timer* t) {
-	return t->average;
+    return t->average;
 }
 
 double timer_std_dev(struct timer* t) {
-	return sqrt(t->standard_deviation / (double)(t->count - 1));
+    return sqrt(t->standard_deviation / (double)(t->count - 1));
 }
 
 void timers_init(struct timer** timers, int num_timers)
@@ -60,6 +60,7 @@ void timers_init(struct timer** timers, int num_timers)
 void timers_start(struct timer* timers, int t) {
     timer_start(&timers[t]);
 }
+
 struct timer* timers_get(struct timer* timers, int t) {
     return &timers[t];
 }
