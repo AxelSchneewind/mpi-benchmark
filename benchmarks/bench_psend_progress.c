@@ -47,8 +47,8 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
     {
         for (size_t i = 0; i < test_case->iteration_count; i++)
         {
-			timers_start(timers, Iteration);
-			timers_start(timers, IterationStartToWait);
+            timers_start(timers, Iteration);
+            timers_start(timers, IterationStartToWait);
 
             // printf("s1\n"); fflush(stdout);
             MPI_CHECK(MPI_Start(&request));
@@ -60,7 +60,10 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
                     unsigned int partition_num = *permutation_at(test_case->send_pattern, p + t * test_case->partitions_per_thread);
 
                     // try to trigger progress as MPI_Pready doesn't (at least for openmpi)
+                    // currently causes problems on OpenMPI (see https://github.com/open-mpi/ompi/issues/12328)
                     MPI_CHECK(MPI_Request_get_status(request, &flag, &result->send_status));
+
+                    work(test_case->partition_size);
 
                     /* 
                      * MPI_Request_get_status sometimes returns true despite not all Pready calls being done
@@ -75,7 +78,7 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
             }
 
             // also, sometimes gets stuck here, but only if MPI_Request_get_status is called
-			timers_stop(timers, IterationStartToWait);
+            timers_stop(timers, IterationStartToWait);
             MPI_CHECK(MPI_Wait(&request, &result->send_status));
 
             timers_stop(timers, Iteration);
@@ -91,13 +94,14 @@ void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
             // int flag = false;
             // while(!flag)
             // {
+            //     // currently causes problems on OpenMPI (see https://github.com/open-mpi/ompi/issues/12328)
             //     MPI_CHECK(MPI_Request_get_status(request, &flag, MPI_STATUS_IGNORE));
             // }
 
-			timers_stop(timers, IterationStartToWait);
+            timers_stop(timers, IterationStartToWait);
             MPI_CHECK(MPI_Wait(&request, MPI_STATUS_IGNORE));
 
-			timers_stop(timers, Iteration);
+            timers_stop(timers, Iteration);
         }
     }
 

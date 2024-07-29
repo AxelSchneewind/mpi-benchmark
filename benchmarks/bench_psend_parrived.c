@@ -46,7 +46,6 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
     {
         for (size_t i = 0; i < test_case->iteration_count; i++)
         {
-			
             timers_start(timers, Iteration);
             timers_start(timers, IterationStartToWait);
 
@@ -60,8 +59,10 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
 
                     // 
                     MPI_CHECK(MPI_Pready(partition_num, request));
-                    int flag;
-                    MPI_CHECK(MPI_Request_get_status(request, &flag, &result->send_status));
+
+                    // currently causes problems on OpenMPI (see https://github.com/open-mpi/ompi/issues/12328)
+                    // int flag;
+                    // MPI_CHECK(MPI_Request_get_status(request, &flag, &result->send_status));
                 }
             }
 
@@ -75,7 +76,7 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
     {
         for (size_t i = 0; i < test_case->iteration_count; i++)
         {
-			
+            
             timers_start(timers, Iteration);
             timers_start(timers, IterationStartToWait);
 
@@ -90,9 +91,7 @@ void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
                     int _flag = 0;
                     for (int p = 0; p < /*test_case->partitions_per_thread*/ test_case->partition_count_recv; p++) {
                         MPI_CHECK(MPI_Request_get_status(request, &_flag, &result->recv_status));
-                        if (_flag) {		// enable if something goes wrong 
-                            flag = _flag;
-                        }
+                        flag |= _flag;
 
                         if (flag) {
                             break;
