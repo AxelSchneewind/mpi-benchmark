@@ -113,9 +113,9 @@ int main(int argc, char **argv)
         if (comm_rank == 1)
         {
             if (test_case->partition_size == test_case->partition_size_recv)
-                printf("Running test %.4li in mode %15s, with %i threads, partition size %7lli, send pattern %s :\n\t", i, mode_names[test_case->mode], test_case->thread_count, test_case->partition_size, send_pattern_identifiers[test_case->send_pattern_num]);
+                printf("[Test %.4li]%15s, %i threads, partition size %7lli, send pattern %s :\n", i, mode_names[test_case->mode], test_case->thread_count, test_case->partition_size, send_pattern_identifiers[test_case->send_pattern_num]);
             else
-                printf("Running test %.4li in mode %15s, with %i threads, partition size %7lli -> %7lli, send pattern %s :\n\t", i, mode_names[test_case->mode], test_case->thread_count, test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num]);
+                printf("[Test %.4li]%15s, %i threads, partition size %7lli -> %7lli, send pattern %s :\n", i, mode_names[test_case->mode], test_case->thread_count, test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num]);
             fflush(stdout);
         }
 
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
             *result = *test_cases_get_result(tests, i-1);
 
             if (comm_rank == 1){
-                printf("time limit exceeded in previous run, not running benchmark\n"); 
+                printf("            time limit exceeded in previous run, skipping benchmark\n"); 
                 fflush(stdout);
             }
         } else {    // otherwise, run benchmark
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
             usleep(10000); // sleep 10 ms
 
             if (comm_rank == 1) {
-                printf("success = %i, total time: %10gs, average time: %10gms, standard deviation = %10g\n", result->success, result->timings[Total], result->timings[Iteration] * 1000, result->timings_std_dev[Iteration] / result->timings[Iteration]);
+                printf("            %s, bandwidth: %6.1lfGiB/s, mean time: %6.1lfms, std deviation = %6.1lfms\n", result->success ? "success" : "failure", result->bandwidth/1024/1024/1024, result->timings[Iteration] * 1000, result->timings_std_dev[Iteration] * 1000);
                 fflush(stdout);
             }
         }
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 
     if (comm_rank == 1)
     {
-        printf("done, success: %d\n", success);
+        printf("done, %s\n", success ? "all tests sucessful" : "some tests failed");
     }
 
     return 0;
