@@ -62,6 +62,8 @@ struct gengetopt_args_info
   unsigned int max_partition_size_min; /**< @brief the logs of the maximal partition sizes for each mode's minimum occurreces */
   unsigned int max_partition_size_max; /**< @brief the logs of the maximal partition sizes for each mode's maximum occurreces */
   const char *max_partition_size_help; /**< @brief the logs of the maximal partition sizes for each mode help description.  */
+  int different_partition_sizes_flag;	/**< @brief flag to enable different partition sizes for send and receive sides (default=off).  */
+  const char *different_partition_sizes_help; /**< @brief flag to enable different partition sizes for send and receive sides help description.  */
   int* min_thread_count_arg;	/**< @brief log2 of the minimal thread counts for each mode (default='0').  */
   char ** min_thread_count_orig;	/**< @brief log2 of the minimal thread counts for each mode original value given at command line.  */
   unsigned int min_thread_count_min; /**< @brief log2 of the minimal thread counts for each mode's minimum occurreces */
@@ -90,6 +92,7 @@ struct gengetopt_args_info
   unsigned int modes_given ;	/**< @brief Whether modes was given.  */
   unsigned int min_partition_size_given ;	/**< @brief Whether min-partition-size was given.  */
   unsigned int max_partition_size_given ;	/**< @brief Whether max-partition-size was given.  */
+  unsigned int different_partition_sizes_given ;	/**< @brief Whether different-partition-sizes was given.  */
   unsigned int min_thread_count_given ;	/**< @brief Whether min-thread-count was given.  */
   unsigned int max_thread_count_given ;	/**< @brief Whether max-thread-count was given.  */
   unsigned int send_patterns_given ;	/**< @brief Whether send-patterns was given.  */

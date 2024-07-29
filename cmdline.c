@@ -41,6 +41,7 @@ const char *gengetopt_args_info_help[] = {
   "  -m, --modes=STRING            a comma separated list containing the\n                                  benchmarks to run  (default=`all')",
   "  -p, --min-partition-size=INT  the logs of the minimal partition sizes for\n                                  each mode  (default=`0')",
   "  -P, --max-partition-size=INT  the logs of the maximal partition sizes for\n                                  each mode  (default=`0')",
+  "  -c, --different-partition-sizes\n                                flag to enable different partition sizes for\n                                  send and receive sides  (default=off)",
   "  -t, --min-thread-count=INT    log2 of the minimal thread counts for each mode\n                                  (default=`0')",
   "  -T, --max-thread-count=INT    log2 of the maximal thread counts for each mode\n                                  (default=`0')",
   "  -s, --send-patterns=ENUM      send patterns to use for all test cases\n                                  (possible values=\"Linear\",\n                                  \"LinearInverse\", \"Stride2\",\n                                  \"Stride128\", \"Stride1K\", \"Stride16K\",\n                                  \"Random\", \"RandomBurst128\",\n                                  \"RandomBurst1K\", \"RandomBurst16K\",\n                                  \"GridBoundary\" default=`Linear')",
@@ -49,6 +50,7 @@ const char *gengetopt_args_info_help[] = {
 };
 
 typedef enum {ARG_NO
+  , ARG_FLAG
   , ARG_STRING
   , ARG_INT
   , ARG_ENUM
@@ -81,6 +83,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->modes_given = 0 ;
   args_info->min_partition_size_given = 0 ;
   args_info->max_partition_size_given = 0 ;
+  args_info->different_partition_sizes_given = 0 ;
   args_info->min_thread_count_given = 0 ;
   args_info->max_thread_count_given = 0 ;
   args_info->send_patterns_given = 0 ;
@@ -101,6 +104,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->min_partition_size_orig = NULL;
   args_info->max_partition_size_arg = NULL;
   args_info->max_partition_size_orig = NULL;
+  args_info->different_partition_sizes_flag = 0;
   args_info->min_thread_count_arg = NULL;
   args_info->min_thread_count_orig = NULL;
   args_info->max_thread_count_arg = NULL;
@@ -130,16 +134,17 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->max_partition_size_help = gengetopt_args_info_help[6] ;
   args_info->max_partition_size_min = 0;
   args_info->max_partition_size_max = 0;
-  args_info->min_thread_count_help = gengetopt_args_info_help[7] ;
+  args_info->different_partition_sizes_help = gengetopt_args_info_help[7] ;
+  args_info->min_thread_count_help = gengetopt_args_info_help[8] ;
   args_info->min_thread_count_min = 0;
   args_info->min_thread_count_max = 0;
-  args_info->max_thread_count_help = gengetopt_args_info_help[8] ;
+  args_info->max_thread_count_help = gengetopt_args_info_help[9] ;
   args_info->max_thread_count_min = 0;
   args_info->max_thread_count_max = 0;
-  args_info->send_patterns_help = gengetopt_args_info_help[9] ;
+  args_info->send_patterns_help = gengetopt_args_info_help[10] ;
   args_info->send_patterns_min = 0;
   args_info->send_patterns_max = 0;
-  args_info->output_file_help = gengetopt_args_info_help[10] ;
+  args_info->output_file_help = gengetopt_args_info_help[11] ;
   args_info->output_file_min = 0;
   args_info->output_file_max = 0;
   
@@ -398,6 +403,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
   write_multiple_into_file(outfile, args_info->modes_given, "modes", args_info->modes_orig, 0);
   write_multiple_into_file(outfile, args_info->min_partition_size_given, "min-partition-size", args_info->min_partition_size_orig, 0);
   write_multiple_into_file(outfile, args_info->max_partition_size_given, "max-partition-size", args_info->max_partition_size_orig, 0);
+  if (args_info->different_partition_sizes_given)
+    write_into_file(outfile, "different-partition-sizes", 0, 0 );
   write_multiple_into_file(outfile, args_info->min_thread_count_given, "min-thread-count", args_info->min_thread_count_orig, 0);
   write_multiple_into_file(outfile, args_info->max_thread_count_given, "max-thread-count", args_info->max_thread_count_orig, 0);
   write_multiple_into_file(outfile, args_info->send_patterns_given, "send-patterns", args_info->send_patterns_orig, cmdline_parser_send_patterns_values);
@@ -793,6 +800,9 @@ int update_arg(void *field, char **orig_field,
     val = possible_values[found];
 
   switch(arg_type) {
+  case ARG_FLAG:
+    *((int *)field) = !*((int *)field);
+    break;
   case ARG_INT:
     if (val) *((int *)field) = strtol (val, &stop_char, 0);
     break;
@@ -826,6 +836,7 @@ int update_arg(void *field, char **orig_field,
   /* store the original value */
   switch(arg_type) {
   case ARG_NO:
+  case ARG_FLAG:
     break;
   default:
     if (value && orig_field) {
@@ -1036,6 +1047,7 @@ cmdline_parser_internal (
         { "modes",	1, NULL, 'm' },
         { "min-partition-size",	1, NULL, 'p' },
         { "max-partition-size",	1, NULL, 'P' },
+        { "different-partition-sizes",	0, NULL, 'c' },
         { "min-thread-count",	1, NULL, 't' },
         { "max-thread-count",	1, NULL, 'T' },
         { "send-patterns",	1, NULL, 's' },
@@ -1043,7 +1055,7 @@ cmdline_parser_internal (
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVb:i:m:p:P:t:T:s:o::", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVb:i:m:p:P:ct:T:s:o::", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -1106,6 +1118,16 @@ cmdline_parser_internal (
           if (update_multiple_arg_temp(&max_partition_size_list, 
               &(local_args_info.max_partition_size_given), optarg, 0, "0", ARG_INT,
               "max-partition-size", 'P',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'c':	/* flag to enable different partition sizes for send and receive sides.  */
+        
+        
+          if (update_arg((void *)&(args_info->different_partition_sizes_flag), 0, &(args_info->different_partition_sizes_given),
+              &(local_args_info.different_partition_sizes_given), optarg, 0, 0, ARG_FLAG,
+              check_ambiguity, override, 1, 0, "different-partition-sizes", 'c',
               additional_error))
             goto failure;
         
