@@ -10,17 +10,17 @@
 #include <time.h>
 
 static const char* const send_pattern_identifiers[SendPatternCount] = {
-    "linear",
-    "linear inverse",
-    "stride (2B)",
-    "stride (128B)",
-    "stride (1KB)",
-    "stride (16KB)",
-    "random",
-    "random burst (128B)",
-    "random burst (1KB)",
-    "random burst (16KB)",
-	"GridBoundary"
+	"linear",
+    	"linear inverse",
+    	"stride (2B)",
+    	"stride (128B)",
+    	"stride (1KB)",
+    	"stride (16KB)",
+    	"random",
+    	"random burst (128B)",
+    	"random burst (1KB)",
+    	"random burst (16KB)",
+	"neighborhood exchange"
 };
 
 
