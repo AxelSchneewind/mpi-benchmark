@@ -13,7 +13,7 @@ def evaluate_list(list_str, all_values):
     include = []
     exclude = []
     for t in list_str.split(','):
-        if t == 'all':
+        if t == 'all' or t == '*':
             include = all_values
         if not t.startswith('^'):
             include = include + [t]
@@ -39,6 +39,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--single-plot', action='store_true')
     parser.add_argument('-t', '--title', default='')
     parser.add_argument('-f', '--file', default='results.csv')
+    parser.add_argument('-e', '--show-std', action='store_true')    # TODO: implement in plots.py
     parser.add_argument('-o', '--output-file')
     args = parser.parse_args()
 

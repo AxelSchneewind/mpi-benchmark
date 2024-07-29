@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 
 mode_names = [ 'Send', 'SendPersistent', 'Isend', 'IsendTest', 'IsendThenTest', 'IsendTestall', 'CustomPsend', 'WinSingle', 'Win', 'Psend', 'PsendParrived', 'PsendProgress', 'PsendProgressThread']
-send_pattern_names = [ 'linear', 'linear inverse', 'stride (128B)', 'stride (1KB)', 'stride (16KB)', 'random', 'random burst (128B at a time)', 'random burst (1KB at a time)', 'random burst (16KB at a time)' ]
+send_pattern_names = [ 'linear', 'linear inverse', 'stride (2B)', 'stride (128B)', 'stride (1KB)', 'stride (16KB)', 'random', 'random burst (128B)', 'random burst (1KB)', 'random burst (16KB)', 'neighborhood exchange' ]
 
 # returns (xValues, yValues, pattern, mode, column) all partition_size -> column plots for the given modes and patterns
 def iter_results(data, modes = None, patterns = None, columns = None, thread_counts = None, filter = None):
@@ -27,10 +27,18 @@ def iter_results(data, modes = None, patterns = None, columns = None, thread_cou
                         continue
                     xValues = plot_data['partition_size']
                     yValues = plot_data[column]
-                    yield (xValues, yValues, mode, pattern, t, column)
+                    stdValues = None
+                    if str('std_dev(' +column + ')') in plot_data:
+                        stdValues = plot_data['std_dev(' +column + ')']
+                    elif column == 'bandwidth':
+                        stdValues = 1 / plot_data['std_dev(t_total)']
+                    yield (xValues, yValues, stdValues, mode, pattern, t, column)
 
-def plot(ax, x, y, domain=None, title=None, label=None, ylabel='Bandwidth [B/s]', xlabel='partition size [B]'):
-    ax.plot(x, y, label=label)
+def plot(ax, x, y, std, domain=None, title=None, label=None, ylabel='Bandwidth [B/s]', xlabel='partition size [B]'):
+    if std is not None and len(std) == len(x):
+        ax.errorbar(x, y, std, label=label)
+    else:
+        ax.plot(x, y, label=label)
 
     if ylabel != None:
         ax.set_ylabel(ylabel)    
@@ -74,7 +82,7 @@ def plot_column(data, column_names = ['bandwidth'], modes=mode_names, patterns=s
     num_modes = 0
     ax_per_mode = {}
 
-    for (xValues, yValues, mode, pattern, thread_count, column) in iter_results(data, modes=modes, patterns=patterns, thread_counts=thread_counts, columns=column_names):
+    for (xValues, yValues, stdValues, mode, pattern, thread_count, column) in iter_results(data, modes=modes, patterns=patterns, thread_counts=thread_counts, columns=column_names):
         # next axis
         if not mode in ax_per_mode.keys():
             ax_per_mode[mode] = (num_modes // cols, num_modes % cols)
@@ -92,7 +100,7 @@ def plot_column(data, column_names = ['bandwidth'], modes=mode_names, patterns=s
             label = label + ', ' + str(thread_count) + ' threads'
 
         (a0, a1) = ax_per_mode[mode]
-        plot(ax[a0, a1], xValues, yValues, title=title, ylabel=ylabel, label=label, domain=domain)
+        plot(ax[a0, a1], xValues, yValues, stdValues, title=title, ylabel=ylabel, label=label, domain=domain)
 
         if title != None:
             ax[a0, a1].set_title(title)
@@ -115,11 +123,11 @@ def plot_column_combined(data, column_names=['bandwidth'], modes=mode_names, pat
     cols = 1
     (fig, ax) = plt.subplots(rows, cols)
 
-    for (xValues, yValues, mode, pattern, thread_count, column) in iter_results(data, modes=modes, patterns=patterns, thread_counts=thread_counts, columns=column_names):
+    for (xValues, yValues, stdValues, mode, pattern, thread_count, column) in iter_results(data, modes=modes, patterns=patterns, thread_counts=thread_counts, columns=column_names):
         label = mode
         if multiple_patterns:
             label = label + ', ' + pattern
         if multiple_thread_counts:
             label = label + ', ' + str(thread_count) + ' threads'
-        plot(ax, xValues, yValues, title=title, ylabel=ylabel, label=label, domain=domain)
+        plot(ax, xValues, yValues, stdValues, title=title, ylabel=ylabel, label=label, domain=domain)
 
