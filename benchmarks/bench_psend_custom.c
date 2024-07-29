@@ -23,20 +23,22 @@ void bench_custom_psend(TestCase *test_case, Result *result, int comm_rank)
     }
 
     // warmup
-    if (comm_rank == 0)
-    {
-        MPI_CHECK(custom_MPI_Start(request));
-
-        for (size_t p = 0; p < test_case->partition_count; p++)
+    for(int it = 0; it < WARMUP_ITERATIONS; it++) {
+        if (comm_rank == 0)
         {
-            unsigned int partition_num = p;
-            MPI_CHECK(custom_MPI_Pready(partition_num, request));
-        }
+            MPI_CHECK(custom_MPI_Start(request));
 
-        MPI_CHECK(custom_MPI_Wait(request, &result->send_status));
-    } else if (comm_rank == 1) {
-        MPI_CHECK(custom_MPI_Start(request));
-        MPI_CHECK(custom_MPI_Wait(request, &result->recv_status));
+            for (size_t p = 0; p < test_case->partition_count; p++)
+            {
+                unsigned int partition_num = p;
+                MPI_CHECK(custom_MPI_Pready(partition_num, request));
+            }
+
+            MPI_CHECK(custom_MPI_Wait(request, &result->send_status));
+        } else if (comm_rank == 1) {
+            MPI_CHECK(custom_MPI_Start(request));
+            MPI_CHECK(custom_MPI_Wait(request, &result->recv_status));
+        }
     }
     usleep(POST_WARMUP_SLEEP_US);
 

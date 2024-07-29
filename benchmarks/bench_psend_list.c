@@ -20,16 +20,18 @@ void bench_psend_list(TestCase *test_case, Result *result, int comm_rank)
 
 
     // warmup
-    if (comm_rank == 0)
-    {
-        MPI_CHECK(MPI_Start(&request));
+    for(int it = 0; it < WARMUP_ITERATIONS; it++) {
+        if (comm_rank == 0)
+        {
+            MPI_CHECK(MPI_Start(&request));
 
-        MPI_Pready_list(test_case->partition_count, test_case->send_pattern, request);
+            MPI_Pready_list(test_case->partition_count, test_case->send_pattern, request);
 
-        MPI_CHECK(MPI_Wait(&request, MPI_STATUS_IGNORE));
-    } else if (comm_rank == 1) {
-        MPI_CHECK(MPI_Start(&request));
-        MPI_CHECK(MPI_Wait(&request, MPI_STATUS_IGNORE));
+            MPI_CHECK(MPI_Wait(&request, MPI_STATUS_IGNORE));
+        } else if (comm_rank == 1) {
+            MPI_CHECK(MPI_Start(&request));
+            MPI_CHECK(MPI_Wait(&request, MPI_STATUS_IGNORE));
+        }
     }
     usleep(POST_WARMUP_SLEEP_US);
 
