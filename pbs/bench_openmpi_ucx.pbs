@@ -15,4 +15,4 @@ BIN_DIRECTORY=$(bin_directory)
 
 mpirun --version > version_openmpi.log
 # mpirun --mca prte_allocation_required 0 --mca mpi_show_mca_params all ./bench > params.txt
-mpirun --mca pml ucx  --mca mpi_show_mca_params all  -np 2 -N 1 $BIN_DIRECTORY/bench_openmpi $(make_bench_args) > results.log 2>&1
+mpirun --mca pml ucx --mca btl ^uct --mca mpi_show_mca_params all  -np 2 -N 1 $BIN_DIRECTORY/bench_openmpi $(make_bench_args) > results.log 2>&1

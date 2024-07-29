@@ -18,5 +18,5 @@ BIN_DIRECTORY=$(bin_directory)
 which mpirun > version_openmpi.log
 mpirun --version >> version_openmpi.log
 
-mpirun -np 2 -N 1 $BIN_DIRECTORY/bench_openmpi_503 $(make_bench_args) >> results.log 2>&1
+mpirun -np 2 -N 1 --mca btl ^uct  $BIN_DIRECTORY/bench_openmpi_503 $(make_bench_args) >> results.log 2>&1
 # mpirun --mca mpi_show_mca_params all --mca mpi_show_mca_param_file mca_params.txt -np 2 -N 1 $BIN_DIRECTORY/bench_openmpi_503 $(make_bench_args) > results.log 2>&1
