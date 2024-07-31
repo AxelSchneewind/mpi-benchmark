@@ -8,12 +8,12 @@ void permutation_create(int** out, size_t num_elements) {
     // initialize identity
     for (size_t i = 0; i < num_elements; i++)
         (*out)[i] = i;
-};
+}
 
 void permutation_destroy(int** out) {
     free(*out);
     *out = NULL;
-};
+}
 
 
 int* permutation_at(int* p, size_t index) {
@@ -35,7 +35,7 @@ int permutation_is_identity(int* p, size_t size)
     }
 
     return 1;
-};
+}
 
 // check that each entry only appears once
 int permutation_is_injective(int* p, size_t size) {
@@ -59,7 +59,7 @@ int permutation_is_injective(int* p, size_t size) {
 
 int permutation_is_valid(int* p, size_t size) {
     return permutation_is_injective(p, size);
-};
+}
 
 int permutation_apply(int* target, int* perm, size_t len)
 {
@@ -85,7 +85,7 @@ int permutation_apply(int* target, int* perm, size_t len)
     permutation_destroy(&temp);
 
     return permutation_is_valid(target, len);
-};
+}
 
 int permutation_invert(int* target, size_t len)
 {
@@ -111,7 +111,7 @@ int permutation_invert(int* target, size_t len)
     permutation_destroy(&temp);
 
     return permutation_is_valid(target, len);
-};
+}
 
 
 

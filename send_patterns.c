@@ -100,7 +100,7 @@ void make_grid_boundary_pattern(int* result, size_t width, size_t height, int* b
     if (NULL != inner_permutation)
         permutation_apply(result + boundary_size, inner_permutation, numbers_put - boundary_size);
     assert(permutation_is_valid(result, width * height));
-};
+}
 
 // 
 void shuffle(int *output, size_t count) {
@@ -118,7 +118,7 @@ void shuffle(int *output, size_t count) {
     }
 
     free(remaining_values);
-};
+}
 
 void make_random_pattern(int *result, size_t count) {
     srand(time(NULL));
@@ -126,7 +126,7 @@ void make_random_pattern(int *result, size_t count) {
         result[i] = i;
 
     shuffle(result, count);
-};
+}
 
 void make_random_pattern_seeded(int *result, size_t count, int seed) {
     srand(seed);
@@ -135,7 +135,7 @@ void make_random_pattern_seeded(int *result, size_t count, int seed) {
         result[i] = i;
 
     shuffle(result, count);
-} ;
+}
 
 
 void make_random_burst_pattern(int *result, size_t count, size_t burst_size) {
@@ -157,7 +157,7 @@ void make_random_burst_pattern(int *result, size_t count, size_t burst_size) {
     }
 
     free(offsets);
-};
+}
 
 
 void make_partition_send_pattern(const permutation byte_send_pattern, permutation partition_send_pattern, size_t byte_count, size_t partition_size) {
@@ -180,4 +180,4 @@ void make_partition_send_pattern(const permutation byte_send_pattern, permutatio
     }
 
     free(num_ready);
-};
+}
