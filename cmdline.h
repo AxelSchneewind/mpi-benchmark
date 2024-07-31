@@ -79,6 +79,9 @@ struct gengetopt_args_info
   unsigned int send_patterns_min; /**< @brief send patterns to use for all test cases's minimum occurreces */
   unsigned int send_patterns_max; /**< @brief send patterns to use for all test cases's maximum occurreces */
   const char *send_patterns_help; /**< @brief send patterns to use for all test cases help description.  */
+  char * bench_name_arg;	/**< @brief name of this benchmark (default='').  */
+  char * bench_name_orig;	/**< @brief name of this benchmark original value given at command line.  */
+  const char *bench_name_help; /**< @brief name of this benchmark help description.  */
   char ** output_file_arg;	/**< @brief list of files (corresponding to the respective rank) that the results will be written to (csv format).  */
   char ** output_file_orig;	/**< @brief list of files (corresponding to the respective rank) that the results will be written to (csv format) original value given at command line.  */
   unsigned int output_file_min; /**< @brief list of files (corresponding to the respective rank) that the results will be written to (csv format)'s minimum occurreces */
@@ -96,6 +99,7 @@ struct gengetopt_args_info
   unsigned int min_thread_count_given ;	/**< @brief Whether min-thread-count was given.  */
   unsigned int max_thread_count_given ;	/**< @brief Whether max-thread-count was given.  */
   unsigned int send_patterns_given ;	/**< @brief Whether send-patterns was given.  */
+  unsigned int bench_name_given ;	/**< @brief Whether bench-name was given.  */
   unsigned int output_file_given ;	/**< @brief Whether output-file was given.  */
 
 } ;

@@ -10,6 +10,8 @@
 setup config_from_args(struct gengetopt_args_info* args) {
     setup result = malloc(sizeof(struct setup_t));
 
+    result->name = args->bench_name_arg;
+
     const int num_modes = args->modes_given;
     const int num_send_patterns = args->send_patterns_given;
     int mode[ModeCount];
@@ -76,6 +78,12 @@ setup config_from_args(struct gengetopt_args_info* args) {
 
     return result;
 }
+
+
+const char* config_name(setup config) {
+    return config->name;
+}
+
 
 int config_num_test_cases(setup config, Mode mode) {
 #ifdef DISABLE_PSEND

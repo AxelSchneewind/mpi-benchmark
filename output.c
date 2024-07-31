@@ -33,7 +33,7 @@ void result_file_create(const char* filename) {
     // open file and overwrite with header line
     file = fopen(filename, "w");
 
-    fprintf(file, "mode,buffer_size,thread_count,partition_size,partition_size_recv,send_pattern,t_local,t_start_to_wait,t_wait,t_total,t_wait_relative,bandwidth,std_dev(t_local),std_dev(t_start_to_wait),std_dev(t_total)\n");
+    fprintf(file, "name,mode,buffer_size,thread_count,partition_size,partition_size_recv,send_pattern,t_local,t_start_to_wait,t_wait,t_total,t_wait_relative,bandwidth,std_dev(t_local),std_dev(t_start_to_wait),std_dev(t_total)\n");
     fclose(file);
 }
 
@@ -44,7 +44,7 @@ FILE *result_file_open(char** filenames, int filenames_given, int comm_rank)
     const char* filename;
 
     // use default name if no argument given
-    if (filenames_given <= comm_rank || NULL == filenames[comm_rank]) {
+    if (filenames_given > comm_rank || NULL == filenames[comm_rank]) {
         filename = result_file_name(comm_rank);
     } else {
         filename = filenames[comm_rank];
@@ -67,7 +67,8 @@ FILE *result_file_open(char** filenames, int filenames_given, int comm_rank)
 
 void record_result(TestCase *test_case, Result *result, FILE *file)
 {
-    fprintf(file, "%s,%lli,%i,%lli,%lli,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", 
+    fprintf(file, "%s,%s,%lli,%i,%lli,%lli,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", 
+                    test_case->name,
                     mode_names[test_case->mode], 
                     test_case->buffer_size, 
                     test_case->thread_count,

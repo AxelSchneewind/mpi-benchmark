@@ -14,6 +14,7 @@ option "max-thread-count" T "log2 of the maximal thread counts for each mode" in
 
 option "send-patterns" s "send patterns to use for all test cases" enum values="Linear","LinearInverse","Stride2","Stride128","Stride1K","Stride16K","Random","RandomBurst128","RandomBurst1K","RandomBurst16K","GridBoundary" default="Linear" multiple optional
 
+option "bench-name" n "name of this benchmark" string default="" optional
 option "output-file" o "list of files (corresponding to the respective rank) that the results will be written to (csv format)" string typestr="FILE" argoptional multiple
 
 # package "<packname>"

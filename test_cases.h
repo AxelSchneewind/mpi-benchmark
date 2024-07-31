@@ -21,6 +21,7 @@ enum Mode
 {
     Send =             0,
     SendPersistent      ,
+    SendPersistentTest  ,
     Isend               ,
     IsendTest           ,
     IsendThenTest       ,
@@ -69,6 +70,7 @@ typedef struct { void (*run)(struct TestCase* test_case, struct Result *result, 
 // 
 struct TestCase
 {
+    const char* name;
     Mode mode;
     RunMethod method;
     char* buffer;

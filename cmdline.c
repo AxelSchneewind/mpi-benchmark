@@ -45,6 +45,7 @@ const char *gengetopt_args_info_help[] = {
   "  -t, --min-thread-count=INT    log2 of the minimal thread counts for each mode\n                                  (default=`0')",
   "  -T, --max-thread-count=INT    log2 of the maximal thread counts for each mode\n                                  (default=`0')",
   "  -s, --send-patterns=ENUM      send patterns to use for all test cases\n                                  (possible values=\"Linear\",\n                                  \"LinearInverse\", \"Stride2\",\n                                  \"Stride128\", \"Stride1K\", \"Stride16K\",\n                                  \"Random\", \"RandomBurst128\",\n                                  \"RandomBurst1K\", \"RandomBurst16K\",\n                                  \"GridBoundary\" default=`Linear')",
+  "  -n, --bench-name=STRING       name of this benchmark  (default=`')",
   "  -o, --output-file[=FILE]      list of files (corresponding to the respective\n                                  rank) that the results will be written to\n                                  (csv format)",
     0
 };
@@ -87,6 +88,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->min_thread_count_given = 0 ;
   args_info->max_thread_count_given = 0 ;
   args_info->send_patterns_given = 0 ;
+  args_info->bench_name_given = 0 ;
   args_info->output_file_given = 0 ;
 }
 
@@ -111,6 +113,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->max_thread_count_orig = NULL;
   args_info->send_patterns_arg = NULL;
   args_info->send_patterns_orig = NULL;
+  args_info->bench_name_arg = gengetopt_strdup ("");
+  args_info->bench_name_orig = NULL;
   args_info->output_file_arg = NULL;
   args_info->output_file_orig = NULL;
   
@@ -144,7 +148,8 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->send_patterns_help = gengetopt_args_info_help[10] ;
   args_info->send_patterns_min = 0;
   args_info->send_patterns_max = 0;
-  args_info->output_file_help = gengetopt_args_info_help[11] ;
+  args_info->bench_name_help = gengetopt_args_info_help[11] ;
+  args_info->output_file_help = gengetopt_args_info_help[12] ;
   args_info->output_file_min = 0;
   args_info->output_file_max = 0;
   
@@ -312,6 +317,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   args_info->max_thread_count_arg = 0;
   free_multiple_field (args_info->send_patterns_given, (void *)(args_info->send_patterns_arg), &(args_info->send_patterns_orig));
   args_info->send_patterns_arg = 0;
+  free_string_field (&(args_info->bench_name_arg));
+  free_string_field (&(args_info->bench_name_orig));
   free_multiple_string_field (args_info->output_file_given, &(args_info->output_file_arg), &(args_info->output_file_orig));
   
   
@@ -408,6 +415,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
   write_multiple_into_file(outfile, args_info->min_thread_count_given, "min-thread-count", args_info->min_thread_count_orig, 0);
   write_multiple_into_file(outfile, args_info->max_thread_count_given, "max-thread-count", args_info->max_thread_count_orig, 0);
   write_multiple_into_file(outfile, args_info->send_patterns_given, "send-patterns", args_info->send_patterns_orig, cmdline_parser_send_patterns_values);
+  if (args_info->bench_name_given)
+    write_into_file(outfile, "bench-name", args_info->bench_name_orig, 0);
   write_multiple_into_file(outfile, args_info->output_file_given, "output-file", args_info->output_file_orig, 0);
   
 
@@ -1051,11 +1060,12 @@ cmdline_parser_internal (
         { "min-thread-count",	1, NULL, 't' },
         { "max-thread-count",	1, NULL, 'T' },
         { "send-patterns",	1, NULL, 's' },
+        { "bench-name",	1, NULL, 'n' },
         { "output-file",	2, NULL, 'o' },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVb:i:m:p:P:ct:T:s:o::", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVb:i:m:p:P:ct:T:s:n:o::", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -1155,6 +1165,18 @@ cmdline_parser_internal (
           if (update_multiple_arg_temp(&send_patterns_list, 
               &(local_args_info.send_patterns_given), optarg, cmdline_parser_send_patterns_values, "Linear", ARG_ENUM,
               "send-patterns", 's',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'n':	/* name of this benchmark.  */
+        
+        
+          if (update_arg( (void *)&(args_info->bench_name_arg), 
+               &(args_info->bench_name_orig), &(args_info->bench_name_given),
+              &(local_args_info.bench_name_given), optarg, 0, "", ARG_STRING,
+              check_ambiguity, override, 0, 0,
+              "bench-name", 'n',
               additional_error))
             goto failure;
         

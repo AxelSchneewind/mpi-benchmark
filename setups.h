@@ -16,6 +16,7 @@
 
 
 struct setup_t {
+    const char* name;
     MPI_Count buffer_size;
     int iterations;
     int num_send_patterns;
@@ -30,6 +31,8 @@ struct setup_t {
 typedef struct setup_t* setup;
 
 setup config_from_args(struct gengetopt_args_info* args);
+
+const char* config_name(setup config);
 
 int config_num_test_cases(setup config, Mode mode);
 
