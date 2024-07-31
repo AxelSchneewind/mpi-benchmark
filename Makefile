@@ -6,12 +6,12 @@ MPI_DIR=/home/axel/software/openmpi-5.0.0/build/bin/
 
 # arguments for running benchmarks
 BENCH_BUFFER_SIZE=23
-BENCH_ITERATION_COUNT=1
-BENCH_MODES=Send,SendPersistent,Isend,Psend,PsendParrived,PsendProgress# ,PsendCustom
-#BENCH_MODES=PsendCustom
+BENCH_ITERATION_COUNT=100
+# BENCH_MODES=Send,SendPersistent,Isend,Psend,IsendTest,PsendProgress,PsendCustom
+BENCH_MODES=IsendTestall,PsendCustom
 BENCH_MIN_THREAD_COUNTS=0
 BENCH_MAX_THREAD_COUNTS=4
-BENCH_MIN_PARTITION_SIZES=8
+BENCH_MIN_PARTITION_SIZES=12
 BENCH_MAX_PARTITION_SIZES=23
 BENCH_SEND_PATTERNS=Linear,LinearInverse,GridBoundary
 BENCH_ARGS=-b $(BENCH_BUFFER_SIZE) -i $(BENCH_ITERATION_COUNT) -m $(BENCH_MODES) -t $(BENCH_MIN_THREAD_COUNTS) -T $(BENCH_MAX_THREAD_COUNTS) -p $(BENCH_MIN_PARTITION_SIZES) -P $(BENCH_MAX_PARTITION_SIZES) -s $(BENCH_SEND_PATTERNS) -o out0.csv,out1.csv
@@ -28,14 +28,14 @@ cmdline.c: cmdline.ggo
 	gengetopt -i cmdline.ggo
 
 
-SRC=$(wildcard benchmarks/*.c) $(filter-out custom_psend_dummy.c, $(wildcard *.c)) message-aggregation/custom_psend.c message-aggregation/intervals.c
+SRC=$(wildcard benchmarks/*.c) $(filter-out custom_psend_dummy.c, $(wildcard *.c)) message-aggregation/custom_psend_aggregate_simple.c message-aggregation/intervals.c
 
 
 bench_dbg: $(SRC) cmdline.c bench.h test_cases.h
 	$(MPI_CC) $(SRC) -o bench_dbg -lm -lpthread -I. -Wall -g -fopenmp
 
 bench: $(SRC) cmdline.c bench.h test_cases.h
-	$(MPI_CC) $(SRC) -o bench -lm -lpthread -I. -Wall -O2 -fopenmp
+	$(MPI_CC) $(SRC) -o bench -lm -lpthread -I. -Wpedantic -O2 -fopenmp
 # -DNDEBUG
 
 

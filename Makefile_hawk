@@ -4,7 +4,8 @@ MPI_CC=mpicc
 
 
 
-SRC_CUSTOM_PSEND=message-aggregation/intervals.c message-aggregation/custom_psend.c
+SRC_CUSTOM_PSEND=message-aggregation/custom_psend_aggregate_simple.c
+# message-aggregation/intervals.c message-aggregation/custom_psend.c
 SRC_NOPSEND=$(filter-out $(wildcard benchmarks/bench_psen*.c), $(SRC)) benchmarks/bench_psend_custom.c
 SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c custom_psend_dummy.c win.c partitioned_get_status.c, $(wildcard *.c)) $(SRC_CUSTOM_PSEND)
 
