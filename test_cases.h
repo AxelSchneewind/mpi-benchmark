@@ -71,6 +71,7 @@ typedef struct { void (*run)(struct TestCase* test_case, struct Result *result, 
 struct TestCase
 {
     const char* name;
+    int number;
     Mode mode;
     RunMethod method;
     char* buffer;

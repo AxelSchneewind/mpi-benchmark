@@ -89,16 +89,16 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    setup selection = config_from_args(&args);
-    if (NULL == selection) 
+    setup config = config_from_args(&args);
+    if (NULL == config) 
         return -1;
 
     TestCases tests;
-    test_cases_init(selection, &tests);
+    test_cases_init(config, &tests);
 
     //
     if (comm_rank == 0)
-        printf("Running %i tests, with buffer size %9lli, iteration count: %i: \n", test_cases_get_count(tests), selection->buffer_size, selection->iterations);
+        printf("[%5s] Running %i tests, with buffer size %9lli, iteration count: %i: \n", config_name(config), test_cases_get_count(tests), config->buffer_size, config->iterations);
 
     // set up result file for this rank
     FILE *result_file = result_file_open(args.output_file_arg, args.output_file_given, comm_rank);
@@ -113,9 +113,9 @@ int main(int argc, char **argv)
         if (comm_rank == 1)
         {
             if (test_case->partition_size == test_case->partition_size_recv)
-                printf("[Test %.4li]%15s, %i threads, partition size %7lli, send pattern %s :\n", i, mode_names[test_case->mode], test_case->thread_count, test_case->partition_size, send_pattern_identifiers[test_case->send_pattern_num]);
+                printf("[%5s:%.4li]%15s, %i threads, part. size %7lli, pattern %s :\n", config_name(config), i, mode_names[test_case->mode], test_case->thread_count, test_case->partition_size, send_pattern_identifiers[test_case->send_pattern_num]);
             else
-                printf("[Test %.4li]%15s, %i threads, partition size %7lli -> %7lli, send pattern %s :\n", i, mode_names[test_case->mode], test_case->thread_count, test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num]);
+                printf("[%5s:%.4li]%15s, %i threads, part. size %7lli -> %7lli, pattern %s :\n", config_name(config), i, mode_names[test_case->mode], test_case->thread_count, test_case->partition_size, test_case->partition_size_recv, send_pattern_identifiers[test_case->send_pattern_num]);
             fflush(stdout);
         }
 
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
             usleep(10000); // sleep 10 ms
 
             if (comm_rank == 1) {
-                printf("            %s, bandwidth: %6.1lfGiB/s, mean time: %6.1lfms, std deviation = %6.1lfms\n", result->success ? "success" : "failure", result->bandwidth/1024/1024/1024, result->timings[Iteration] * 1000, result->timings_std_dev[Iteration] * 1000);
+                printf("            %s, bandwidth: %6.1lfGiB/s, avg time: %6.1lfms, std-deviation = %6.1lfms\n", result->success ? "success" : "failure", result->bandwidth/1024/1024/1024, result->timings[Iteration] * 1000, result->timings_std_dev[Iteration] * 1000);
                 fflush(stdout);
             }
         }

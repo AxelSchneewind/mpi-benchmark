@@ -9,16 +9,16 @@
 
 setup config_from_args(struct gengetopt_args_info* args) {
     setup result = malloc(sizeof(struct setup_t));
-
-    result->name = args->bench_name_arg;
-
-    const int num_modes = args->modes_given;
-    const int num_send_patterns = args->send_patterns_given;
     int mode[ModeCount];
 
     memset(result, 0, sizeof(struct setup_t));
     memset(mode, 0, sizeof(int) * ModeCount);
     memset(result->different_partition_sizes, args->different_partition_sizes_flag, sizeof(bool) * ModeCount);
+
+    const int num_modes = args->modes_given;
+    const int num_send_patterns = args->send_patterns_given;
+
+    result->name = (args->bench_name_arg && strlen(args->bench_name_arg)) ? args->bench_name_arg : "bench";
     result->iterations = args->iteration_count_arg;
     result->buffer_size = (1 << args->buffer_size_arg);
     result->num_send_patterns = (0 >= num_send_patterns) ? 1 : num_send_patterns;

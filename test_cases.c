@@ -257,6 +257,7 @@ void test_cases_init(setup configuration, TestCases* tests)
 
                             TestCase *test_case = &result->test_cases[index++];
                             test_case->name = config_name(configuration);
+                            test_case->number = index;
 
                             // assign send pattern
                             test_case->send_pattern_num = configuration->send_patterns[i];
