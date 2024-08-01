@@ -32,8 +32,8 @@ int first_public_partition(struct custom_request* req, int internal_part) {
 }
 
 // constants
-#define MAX_PARTITION_COUNT_SEND 512
-#define MAX_PARTITION_COUNT_RECV 512
+#define MAX_PARTITION_COUNT_SEND 128
+#define MAX_PARTITION_COUNT_RECV 128
 
 int custom_MPI_Precv_init(void *buf, int partitions, MPI_Count count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Info info, custom_MPI_Request* request) {
     custom_MPI_Request r = malloc(sizeof(struct custom_request));
@@ -135,3 +135,4 @@ int custom_MPI_Pready_list(int length, int array_of_partitions[], custom_MPI_Req
     }
     return 0;
 }
+
