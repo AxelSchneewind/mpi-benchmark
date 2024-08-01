@@ -16,22 +16,28 @@ def evaluate_list(list_str, all_values):
         if t == 'all' or t == '*':
             include = all_values
         if not t.startswith('^'):
-            include = include + [t]
+            include = include + [str(t)]
         else:
-            exclude = exclude + [t[1:]]
+            exclude = exclude + [str(t[1:])]
 
     result = []
     for m in include:
-        if not m in exclude:
+        is_excluded = False
+        for e in exclude:
+            if m == e:
+                is_excluded = True
+                break
+        if not is_excluded:
             result = result + [m]
     
     return result
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='plotter for benchmarks', description='', epilog='')
+    parser = argparse.ArgumentParser(prog='plot', description='plots performance metric over partition size', epilog='')
     parser.add_argument('-c', '--columns', default='bandwidth')
     parser.add_argument('-n', '--thread-counts', default='1')
+    parser.add_argument('-b', '--bench-name', default='all')
     parser.add_argument('-m', '--modes', default='all')
     parser.add_argument('-p', '--patterns', default='all')
     parser.add_argument('-y', '--ydomain', default='')
@@ -40,17 +46,24 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--title', default='')
     parser.add_argument('-f', '--file', default='results.csv')
     parser.add_argument('-e', '--show-std', action='store_true')    # TODO: implement in plots.py
+    parser.add_argument('-r', '--ratios', default='0', help='log2 of the ratios between send to receive partition counts to plot')
     parser.add_argument('-o', '--output-file')
     args = parser.parse_args()
 
+    # read csv file
     data = pd.read_csv(args.file)
     data.sort_values(by=['mode', 'thread_count', 'send_pattern'], inplace=True)
 
-    # only use results where send and recv partition sizes are equal
-    data = data.loc[data['partition_size'] == data['partition_size_recv']]
-
     # select column(s)
     columns = evaluate_list(args.columns, data.columns)
+
+    # select ratio of send to recv partitions
+    partitioning_ratios = evaluate_list(args.ratios, [0])
+
+    # select benchmark names
+    bench_names = evaluate_list(args.bench_name, list(data['name'].unique()))
+    if 'name' in data:
+        data = data[[bool(d in bench_names) for d in data['name']]]
 
     ylabel = None
     if columns[0].startswith('t_'):
@@ -88,9 +101,9 @@ if __name__ == "__main__":
 
     # 
     if args.single_plot:
-        plots.plot_column_combined(data, columns, title=title, modes=modes, patterns=patterns, thread_counts=thread_counts, ylabel=ylabel, domain=domain)
+        plots.plot_column_combined(data, columns, title=title, modes=modes, patterns=patterns, thread_counts=thread_counts, ylabel=ylabel, domain=domain, partitioning_ratios=partitioning_ratios)
     else:
-        plots.plot_column(data, columns, title=title, modes=modes, patterns=patterns, thread_counts=thread_counts, ylabel=ylabel, domain=domain)
+        plots.plot_column(data, columns, title=title, modes=modes, patterns=patterns, thread_counts=thread_counts, ylabel=ylabel, domain=domain, partitioning_ratios=partitioning_ratios)
 
     # output depending on output file argument
     if args.output_file != None:
