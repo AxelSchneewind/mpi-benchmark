@@ -11,15 +11,15 @@
 
 static const char* const send_pattern_identifiers[SendPatternCount] = {
 	"linear",
-    	"linear inverse",
-    	"stride (2B)",
-    	"stride (128B)",
-    	"stride (1KB)",
-    	"stride (16KB)",
-    	"random",
-    	"random burst (128B)",
-    	"random burst (1KB)",
-    	"random burst (16KB)",
+    "linear inverse",
+    "stride (2B)",
+    "stride (128B)",
+    "stride (1KB)",
+    "stride (16KB)",
+    "random",
+    "random burst (128B)",
+    "random burst (1KB)",
+    "random burst (16KB)",
 	"neighborhood exchange"
 };
 
@@ -27,6 +27,7 @@ static const char* const send_pattern_identifiers[SendPatternCount] = {
 // benchmarking functions
 extern void bench_send(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_send_persistent(TestCase *test_case, Result *result, int comm_rank);
+extern void bench_send_persistent_test(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_isend(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_isend_test(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_isend_then_test(TestCase *test_case, Result *result, int comm_rank);
@@ -48,6 +49,7 @@ extern void bench_win(TestCase *test_case, Result *result, int comm_rank);
 static RunMethod const mode_methods[ModeCount] = {
 	{ &bench_send },
 	{ &bench_send_persistent },
+	{ &bench_send_persistent_test },
 	{ &bench_isend },
 	{ &bench_isend_test },
 	{ &bench_isend_then_test },
@@ -74,6 +76,7 @@ static RunMethod const mode_methods[ModeCount] = {
 static const char* const mode_names[ModeCount] = {
 	"Send",
 	"SendPersistent",
+	"SendPersistentTest",
 	"Isend",
 	"IsendTest",
 	"IsendThenTest",
