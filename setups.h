@@ -18,6 +18,7 @@
 struct setup_t {
     const char* name;
     MPI_Count buffer_size;
+    int warmup_iterations;
     int iterations;
     int num_send_patterns;
     bool enable_mode[ModeCount];

@@ -70,18 +70,25 @@ typedef struct { void (*run)(struct TestCase* test_case, struct Result *result, 
 // 
 struct TestCase
 {
+    // identifiers (i.e. benchmark name and run number)
     const char* name;
     int number;
+
+    // send mechanism
     Mode mode;
     RunMethod method;
+
     char* buffer;
+    MPI_Count buffer_size;
     enum SendPattern send_pattern_num;
     permutation send_pattern;
     permutation recv_pattern;
+
+    int iteration_count;
+    int warmup_iterations;
+
     int thread_count;
     int partitions_per_thread;
-    size_t iteration_count;
-    MPI_Count buffer_size;
     MPI_Count partition_size;
     MPI_Count partition_size_recv; 		// only used by Psend
     MPI_Count partition_count;
