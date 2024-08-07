@@ -64,4 +64,4 @@ void bench_send(TestCase *test_case, Result *result, int comm_rank)
 
     timers_store(timers, result);
     timers_free(timers);
-};
+}

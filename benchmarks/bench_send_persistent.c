@@ -1,109 +1,104 @@
-#include "benchmarks/bench.h"
-#include "stdio.h"
+#include "benchmarks/bench_template.h"
+
+#include <stdio.h>
+#include <assert.h>
+
+struct send_bench_state {
+    MPI_Request* requests;
+    MPI_Status* statuses;
+};
 
 
-void bench_send_persistent(TestCase *test_case, Result *result, int comm_rank)
-{
-    timers timers;
-    timers_init(&timers, TimerCount);
+static int send_init(TestCase *test_case, Result *result, int comm_rank, void* s) {
+    struct send_bench_state* state = (struct send_bench_state*) s;
 
-    MPI_Request* requests = calloc(sizeof(MPI_Request), test_case->partition_count);
+    state->requests = calloc(sizeof(MPI_Request), test_case->partition_count);
+    state->statuses = calloc(sizeof(MPI_Status), test_case->partition_count);
 
-    // initialize send and receive
     if (0 == comm_rank) {
         for (int i = 0; i < test_case->partition_count; i++) {
-            MPI_Send_init(test_case->buffer + test_case->partition_size * i, test_case->partition_size, MPI_CHAR, 1, i, MPI_COMM_WORLD, &requests[i]);
+            MPI_CHECK(MPI_Send_init(test_case->buffer + test_case->partition_size * i, test_case->partition_size, MPI_CHAR, 1, i, MPI_COMM_WORLD, &state->requests[i]));
         }
     } else {
         for (int i = 0; i < test_case->partition_count; i++) {
-            MPI_Recv_init(test_case->buffer + test_case->partition_size * i, test_case->partition_size, MPI_CHAR, 0, i, MPI_COMM_WORLD, &requests[i]);
+            MPI_CHECK(MPI_Recv_init(test_case->buffer + test_case->partition_size * i, test_case->partition_size, MPI_CHAR, 0, i, MPI_COMM_WORLD, &state->requests[i]));
         }
     }
+    return 0;
+}
 
-    // warmup
-    for(int it = 0; it < WARMUP_ITERATIONS; it++) {
-        if (comm_rank == 0)
-        {
-            MPI_Barrier(MPI_COMM_WORLD);
-
-            for (int t = 0; t < test_case->thread_count; t++) {
-                for (int p = 0; p < test_case->partitions_per_thread; p++) {
-                    unsigned int partition_num = *permutation_at(test_case->send_pattern, p + t * test_case->partitions_per_thread);
-                    work(test_case->partition_size);
-                    MPI_CHECK(MPI_Start(&requests[partition_num]));
-                }
-            }
-
-            MPI_CHECK(MPI_Waitall(test_case->partition_count, requests, MPI_STATUSES_IGNORE));
-        } else if (comm_rank == 1) {
-            MPI_Barrier(MPI_COMM_WORLD);
-
-            #pragma omp parallel for num_threads(test_case->thread_count)
-            for (int t = 0; t < test_case->thread_count; t++) {
-                for (int p = 0; p < test_case->partitions_per_thread; p++) {
-                    unsigned int partition_num = *permutation_at(test_case->recv_pattern, p + t * test_case->partitions_per_thread);
-                    MPI_CHECK(MPI_Start(&requests[partition_num]));
-                }
-            }
-
-            MPI_CHECK(MPI_Waitall(test_case->partition_count, requests, MPI_STATUSES_IGNORE));
-        }
-    }
-    usleep(POST_WARMUP_SLEEP_US);
-
-
-    MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
-    timers_start(timers, Total);
-
-    for (size_t i = 0; i < test_case->iteration_count; i++)
-    {
-        if (comm_rank == 0)
-        {
-            // MPI_Barrier(MPI_COMM_WORLD);
-            timers_start(timers, Iteration);
-            timers_start(timers, IterationStartToWait);
-
-            #pragma omp parallel for num_threads(test_case->thread_count)
-            for (int t = 0; t < test_case->thread_count; t++) {
-                for (int p = 0; p < test_case->partitions_per_thread; p++) {
-                    unsigned int partition_num = *permutation_at(test_case->send_pattern, p + t * test_case->partitions_per_thread);
-                    work(test_case->partition_size);
-                    MPI_CHECK(MPI_Start(&requests[partition_num]));
-                }
-            }
-
-            timers_stop(timers, IterationStartToWait);
-            MPI_CHECK(MPI_Waitall(test_case->partition_count, requests, MPI_STATUSES_IGNORE));
-            timers_stop(timers, Iteration);
-        }
-        else if (comm_rank == 1)
-        {
-            // MPI_Barrier(MPI_COMM_WORLD);
-            timers_start(timers, Iteration);
-            timers_start(timers, IterationStartToWait);
-
-            #pragma omp parallel for num_threads(test_case->thread_count)
-            for (int t = 0; t < test_case->thread_count; t++) {
-                for (int p = 0; p < test_case->partitions_per_thread; p++) {
-                    unsigned int partition_num = *permutation_at(test_case->recv_pattern, p + t * test_case->partitions_per_thread);
-                    MPI_CHECK(MPI_Start(&requests[partition_num]));
-                }
-            }
-
-            timers_stop(timers, IterationStartToWait);
-            MPI_CHECK(MPI_Waitall(test_case->partition_count, requests, MPI_STATUSES_IGNORE));
-            timers_stop(timers, Iteration);
-        }
-    }
-
-    MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
-    timers_stop(timers, Total);
-
+static int send_cleanup(TestCase *test_case, Result *result, int comm_rank, void* s) {
+    struct send_bench_state* state = (struct send_bench_state*) s;
     for (int i = 0; i < test_case->partition_count; i++) {
-        MPI_Request_free(&requests[i]);
+        MPI_CHECK(MPI_Request_free(&state->requests[i]));
     }
-    free(requests);
+    free(state->requests);
+    free(state->statuses);
+    state->requests = NULL;
+    state->statuses = NULL;
+    return 0;
+}
 
-    timers_store(timers, result);
-    timers_free(timers);
+static int send_start(TestCase *test_case, Result *result, int comm_rank, void* s) {
+    return 0;
+}
+
+
+static int send_complete(TestCase *test_case, Result *result, int comm_rank, void* s) {
+    struct send_bench_state* state = (struct send_bench_state*) s;
+    MPI_CHECK(MPI_Waitall(test_case->partition_count, state->requests, MPI_STATUSES_IGNORE));
+    return 0;
+}
+
+static int send_recv_partition_operation(TestCase *test_case, Result *result, int comm_rank, int partition, int threadnum, void* s) {
+    struct send_bench_state* state = (struct send_bench_state*) s;
+    MPI_CHECK(MPI_Start(&state->requests[partition]));
+    return 0;
+}
+
+static int send_send_partition_operation(TestCase *test_case, Result *result, int comm_rank, int partition, int threadnum, void* s) {
+    struct send_bench_state* state = (struct send_bench_state*) s;
+    assert (0 == comm_rank);
+    MPI_CHECK(MPI_Start(&state->requests[partition]));
+    return 0;
+}
+
+static int send_test_send_partition_operation(TestCase *test_case, Result *result, int comm_rank, int partition, int threadnum, void* s) {
+    struct send_bench_state* state = (struct send_bench_state*) s;
+    assert (0 == comm_rank);
+    int flag;
+    MPI_CHECK(MPI_Start(&state->requests[partition]));
+    MPI_CHECK(MPI_Request_get_status(state->requests[partition], &flag, &state->statuses[partition]));
+    return 0;
+}
+
+
+static const struct benchmarking_function send_persistent_test = {
+    .state_size = sizeof(struct send_bench_state),
+    .init = &send_init,
+    .start = &send_start,
+    .partition_operation_send = &send_test_send_partition_operation,
+    .partition_operation_recv = &send_recv_partition_operation,
+    .complete = &send_complete,
+    .cleanup = &send_cleanup
 };
+
+static const struct benchmarking_function send_persistent = {
+    .state_size = sizeof(struct send_bench_state),
+    .init = &send_init,
+    .start = &send_start,
+    .partition_operation_send = &send_send_partition_operation,
+    .partition_operation_recv = &send_recv_partition_operation,
+    .complete = &send_complete,
+    .cleanup = &send_cleanup
+};
+
+void bench_send_persistent_test(TestCase *test_case, Result *result, int comm_rank)
+{ 
+    execute(test_case, result, comm_rank, send_persistent_test);
+}
+
+void bench_send_persistent(TestCase *test_case, Result *result, int comm_rank)
+{ 
+    execute(test_case, result, comm_rank, send_persistent);
+}
