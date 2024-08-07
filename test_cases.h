@@ -30,6 +30,7 @@ enum Mode
     WinSingle           ,
     Win                 ,
     Psend               ,
+    PsendOffloaded      ,
     PsendList           ,
     PsendParrived       ,
     PsendProgress       ,
