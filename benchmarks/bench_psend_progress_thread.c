@@ -1,5 +1,7 @@
 #include "benchmarks/bench.h"
 
+#include "benchmarks/bench_psend.h"
+
 
 #include <stdio.h>
 #include <stdatomic.h>
@@ -152,110 +154,71 @@ void progress_thread_destroy(progress_thread *thread)
 
 
 
+struct psend_progress_thread_bench_state {
+    MPI_Request request;
+    MPI_Status status;
+    progress_thread progress;
+};
 
-// TODO
 
+static int psend_progress_thread_init(TestCase *test_case, Result *result, int comm_rank, void* s) {
+    struct psend_progress_thread_bench_state* state = (struct psend_progress_thread_bench_state*) s;
+    if (0 == comm_rank) {
+        MPI_CHECK(MPI_Psend_init(test_case->buffer, test_case->buffer_size / test_case->partition_size, test_case->partition_size, MPI_CHAR, 1, 0, MPI_COMM_WORLD, MPI_INFO_ENV, &state->request));
+    } else {
+        MPI_CHECK(MPI_Precv_init(test_case->buffer, test_case->buffer_size / test_case->partition_size_recv, test_case->partition_size_recv, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_INFO_ENV, &state->request));
+    }
+
+    progress_thread_create(&state->progress);
+
+    return 0;
+}
+
+static int psend_progress_thread_cleanup(TestCase *test_case, Result *result, int comm_rank, void* s) {
+    struct psend_progress_thread_bench_state* state = (struct psend_progress_thread_bench_state*) s;
+    progress_thread_destroy(&state->progress);
+    MPI_CHECK(MPI_Request_free(&state->request));
+    return 0;
+}
+
+static int psend_progress_thread_start(TestCase *test_case, Result *result, int comm_rank, void* s) {
+    struct psend_progress_thread_bench_state* state = (struct psend_progress_thread_bench_state*) s;
+    MPI_CHECK(MPI_Start(&state->request));
+
+    if (0 == comm_rank) {
+        progress_thread_set_request(&state->progress, &state->request);
+        progress_thread_continue(&state->progress);
+    }
+
+    return 0;
+}
+
+
+static int psend_progress_thread_complete(TestCase *test_case, Result *result, int comm_rank, void* s) {
+    struct psend_progress_thread_bench_state* state = (struct psend_progress_thread_bench_state*) s;
+
+    if (0 == comm_rank) {
+        progress_thread_pause(&state->progress);
+    }
+
+    MPI_CHECK(MPI_Wait(&state->request, MPI_STATUSES_IGNORE));
+    return 0;
+}
+
+
+static const struct benchmarking_function psend_progress_thread = {
+    .state_size = sizeof(struct psend_progress_thread_bench_state),
+    .init = &psend_progress_thread_init,
+    .start = &psend_progress_thread_start,
+    .partition_operation_send = &psend_send_partition_operation,
+    .partition_operation_recv = &psend_recv_partition_operation,
+    .complete = &psend_progress_thread_complete,
+    .cleanup = &psend_progress_thread_cleanup
+};
 
 
 
 void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_rank)
-{
-    // init
-    MPI_Request request;
-
-    timers timers;
-    timers_init(&timers, TimerCount);
-
-    if (comm_rank == 0)
-    {
-        MPI_CHECK(MPI_Psend_init(test_case->buffer, test_case->partition_count, test_case->partition_size, MPI_CHAR, 1, 0, MPI_COMM_WORLD, MPI_INFO_ENV, &request));
-    }
-    else if (comm_rank == 1)
-    {
-        MPI_CHECK(MPI_Precv_init(test_case->buffer, test_case->partition_count_recv, test_case->partition_size_recv, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_INFO_ENV, &request));
-    }
-
-    // warmup
-    for(int it = 0; it < WARMUP_ITERATIONS; it++) {
-        if (comm_rank == 0)
-        {
-            MPI_CHECK(MPI_Start(&request));
-
-            for (size_t p = 0; p < test_case->partition_count; p++)
-            {
-                unsigned int partition_num = p;
-                MPI_CHECK(MPI_Pready(partition_num, request));
-            }
-
-            MPI_CHECK(MPI_Wait(&request, &result->send_status));
-        } else if (comm_rank == 1) {
-            MPI_CHECK(MPI_Start(&request));
-            MPI_CHECK(MPI_Wait(&request, &result->recv_status));
-        }
-    }
-    usleep(POST_WARMUP_SLEEP_US);
-
-    // run
-    MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
-    timers_start(timers, Total);
-
-    progress_thread progress;
-    progress_thread_create(&progress);
-    progress_thread_set_request(&progress, &request);
-
-    if (comm_rank == 0)
-    {
-        for (size_t i = 0; i < test_case->iteration_count; i++)
-        {
-            timers_start(timers, Iteration);
-            timers_start(timers, IterationStartToWait);
-
-            MPI_CHECK(MPI_Start(&request));
-            OUTPUT_RANK(progress_thread_set_request(&progress, &request));
-            OUTPUT_RANK(progress_thread_continue(&progress));
-
-            #pragma omp parallel for num_threads(test_case->thread_count)
-            for (int t = 0; t < test_case->thread_count; t++) {
-                for (int p = 0; p < test_case->partitions_per_thread; p++) {
-                    unsigned int partition_num = *permutation_at(test_case->send_pattern, p + t * test_case->partitions_per_thread);
-                    work(test_case->partition_size);
-                    MPI_CHECK(MPI_Pready(partition_num, request));
-                }
-            }
-
-            OUTPUT_RANK(progress_thread_pause(&progress));
-            timers_stop(timers, IterationStartToWait);
-            OUTPUT_RANK(MPI_CHECK(MPI_Wait(&request, &result->send_status)));
-
-            timers_stop(timers, Iteration);
-        }
-
-    }
-    else if (comm_rank == 1)
-    {
-        for (size_t i = 0; i < test_case->iteration_count; i++)
-        {
-            
-            timers_start(timers, Iteration);
-            timers_start(timers, IterationStartToWait);
-
-            MPI_CHECK(MPI_Start(&request));
-
-            timers_stop(timers, IterationStartToWait);
-            OUTPUT_RANK(MPI_CHECK(MPI_Wait(&request, &result->recv_status)));
-
-            timers_stop(timers, Iteration);
-        }
-    }
-
-    MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
-    timers_stop(timers, Total);
-
-    OUTPUT_RANK(progress_thread_destroy(&progress));
-    MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
-
-    OUTPUT_RANK(MPI_CHECK(MPI_Request_free(&request)));
-
-    timers_store(timers, result);
-    timers_free(timers);
+{ 
+    execute(test_case, result, comm_rank, psend_progress_thread);
 }
