@@ -7,8 +7,6 @@
 #include <unistd.h>
 #include <time.h>
 
-#define POST_WARMUP_SLEEP_US 5000   // pause after warmup run, helps to find actual benchmark runs in traces
-
 // perform some virtual work on a partition
 static void work(const MPI_Count partition_size)
 {

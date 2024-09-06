@@ -3,6 +3,8 @@ version "0.1"
 
 option "buffer-size" b "the log of the buffer size in bytes" int default="23" optional
 option "iteration-count" i "the number of iterations per test case" int default="100" optional
+option "warmup-iteration-count" I "the number of warmup iterations per test case" int default="10" optional
+option "post-warmup-sleep" - "the number of microseconds to sleep after warmup" int default="0" optional
 
 option "modes" m "a comma separated list containing the benchmarks to run" string default="all" multiple
 option "min-partition-size" p "the logs of the minimal partition sizes for each mode" int default="0" multiple

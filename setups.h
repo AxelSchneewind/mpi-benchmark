@@ -18,15 +18,27 @@
 struct setup_t {
     const char* name;
     MPI_Count buffer_size;
+
+    // warmup
     int warmup_iterations;
+    int post_warmup_sleep;
+
     int iterations;
-    int num_send_patterns;
+
+    // which transfer mechanisms to benchmark
     bool enable_mode[ModeCount];
+
+    // whether partition sizes may differ between sender and receiver
     bool different_partition_sizes[ModeCount];
+
+    // logarithms of thread counts to run
     int min_thread_count_log[ModeCount];
     int max_thread_count_log[ModeCount];
     int min_partition_size_log[ModeCount];
     int max_partition_size_log[ModeCount];                                                                                         
+
+    // list of send patterns
+    int num_send_patterns;
     SendPattern send_patterns[SendPatternCount]; 
 };
 typedef struct setup_t* setup;
