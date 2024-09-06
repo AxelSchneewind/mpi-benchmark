@@ -61,16 +61,6 @@ static int psend_send_partition_operation(TestCase *test_case, Result *result, i
     return 0;
 }
 
-static int psendlist_send_partition_operation(TestCase *test_case, Result *result, int comm_rank, int partition, int threadnum, void* s) {
-    struct psend_bench_state* state = (struct psend_bench_state*) s;
-    assert (0 == comm_rank);
-    if (0 != partition)
-        MPI_CHECK(MPI_Pready_list(test_case->partitions_per_thread, permutation_at(test_case->send_pattern, threadnum * test_case->partitions_per_thread), state->request));
-    return 0;
-}
-
-
-
 static int psend_test_send_partition_operation(TestCase *test_case, Result *result, int comm_rank, int partition, int threadnum, void* s) {
     struct psend_bench_state* state = (struct psend_bench_state*) s;
     assert (0 == comm_rank);
