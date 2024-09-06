@@ -136,3 +136,7 @@ int custom_MPI_Pready_list(int length, int array_of_partitions[], custom_MPI_Req
     return 0;
 }
 
+// 
+int custom_MPI_Request_get_status(custom_MPI_Request request, int* flag, MPI_Status *status) {
+    return MPI_Request_get_status(request->internal_req, flag, status);
+}

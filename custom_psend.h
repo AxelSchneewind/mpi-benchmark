@@ -17,3 +17,5 @@ extern int custom_MPI_Wait(custom_MPI_Request request, MPI_Status* status);
 extern int custom_MPI_Parrived(custom_MPI_Request request, int partition, int *flag);
 extern int custom_MPI_Pready(int partition, custom_MPI_Request request);
 extern int custom_MPI_Pready_list(int length, int array_of_partitions[], custom_MPI_Request request);
+
+extern int custom_MPI_Request_get_status(custom_MPI_Request request, int* flag, MPI_Status *status);
