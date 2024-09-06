@@ -2,7 +2,7 @@
 #include "send_patterns.h"
 #include "bench.h"
 #include "test_cases.h"
-#include "setups.h"
+#include "configuration.h"
 #include "output.h"
 
 #include "cmdline.h"
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    setup config = config_from_args(&args);
+    configuration config = config_from_args(&args);
     if (NULL == config) 
         return -1;
 
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
 
     //
     if (comm_rank == 0)
-        printf("[%5s] Running %i tests, with buffer size %9lli, iteration count: %i: \n", config_name(config), test_cases_get_count(tests), config->buffer_size, config->iterations);
+        printf("[%5s] Running %i tests, with buffer size %9lli, iteration count: %i: \n", config_name(config), test_cases_get_count(tests), config_buffer_size(config), config_iterations(config));
 
     // set up result file for this rank
     FILE *result_file = result_file_open(args.output_file_arg, args.output_file_given, comm_rank);

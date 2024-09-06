@@ -1,4 +1,4 @@
-#include "setups.h"
+#include "configuration.h"
 
 #include "bench.h"
 
@@ -6,12 +6,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-setup config_from_args(struct gengetopt_args_info* args) {
-    setup result = malloc(sizeof(struct setup_t));
+configuration config_from_args(struct gengetopt_args_info* args) {
+    configuration result = malloc(sizeof(struct configuration_t));
     int mode[ModeCount];
 
-    memset(result, 0, sizeof(struct setup_t));
+    memset(result, 0, sizeof(struct configuration_t));
     memset(mode, 0, sizeof(int) * ModeCount);
     memset(result->different_partition_sizes, args->different_partition_sizes_flag, sizeof(bool) * ModeCount);
 
@@ -84,12 +83,20 @@ setup config_from_args(struct gengetopt_args_info* args) {
 }
 
 
-const char* config_name(setup config) {
+const char* config_name(configuration config) {
     return config->name;
 }
 
+MPI_Count config_buffer_size(configuration config) {
+    return config->buffer_size;
+}
 
-int config_num_test_cases(setup config, Mode mode) {
+int config_iterations(configuration config) {
+    return config->iterations;
+}
+
+
+int config_num_test_cases(configuration config, Mode mode) {
 #ifdef DISABLE_PSEND
         if (is_psend(mode))
             return 0;
@@ -106,12 +113,12 @@ int config_num_test_cases(setup config, Mode mode) {
         * (config->max_thread_count_log[mode] - config->min_thread_count_log[mode] + 1);
 }
 
-int config_allow_different_partition_sizes(setup config, Mode mode) {
+int config_allow_different_partition_sizes(configuration config, Mode mode) {
     return config->different_partition_sizes[mode];
 }
 
 
-int config_min_partition_size_log_total(setup config) {
+int config_min_partition_size_log_total(configuration config) {
     int result = config->min_partition_size_log[0];
     for (int i = 0; i < ModeCount; ++i) {
         if (config->enable_mode[i] && config->min_partition_size_log[i] < result) {
@@ -121,7 +128,7 @@ int config_min_partition_size_log_total(setup config) {
     return result;
 }
 
-int config_max_partition_size_log_total(setup config) {
+int config_max_partition_size_log_total(configuration config) {
     int result = config->max_partition_size_log[0];
     for (int i = 0; i < ModeCount; ++i) {
         if (config->enable_mode[i] && config->max_partition_size_log[i] > result) {
@@ -131,25 +138,25 @@ int config_max_partition_size_log_total(setup config) {
     return result;
 }
 
-int config_min_partition_size_total(setup config) {
+int config_min_partition_size_total(configuration config) {
     return (1 << config_min_partition_size_log_total(config));
 }
 
-int config_max_partition_size_total(setup config) {
+int config_max_partition_size_total(configuration config) {
     return (1 << config_max_partition_size_log_total(config));
 }
 
-int config_max_partition_size(setup config, Mode mode) {
+int config_max_partition_size(configuration config, Mode mode) {
     return (1 << config->max_partition_size_log[mode]);
 } 
 
-int config_min_partition_size(setup config, Mode mode) {
+int config_min_partition_size(configuration config, Mode mode) {
     return (1 << config->min_partition_size_log[mode]);
 }
 
-int config_max_thread_count(setup config, Mode mode){
+int config_max_thread_count(configuration config, Mode mode){
     return (1 << config->max_thread_count_log[mode]);
 }
-int config_min_thread_count(setup config, Mode mode){
+int config_min_thread_count(configuration config, Mode mode){
     return (1 << config->min_thread_count_log[mode]);
 }

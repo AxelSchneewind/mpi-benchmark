@@ -147,9 +147,9 @@ TestCase *test_cases_get_test_case(TestCases tests, int i);
 Result *test_cases_get_result(TestCases tests, int i);
 
 // forward declaration for configuration struct
-struct setup_t;
-typedef struct setup_t* setup;
+struct configuration_t;
+typedef struct configuration_t* configuration;
 
 /// computes a list of test cases from a given configuration
-void test_cases_init(setup setup, TestCases* tests);
+void test_cases_init(configuration config, TestCases* tests);
 void test_cases_free(TestCases* tests);

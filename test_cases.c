@@ -1,6 +1,6 @@
 #include "test_cases.h"
 
-#include "setups.h"
+#include "configuration.h"
 #include "bench.h"
 
 #include "send_patterns.h"
@@ -170,20 +170,20 @@ void set_send_pattern_count(struct test_cases* tests, int num_partition_sizes, i
  * @brief creates a list of benchmarks, based on the configuration given
  *
  */
-void test_cases_init(setup configuration, TestCases* tests)
+void test_cases_init(configuration config, TestCases* tests)
 {
     struct test_cases* result = malloc(sizeof(struct test_cases));
-    result->buffer = malloc(sizeof(char) * configuration->buffer_size);
-    result->buffer_size = configuration->buffer_size;
-    result->num_send_patterns = configuration->num_send_patterns;
-    result->send_patterns = configuration->send_patterns;
+    result->buffer = malloc(sizeof(char) * config->buffer_size);
+    result->buffer_size = config->buffer_size;
+    result->num_send_patterns = config->num_send_patterns;
+    result->send_patterns = config->send_patterns;
 
     // here minimum and maximum over all partition sizes are stored 
-    result->min_partition_size = config_min_partition_size_total(configuration);
-    result->max_partition_size = config_max_partition_size_total(configuration);
+    result->min_partition_size = config_min_partition_size_total(config);
+    result->max_partition_size = config_max_partition_size_total(config);
 
-    result->min_partition_size_log = config_min_partition_size_log_total(configuration);
-    result->max_partition_size_log = config_max_partition_size_log_total(configuration);
+    result->min_partition_size_log = config_min_partition_size_log_total(config);
+    result->max_partition_size_log = config_max_partition_size_log_total(config);
 
     // check partition sizes
     if (0 > result->min_partition_size
@@ -196,21 +196,21 @@ void test_cases_init(setup configuration, TestCases* tests)
     // count number of test cases
     result->test_count = 0;
     for (Mode mode = 0; mode < ModeCount; mode++) {
-        result->test_count += config_num_test_cases(configuration, mode);
+        result->test_count += config_num_test_cases(config, mode);
     }
 
     // set up byte send patterns
-    permutation *byte_send_patterns = calloc(configuration->num_send_patterns, sizeof(permutation));
-    for (size_t i = 0; i < configuration->num_send_patterns; i++)
+    permutation *byte_send_patterns = calloc(config->num_send_patterns, sizeof(permutation));
+    for (size_t i = 0; i < config->num_send_patterns; i++)
     {
-        SendPattern pattern_id = configuration->send_patterns[i];
+        SendPattern pattern_id = config->send_patterns[i];
         if (!send_pattern_partition_dependent(pattern_id)) {
-            byte_send_patterns[i] = calloc(sizeof(int), configuration->buffer_size);
-            make_send_pattern(byte_send_patterns[i], configuration->buffer_size, configuration->send_patterns[i]);
+            byte_send_patterns[i] = calloc(sizeof(int), config->buffer_size);
+            make_send_pattern(byte_send_patterns[i], config->buffer_size, config->send_patterns[i]);
         } else {
             byte_send_patterns[i] = NULL;
         }
-        // printf("Making byte send pattern %s: %d %d %d %d %d %d...\n", send_pattern_identifiers[configuration->send_patterns[i]], byte_send_patterns[i][0], byte_send_patterns[i][1], byte_send_patterns[i][2], byte_send_patterns[i][3], byte_send_patterns[i][4], byte_send_patterns[i][5]);
+        // printf("Making byte send pattern %s: %d %d %d %d %d %d...\n", send_pattern_identifiers[config->send_patterns[i]], byte_send_patterns[i][0], byte_send_patterns[i][1], byte_send_patterns[i][2], byte_send_patterns[i][3], byte_send_patterns[i][4], byte_send_patterns[i][5]);
     }
 
     // set up partition send patterns
@@ -222,7 +222,7 @@ void test_cases_init(setup configuration, TestCases* tests)
         {
             for (int i = 0; i < result->num_send_patterns; i++)
             {
-                SendPattern pattern_id = configuration->send_patterns[i];
+                SendPattern pattern_id = config->send_patterns[i];
                 if (send_pattern_partition_dependent(pattern_id)) {
                     partition_send_pattern_create(&result->partition_send_patterns[size_index][i], pattern_id, result->buffer_size, partition_size);
                 } else {
@@ -242,25 +242,25 @@ void test_cases_init(setup configuration, TestCases* tests)
     // iterate over modes
     for (Mode mode = 0; mode < ModeCount; mode++) {
         // only use enabled modes
-        if (configuration->enable_mode[mode]) {
+        if (config->enable_mode[mode]) {
             // iterate over send side partition sizes
-            for (MPI_Count partition_size = config_max_partition_size(configuration, mode); partition_size >= config_min_partition_size(configuration, mode); partition_size /= 2) {
-                bool allow_different_partition_sizes = config_allow_different_partition_sizes(configuration, mode);
+            for (MPI_Count partition_size = config_max_partition_size(config, mode); partition_size >= config_min_partition_size(config, mode); partition_size /= 2) {
+                bool allow_different_partition_sizes = config_allow_different_partition_sizes(config, mode);
                 // iterate over receive side partition sizes
-                for (MPI_Count partition_size_recv = (allow_different_partition_sizes ? config_max_partition_size(configuration, mode) : partition_size); partition_size_recv >= (allow_different_partition_sizes ? config_min_partition_size(configuration, mode) : partition_size); partition_size_recv /= 2) {
+                for (MPI_Count partition_size_recv = (allow_different_partition_sizes ? config_max_partition_size(config, mode) : partition_size); partition_size_recv >= (allow_different_partition_sizes ? config_min_partition_size(config, mode) : partition_size); partition_size_recv /= 2) {
                     // iterate over thread count
-                    for (int t = config_min_thread_count(configuration, mode); t <= config_max_thread_count(configuration, mode); t *= 2) {
+                    for (int t = config_min_thread_count(config, mode); t <= config_max_thread_count(config, mode); t *= 2) {
                         // iterate over send patterns
-                        for (int i = 0; i < configuration->num_send_patterns; i++) {
+                        for (int i = 0; i < config->num_send_patterns; i++) {
                             if (t > result->buffer_size / partition_size)
                                 continue;
 
                             TestCase *test_case = &result->test_cases[index++];
-                            test_case->name = config_name(configuration);
+                            test_case->name = config_name(config);
                             test_case->number = index;
 
                             // assign send pattern
-                            test_case->send_pattern_num = configuration->send_patterns[i];
+                            test_case->send_pattern_num = config->send_patterns[i];
                             test_case->send_pattern = test_cases_send_pattern(result, partition_size, i);
                             test_case->recv_pattern = test_cases_send_pattern(result, partition_size_recv, i);
                             assert(NULL != test_case->send_pattern && NULL != test_case->recv_pattern);
@@ -268,9 +268,9 @@ void test_cases_init(setup configuration, TestCases* tests)
                             test_case->mode = mode;
                             test_case->method = mode_methods[test_case->mode];
 
-                            test_case->iteration_count = configuration->iterations;
-                            test_case->warmup_iterations = configuration->warmup_iterations;
-                            test_case->post_warmup_sleep = configuration->post_warmup_sleep;
+                            test_case->iteration_count = config->iterations;
+                            test_case->warmup_iterations = config->warmup_iterations;
+                            test_case->post_warmup_sleep = config->post_warmup_sleep;
 
                             test_case->buffer_size = result->buffer_size;
                             test_case->buffer = result->buffer;
@@ -300,7 +300,7 @@ void test_cases_init(setup configuration, TestCases* tests)
     for (int t = 0; t < max_num_threads; t++) { }
 
     // byte-level send patterns are not needed anymore
-    for (size_t i = 0; i < configuration->num_send_patterns; i++)
+    for (size_t i = 0; i < config->num_send_patterns; i++)
         free(byte_send_patterns[i]);
     free(byte_send_patterns);
 
