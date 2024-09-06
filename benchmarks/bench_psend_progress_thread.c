@@ -216,8 +216,6 @@ static const struct benchmarking_function psend_progress_thread = {
     .cleanup = &psend_progress_thread_cleanup
 };
 
-
-
 void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_rank)
 { 
     execute(test_case, result, comm_rank, psend_progress_thread);
