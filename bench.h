@@ -35,6 +35,7 @@ extern void bench_isend_testall(TestCase *test_case, Result *result, int comm_ra
 
 #ifndef DISABLE_PSEND
 extern void bench_psend(TestCase *test_case, Result *result, int comm_rank);
+extern void bench_psend_gpu(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_psend_list(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank);
 extern void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank);
@@ -59,11 +60,13 @@ static RunMethod const mode_methods[ModeCount] = {
 	{ &bench_win },
 #ifndef DISABLE_PSEND
 	{ &bench_psend },
+	{ &bench_psend_gpu },
 	{ &bench_psend_list },
 	{ &bench_psend_parrived },
 	{ &bench_psend_progress },
 	{ &bench_psend_progress_thread },
 #else 
+	{ &bench_send },
 	{ &bench_send },
 	{ &bench_send },
 	{ &bench_send },
@@ -85,6 +88,7 @@ static const char* const mode_names[ModeCount] = {
 	"WinSingle",
 	"Win",
 	"Psend",
+	"PsendOffloaded",
 	"PsendList",
 	"PsendParrived",
 	"PsendProgress",

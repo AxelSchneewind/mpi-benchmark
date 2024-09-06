@@ -3,6 +3,7 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
 
 
 // where each rank should write its results
@@ -44,10 +45,12 @@ FILE *result_file_open(char** filenames, int filenames_given, int comm_rank)
     const char* filename;
 
     // use default name if no argument given
-    if (filenames_given <= comm_rank || NULL == filenames[comm_rank]) {
+    if (filenames_given <= comm_rank || NULL == filenames[comm_rank] || 0 == strlen(filenames[comm_rank])) {
+	printf("Too few filenames given (%i of %i), using default\n", filenames_given, comm_rank);
         filename = result_file_name(comm_rank);
     } else {
         filename = filenames[comm_rank];
+	printf("writing to %s\n", filename);
     }
 
     // if file does not exist yet, create it and write header

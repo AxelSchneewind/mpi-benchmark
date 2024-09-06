@@ -1,11 +1,12 @@
 #include "benchmarks/bench_template.h"
 #include "benchmarks/bench_psend.h"
 
+
 #include <stdio.h>
 #include <assert.h>
 
 
-static const struct benchmarking_function psend_parrived = {
+static const struct benchmarking_function psend_gpu_parrived = {
     .state_size = sizeof(struct psend_bench_state),
     .init = &psend_init,
     .start = &psend_start,
@@ -15,7 +16,7 @@ static const struct benchmarking_function psend_parrived = {
     .cleanup = &psend_cleanup
 };
 
-static const struct benchmarking_function psend_test = {
+static const struct benchmarking_function psend_gpu_test = {
     .state_size = sizeof(struct psend_bench_state),
     .init = &psend_init,
     .start = &psend_start,
@@ -25,7 +26,7 @@ static const struct benchmarking_function psend_test = {
     .cleanup = &psend_cleanup
 };
 
-static const struct benchmarking_function psend = {
+static const struct benchmarking_function psend_gpu = {
     .state_size = sizeof(struct psend_bench_state),
     .init = &psend_init,
     .start = &psend_start,
@@ -36,18 +37,20 @@ static const struct benchmarking_function psend = {
 };
 
 
-void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank)
+
+void bench_psend_gpu_progress(TestCase *test_case, Result *result, int comm_rank)
 { 
-    execute(test_case, result, comm_rank, psend_test);
+    execute_gpu(test_case, result, comm_rank, psend_gpu_test);
 }
 
-void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
+void bench_psend_gpu_parrived(TestCase *test_case, Result *result, int comm_rank)
 { 
-    execute(test_case, result, comm_rank, psend_parrived);
+    execute_gpu(test_case, result, comm_rank, psend_gpu_parrived);
 }
 
-void bench_psend(TestCase *test_case, Result *result, int comm_rank)
+void bench_psend_gpu(TestCase *test_case, Result *result, int comm_rank)
 { 
-    execute(test_case, result, comm_rank, psend);
+    execute_gpu(test_case, result, comm_rank, psend_gpu);
 }
+
 

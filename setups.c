@@ -20,6 +20,7 @@ setup config_from_args(struct gengetopt_args_info* args) {
 
     result->name = (args->bench_name_arg && strlen(args->bench_name_arg)) ? args->bench_name_arg : "bench";
     result->iterations = args->iteration_count_arg;
+    result->warmup_iterations = args->warmup_iteration_count_arg;
     result->buffer_size = (1 << args->buffer_size_arg);
     result->num_send_patterns = (0 >= num_send_patterns) ? 1 : num_send_patterns;
 
