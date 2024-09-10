@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <mpi.h>
 
 struct psend_bench_state {
     MPI_Request request;
