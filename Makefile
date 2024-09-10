@@ -11,11 +11,7 @@ all: bench
 
 # remove build files
 clean: 
-	rm -rf build
-
-# command line argument parsing
-cmdline.c: cmdline.ggo
-	gengetopt -i cmdline.ggo
+	rm -rf build/*
 
 MPI_CC_FLAGS=-I. -lm -lpthread -Wpedantic -fopenmp
 
@@ -31,6 +27,12 @@ BENCHMARKS_OBJ=$(patsubst %.c,build/%.o, $(BENCHMARKS_SRC))
 build/%.o: %.c 
 	mkdir -p $(@D) &&\
 	$(MPI_CC) $(filter %.c %.o,$^) -c -I. -fopenmp -O2 -o $@ 
+
+
+# command line argument parsing
+cmdline.c: cmdline.ggo
+	gengetopt -i cmdline.ggo
+
 
 # executables are compiled here 
 bench_dbg: $(MAIN_SRC) $(BENCHMARKS_OBJ) $(FRAMEWORK_OBJ)
