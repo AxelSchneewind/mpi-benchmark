@@ -28,7 +28,8 @@ struct benchmarking_function {
 
 
 //
-static void execute(TestCase* testcase, Result* result, int rank, const struct benchmarking_function functions) {
+__attribute__((always_inline)) __attribute__((flatten)) inline static 
+void execute(TestCase* testcase, Result* result, int rank, const struct benchmarking_function functions) {
     char state_buf[functions.state_size];     /* allocate state on the stack*/
     void* state = (void*) state_buf;
 
@@ -150,7 +151,8 @@ static void execute(TestCase* testcase, Result* result, int rank, const struct b
 
 
 // TODO: actually use offloading
-static void execute_gpu(TestCase* testcase, Result* result, int rank, const struct benchmarking_function functions) {
+__attribute__((always_inline)) __attribute__((flatten)) inline static 
+void execute_gpu(TestCase* testcase, Result* result, int rank, const struct benchmarking_function functions) {
     char state_buf[functions.state_size];     /* allocate state on the stack*/
     void* state = (void*) state_buf;
 
