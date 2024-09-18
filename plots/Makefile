@@ -1,5 +1,5 @@
-MERGE_FILES=../merge_results.py
-PLOT=../overview.py
+MERGE_FILES=../plotting/merge_results.py
+PLOT=../plotting/overview.py
 
 RESULTS_DIR=../results
 
