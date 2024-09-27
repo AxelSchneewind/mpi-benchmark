@@ -48,7 +48,7 @@ const char *gengetopt_args_info_help[] = {
   "  -T, --max-thread-count=INT    log2 of the maximal thread counts for each mode\n                                  (default=`0')",
   "  -s, --send-patterns=ENUM      send patterns to use for all test cases\n                                  (possible values=\"Linear\",\n                                  \"LinearInverse\", \"Stride2\",\n                                  \"Stride128\", \"Stride1K\", \"Stride16K\",\n                                  \"Random\", \"RandomBurst128\",\n                                  \"RandomBurst1K\", \"RandomBurst16K\",\n                                  \"GridBoundary\" default=`Linear')",
   "  -n, --bench-name=STRING       name of this benchmark  (default=`')",
-  "  -o, --output-file[=FILE]      list of files (corresponding to the respective\n                                  rank) that the results will be written to\n                                  (csv format)",
+  "  -o, --output-file=FILE        list of files (corresponding to the respective\n                                  rank) that the results will be written to\n                                  (csv format)",
     0
 };
 
@@ -160,8 +160,8 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->send_patterns_max = 0;
   args_info->bench_name_help = gengetopt_args_info_help[13] ;
   args_info->output_file_help = gengetopt_args_info_help[14] ;
-  args_info->output_file_min = 0;
-  args_info->output_file_max = 0;
+  args_info->output_file_min = 2;
+  args_info->output_file_max = 2;
   
 }
 
@@ -733,12 +733,6 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
   if (check_multiple_option_occurrences(prog_name, args_info->send_patterns_given, args_info->send_patterns_min, args_info->send_patterns_max, "'--send-patterns' ('-s')"))
      error_occurred = 1;
   
-  if (! args_info->output_file_given)
-    {
-      fprintf (stderr, "%s: '--output-file' ('-o') option required%s\n", prog_name, (additional_error ? additional_error : ""));
-      error_occurred = 1;
-    }
-  
   if (check_multiple_option_occurrences(prog_name, args_info->output_file_given, args_info->output_file_min, args_info->output_file_max, "'--output-file' ('-o')"))
      error_occurred = 1;
   
@@ -1079,11 +1073,11 @@ cmdline_parser_internal (
         { "max-thread-count",	1, NULL, 'T' },
         { "send-patterns",	1, NULL, 's' },
         { "bench-name",	1, NULL, 'n' },
-        { "output-file",	2, NULL, 'o' },
+        { "output-file",	1, NULL, 'o' },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVb:i:I:m:p:P:ct:T:s:n:o::", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVb:i:I:m:p:P:ct:T:s:n:o:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
