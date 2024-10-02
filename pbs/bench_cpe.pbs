@@ -8,12 +8,10 @@ BENCH_MODES=Send,SendPersistent,Isend
 
 cd $PBS_O_WORKDIR
 
-IMPL=cpe/23.12
-module load gcc/10.2.0 cpe/23.12
-
+source pbs/run-configs/cpe.sh
 source pbs/bench.sh
+
 setup "$IMPL" 
-BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_cpe.log
-mpirun -np 2 $BIN_DIRECTORY/bench_cpe $(make_bench_args) > results.log 2>&1
+$MPI_RUN $MPI_ARGS $EXECUTABLE $(make_bench_args) > results.log 2>&1

@@ -6,19 +6,15 @@
 
 cd $PBS_O_WORKDIR
 
-IMPL=openmpi/5.0.3/trace-default
-module load hlrs-software-stack/current gcc/13.1.0
-module load openmpi/5.0.3
-
+source ./pbs/run-configs/trace_ompi.sh
 source ~/tracing-env.sh
-source ./pbs/bench.sh
 source ./pbs/scorep-config.sh
+source ./pbs/bench.sh
 
 setup "$IMPL"
-BIN_DIRECTORY=$(bin_directory) 
 
 which mpirun > version_openmpi.log
 mpirun --version >> version_openmpi.log
 
-scalasca -analyze -t mpirun -np 2 -N 1 $BIN_DIRECTORY/trace_openmpi_503 $(make_trace_args) > results.log 2>&1
+scalasca -analyze -t $MPI_RUN $MPI_ARGS $EXECUTABLE $(make_trace_args) > results.log 2>&1
 # mpirun --mca mpi_show_mca_params all --mca mpi_show_mca_param_file mca_params.txt -np 2 -N 1 $BIN_DIRECTORY/bench_openmpi_503 $(make_bench_args) > results.log 2>&1

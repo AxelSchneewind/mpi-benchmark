@@ -58,6 +58,4 @@ setup() {
 	cat $PBS_NODE_FILE > node-file.txt
 }
 
-bin_directory() {
-	echo "$PBS_O_WORKDIR/bin/"
-}
+

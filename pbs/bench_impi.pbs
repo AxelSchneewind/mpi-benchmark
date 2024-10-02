@@ -8,15 +8,11 @@ BENCH_MODES=Send,SendPersistent,Isend
 
 cd $PBS_O_WORKDIR
 
-IMPL=impi/19.1.0
-
-module load hlrs-software-stack/current gcc/13.1.0
-module load impi/19.1.0
-
+source pbs/run-configs/impi.sh
 source pbs/bench.sh
+
 setup "$IMPL"
-BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_impi.log
-mpirun -np 2 $BIN_DIRECTORY/bench_impi $(make_bench_args) > results.log 2>&1
+$MPI_RUN $MPI_ARGS $EXECUTABLE $(make_bench_args) > results.log 2>&1
 

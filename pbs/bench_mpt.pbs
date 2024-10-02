@@ -8,13 +8,10 @@ BENCH_MODES=Send,SendPersistent,Isend
 
 cd $PBS_O_WORKDIR
 
-IMPL=mpt/2.28
-
-module load hlrs-software-stack/current gcc/10.2.0 mpt/2.28
-
+source pbs/run-configs/mpt.sh
 source pbs/bench.sh
+
 setup "$IMPL"
-BIN_DIRECTORY=$(bin_directory) 
 
 mpirun --version > version_mpt.log
-mpirun -np 2 -N 1 $BIN_DIRECTORY/bench_mpt $(make_bench_args) > results.log 2>&1
+$MPI_RUN $MPI_ARGS $EXECUTABLE $(make_bench_args) > results.log 2>&1
