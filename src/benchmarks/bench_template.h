@@ -255,8 +255,9 @@ void execute_gpu(TestCase* testcase, Result* result, int rank, const struct benc
 
         timers_stop(timers, IterationStartToWait);
 
-        if (NULL != functions.complete)
+        if (NULL != functions.complete) {
             functions.complete(testcase, result, rank, state);
+        }
 
         timers_stop(timers, Iteration);
     }

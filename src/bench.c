@@ -1,5 +1,4 @@
 
-#include "send_patterns.h"
 #include "bench.h"
 #include "test_cases.h"
 #include "configuration.h"
@@ -148,12 +147,12 @@ int main(int argc, char **argv)
     result_file_close(result_file);
     test_cases_free(&tests);
 
-    MPI_Finalize();
-
     if (comm_rank == 1)
     {
         printf("done, %s\n", success ? "all tests sucessful" : "some tests failed");
     }
+
+    MPI_Finalize();
 
     return 0;
 }
