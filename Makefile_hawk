@@ -2,26 +2,31 @@
 MPI_RUN=mpirun
 MPI_CC=mpicc
 
+# custom openmpi build
+MPI_RUN_CUSTOM=/zhome/academic/HLRS/hlrs/hpcschne/ompi/build/bin/mpirun
+MPI_CC_CUSTOM=/zhome/academic/HLRS/hlrs/hpcschne/ompi/build/bin/mpicc
 
 
 SRC_CUSTOM_PSEND=message-aggregation/custom_psend_aggregate_simple.c
 # message-aggregation/intervals.c message-aggregation/custom_psend.c
-SRC_NOPSEND=$(filter-out $(wildcard benchmarks/bench_psen*.c), $(SRC)) benchmarks/bench_psend_custom.c
-SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c custom_psend_dummy.c win.c partitioned_get_status.c, $(wildcard *.c)) $(SRC_CUSTOM_PSEND)
+SRC=$(wildcard src/*.c) $(wildcard src/benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c custom_psend_dummy.c win.c partitioned_get_status.c, $(wildcard *.c)) $(SRC_CUSTOM_PSEND)
+SRC_NOPSEND=$(filter-out $(wildcard src/benchmarks/bench_psen*.c), $(SRC)) benchmarks/bench_psend_custom.c
 
 CFLAGS=-fopenmp -lm -lpthread -I. -Wall -O1 -DNDEBUG
 
 .phony: all bench run
 all: bench
 
-bench_dbg: $(SRC) bench.h test_cases.h
-	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I. -lm
+bench_dbg: $(SRC) 
+	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -Isrc -lm
 
 .phony: bin/bench_openmpi bin/bench_mpich bin/bench_impi bin/bench_cpe bin/bench_mpt
 bin/bench_openmpi: $(SRC) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.0 && $(MPI_CC) $(SRC) -o bin/bench_openmpi $(CFLAGS))
 bin/bench_openmpi_503: $(SRC) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.3 && $(MPI_CC) $(SRC) -o bin/bench_openmpi_503 $(CFLAGS))
+bin/bench_openmpi_custom: $(SRC) bench.h test_cases.h
+	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.3 && $(MPI_CC_CUSTOM) $(SRC) -o bin/bench_openmpi_custom $(CFLAGS))
 bin/trace_openmpi_503: $(SRC) bench.h test_cases.h
 	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.3 && source ~/tracing-env.sh && scorep-mpicc $(SRC) -o bin/trace_openmpi_503 $(CFLAGS))
 bin/bench_mpich: $(SRC) bench.h test_cases.h
