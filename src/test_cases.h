@@ -98,6 +98,8 @@ struct TestCase
 
     // time to sleep after warmup (in microseconds), to help find benchmark runs in traces
     int post_warmup_sleep;
+    // time to sleep before calling completion function, can be used to find performance loss when transfers start late
+    int pre_complete_sleep;
 
     int thread_count;
 

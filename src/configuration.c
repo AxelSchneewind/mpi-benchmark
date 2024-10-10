@@ -22,6 +22,7 @@ configuration config_from_args(struct gengetopt_args_info* args) {
 
     result->warmup_iterations = args->warmup_iteration_count_arg;
     result->post_warmup_sleep = args->post_warmup_sleep_arg;
+    result->pre_complete_sleep = args->pre_complete_sleep_arg;
 
     result->buffer_size = (1 << args->buffer_size_arg);
     result->num_send_patterns = (0 >= num_send_patterns) ? 1 : num_send_patterns;

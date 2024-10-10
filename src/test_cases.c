@@ -271,6 +271,7 @@ void test_cases_init(configuration config, TestCases* tests)
                             test_case->iteration_count = config->iterations;
                             test_case->warmup_iterations = config->warmup_iterations;
                             test_case->post_warmup_sleep = config->post_warmup_sleep;
+                            test_case->pre_complete_sleep = config->pre_complete_sleep;
 
                             test_case->buffer_size = result->buffer_size;
                             test_case->buffer = result->buffer;

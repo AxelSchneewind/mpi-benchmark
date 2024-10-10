@@ -40,6 +40,7 @@ const char *gengetopt_args_info_help[] = {
   "  -i, --iteration-count=INT     the number of iterations per test case\n                                  (default=`100')",
   "  -I, --warmup-iteration-count=INT\n                                the number of warmup iterations per test case\n                                  (default=`10')",
   "      --post-warmup-sleep=INT   the number of microseconds to sleep after\n                                  warmup  (default=`0')",
+  "      --pre-complete-sleep=INT  the number of microseconds to sleep before\n                                  calling MPI_Wait  (default=`0')",
   "  -m, --modes=STRING            a comma separated list containing the\n                                  benchmarks to run  (default=`all')",
   "  -p, --min-partition-size=INT  the logs of the minimal partition sizes for\n                                  each mode  (default=`0')",
   "  -P, --max-partition-size=INT  the logs of the maximal partition sizes for\n                                  each mode  (default=`0')",
@@ -85,6 +86,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->iteration_count_given = 0 ;
   args_info->warmup_iteration_count_given = 0 ;
   args_info->post_warmup_sleep_given = 0 ;
+  args_info->pre_complete_sleep_given = 0 ;
   args_info->modes_given = 0 ;
   args_info->min_partition_size_given = 0 ;
   args_info->max_partition_size_given = 0 ;
@@ -108,6 +110,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->warmup_iteration_count_orig = NULL;
   args_info->post_warmup_sleep_arg = 0;
   args_info->post_warmup_sleep_orig = NULL;
+  args_info->pre_complete_sleep_arg = 0;
+  args_info->pre_complete_sleep_orig = NULL;
   args_info->modes_arg = NULL;
   args_info->modes_orig = NULL;
   args_info->min_partition_size_arg = NULL;
@@ -139,27 +143,28 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->iteration_count_help = gengetopt_args_info_help[3] ;
   args_info->warmup_iteration_count_help = gengetopt_args_info_help[4] ;
   args_info->post_warmup_sleep_help = gengetopt_args_info_help[5] ;
-  args_info->modes_help = gengetopt_args_info_help[6] ;
+  args_info->pre_complete_sleep_help = gengetopt_args_info_help[6] ;
+  args_info->modes_help = gengetopt_args_info_help[7] ;
   args_info->modes_min = 0;
   args_info->modes_max = 0;
-  args_info->min_partition_size_help = gengetopt_args_info_help[7] ;
+  args_info->min_partition_size_help = gengetopt_args_info_help[8] ;
   args_info->min_partition_size_min = 0;
   args_info->min_partition_size_max = 0;
-  args_info->max_partition_size_help = gengetopt_args_info_help[8] ;
+  args_info->max_partition_size_help = gengetopt_args_info_help[9] ;
   args_info->max_partition_size_min = 0;
   args_info->max_partition_size_max = 0;
-  args_info->different_partition_sizes_help = gengetopt_args_info_help[9] ;
-  args_info->min_thread_count_help = gengetopt_args_info_help[10] ;
+  args_info->different_partition_sizes_help = gengetopt_args_info_help[10] ;
+  args_info->min_thread_count_help = gengetopt_args_info_help[11] ;
   args_info->min_thread_count_min = 0;
   args_info->min_thread_count_max = 0;
-  args_info->max_thread_count_help = gengetopt_args_info_help[11] ;
+  args_info->max_thread_count_help = gengetopt_args_info_help[12] ;
   args_info->max_thread_count_min = 0;
   args_info->max_thread_count_max = 0;
-  args_info->send_patterns_help = gengetopt_args_info_help[12] ;
+  args_info->send_patterns_help = gengetopt_args_info_help[13] ;
   args_info->send_patterns_min = 0;
   args_info->send_patterns_max = 0;
-  args_info->bench_name_help = gengetopt_args_info_help[13] ;
-  args_info->output_file_help = gengetopt_args_info_help[14] ;
+  args_info->bench_name_help = gengetopt_args_info_help[14] ;
+  args_info->output_file_help = gengetopt_args_info_help[15] ;
   args_info->output_file_min = 2;
   args_info->output_file_max = 2;
   
@@ -318,6 +323,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->iteration_count_orig));
   free_string_field (&(args_info->warmup_iteration_count_orig));
   free_string_field (&(args_info->post_warmup_sleep_orig));
+  free_string_field (&(args_info->pre_complete_sleep_orig));
   free_multiple_string_field (args_info->modes_given, &(args_info->modes_arg), &(args_info->modes_orig));
   free_multiple_field (args_info->min_partition_size_given, (void *)(args_info->min_partition_size_arg), &(args_info->min_partition_size_orig));
   args_info->min_partition_size_arg = 0;
@@ -423,6 +429,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "warmup-iteration-count", args_info->warmup_iteration_count_orig, 0);
   if (args_info->post_warmup_sleep_given)
     write_into_file(outfile, "post-warmup-sleep", args_info->post_warmup_sleep_orig, 0);
+  if (args_info->pre_complete_sleep_given)
+    write_into_file(outfile, "pre-complete-sleep", args_info->pre_complete_sleep_orig, 0);
   write_multiple_into_file(outfile, args_info->modes_given, "modes", args_info->modes_orig, 0);
   write_multiple_into_file(outfile, args_info->min_partition_size_given, "min-partition-size", args_info->min_partition_size_orig, 0);
   write_multiple_into_file(outfile, args_info->max_partition_size_given, "max-partition-size", args_info->max_partition_size_orig, 0);
@@ -1065,6 +1073,7 @@ cmdline_parser_internal (
         { "iteration-count",	1, NULL, 'i' },
         { "warmup-iteration-count",	1, NULL, 'I' },
         { "post-warmup-sleep",	1, NULL, 0 },
+        { "pre-complete-sleep",	1, NULL, 0 },
         { "modes",	1, NULL, 'm' },
         { "min-partition-size",	1, NULL, 'p' },
         { "max-partition-size",	1, NULL, 'P' },
@@ -1226,6 +1235,20 @@ cmdline_parser_internal (
                 &(local_args_info.post_warmup_sleep_given), optarg, 0, "0", ARG_INT,
                 check_ambiguity, override, 0, 0,
                 "post-warmup-sleep", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* the number of microseconds to sleep before calling MPI_Wait.  */
+          else if (strcmp (long_options[option_index].name, "pre-complete-sleep") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->pre_complete_sleep_arg), 
+                 &(args_info->pre_complete_sleep_orig), &(args_info->pre_complete_sleep_given),
+                &(local_args_info.pre_complete_sleep_given), optarg, 0, "0", ARG_INT,
+                check_ambiguity, override, 0, 0,
+                "pre-complete-sleep", '-',
                 additional_error))
               goto failure;
           

@@ -133,6 +133,10 @@ void execute(TestCase* testcase, Result* result, int rank, const struct benchmar
 
         timers_stop(timers, IterationStartToWait);
 
+        if (testcase->pre_complete_sleep) {
+            usleep(testcase->pre_complete_sleep);
+        }
+
         if (NULL != functions.complete)
             functions.complete(testcase, result, rank, state);
 
@@ -254,6 +258,10 @@ void execute_gpu(TestCase* testcase, Result* result, int rank, const struct benc
         }
 
         timers_stop(timers, IterationStartToWait);
+
+        if (testcase->pre_complete_sleep) {
+            usleep(testcase->pre_complete_sleep);
+        }
 
         if (NULL != functions.complete) {
             functions.complete(testcase, result, rank, state);

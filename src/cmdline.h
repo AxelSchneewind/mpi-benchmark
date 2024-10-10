@@ -53,6 +53,9 @@ struct gengetopt_args_info
   int post_warmup_sleep_arg;	/**< @brief the number of microseconds to sleep after warmup (default='0').  */
   char * post_warmup_sleep_orig;	/**< @brief the number of microseconds to sleep after warmup original value given at command line.  */
   const char *post_warmup_sleep_help; /**< @brief the number of microseconds to sleep after warmup help description.  */
+  int pre_complete_sleep_arg;	/**< @brief the number of microseconds to sleep before calling MPI_Wait (default='0').  */
+  char * pre_complete_sleep_orig;	/**< @brief the number of microseconds to sleep before calling MPI_Wait original value given at command line.  */
+  const char *pre_complete_sleep_help; /**< @brief the number of microseconds to sleep before calling MPI_Wait help description.  */
   char ** modes_arg;	/**< @brief a comma separated list containing the benchmarks to run (default='all').  */
   char ** modes_orig;	/**< @brief a comma separated list containing the benchmarks to run original value given at command line.  */
   unsigned int modes_min; /**< @brief a comma separated list containing the benchmarks to run's minimum occurreces */
@@ -100,6 +103,7 @@ struct gengetopt_args_info
   unsigned int iteration_count_given ;	/**< @brief Whether iteration-count was given.  */
   unsigned int warmup_iteration_count_given ;	/**< @brief Whether warmup-iteration-count was given.  */
   unsigned int post_warmup_sleep_given ;	/**< @brief Whether post-warmup-sleep was given.  */
+  unsigned int pre_complete_sleep_given ;	/**< @brief Whether pre-complete-sleep was given.  */
   unsigned int modes_given ;	/**< @brief Whether modes was given.  */
   unsigned int min_partition_size_given ;	/**< @brief Whether min-partition-size was given.  */
   unsigned int max_partition_size_given ;	/**< @brief Whether max-partition-size was given.  */

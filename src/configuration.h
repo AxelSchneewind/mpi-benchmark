@@ -22,6 +22,8 @@ struct configuration_t {
     int warmup_iterations;
     int post_warmup_sleep;
 
+    int pre_complete_sleep;
+
     int iterations;
 
     // which transfer mechanisms to benchmark
