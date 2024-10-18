@@ -27,6 +27,8 @@ int is_psend(Mode mode)
 struct test_cases {
     char *buffer;
     MPI_Count buffer_size;
+    char *internal_buffer;
+    MPI_Count internal_buffer_size;
 
     // 
     const SendPattern *send_patterns;
@@ -172,9 +174,15 @@ void set_send_pattern_count(struct test_cases* tests, int num_partition_sizes, i
  */
 void test_cases_init(configuration config, TestCases* tests)
 {
+    int canary_count = 16;
+
     struct test_cases* result = malloc(sizeof(struct test_cases));
-    result->buffer = malloc(sizeof(char) * config->buffer_size);
+
     result->buffer_size = config->buffer_size;
+    result->internal_buffer_size = result->buffer_size + 2 * canary_count;
+    result->internal_buffer = calloc(result->internal_buffer_size, sizeof(char));
+    result->buffer = result->internal_buffer + canary_count;
+
     result->num_send_patterns = config->num_send_patterns;
     result->send_patterns = config->send_patterns;
 
@@ -210,7 +218,6 @@ void test_cases_init(configuration config, TestCases* tests)
         } else {
             byte_send_patterns[i] = NULL;
         }
-        // printf("Making byte send pattern %s: %d %d %d %d %d %d...\n", send_pattern_identifiers[config->send_patterns[i]], byte_send_patterns[i][0], byte_send_patterns[i][1], byte_send_patterns[i][2], byte_send_patterns[i][3], byte_send_patterns[i][4], byte_send_patterns[i][5]);
     }
 
     // set up partition send patterns
@@ -276,6 +283,10 @@ void test_cases_init(configuration config, TestCases* tests)
                             test_case->buffer_size = result->buffer_size;
                             test_case->buffer = result->buffer;
 
+                            test_case->internal_buffer_size = result->internal_buffer_size;
+                            test_case->internal_buffer = result->internal_buffer;
+                            test_case->canary_count = canary_count;
+
                             test_case->partition_size = partition_size;
                             test_case->partition_size_recv = partition_size_recv;
                             test_case->partition_count = result->buffer_size / test_case->partition_size;
@@ -322,7 +333,7 @@ void _test_cases_free(struct test_cases* tests)
     free(tests->partition_send_patterns);
     tests->partition_send_patterns = NULL;
 
-    free(tests->buffer);
+    free(tests->internal_buffer);
     free(tests->test_cases);
     free(tests->results);
 }

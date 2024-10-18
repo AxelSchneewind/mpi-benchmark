@@ -27,30 +27,29 @@ void init_buffer(char* buffer, int size) {
     }
 }
 
-bool check_buffer(char* buffer, int size) {
-    srand(234);
-    for (size_t i = 0; i < size; i++) {
-        if (buffer[i] != ((char)rand())) {
-            return false;
-        }
+void init_canaries(char* buffer, int size) {
+    srand(1237);
+    for (size_t i = 0; i < size; i++)
+    {
+        buffer[i] = (char)(rand());
     }
-    return true;
 }
-
 
 Result bench(TestCase *test_case, int comm_rank, int comm_size)
 {
     static char* buffer_contents = NULL;
     if (NULL == buffer_contents)  {
-        buffer_contents = malloc(test_case->buffer_size);
-        init_buffer(buffer_contents, test_case->buffer_size);
+        buffer_contents = malloc(test_case->internal_buffer_size);
+        init_canaries(buffer_contents, test_case->canary_count);
+        init_canaries(buffer_contents + test_case->internal_buffer_size - test_case->canary_count, test_case->canary_count);
+        init_buffer(buffer_contents + test_case->canary_count, test_case->buffer_size);
     }
 
-    // init send buffer randomly and recv buffer with 0s
-    if (comm_rank == 0) {
-        memcpy(test_case->buffer, buffer_contents, test_case->buffer_size);
-    } else {
-        memset(test_case->buffer, 0, test_case->buffer_size * sizeof(char));
+    if (comm_rank == 0) {       // use buffer_contents for send side buffer
+        memcpy(test_case->internal_buffer, buffer_contents, test_case->internal_buffer_size);
+    } else {                    // use 0s for receive side buffer, but keep canary bytes
+        memcpy(test_case->internal_buffer, buffer_contents, test_case->internal_buffer_size);
+        memset(test_case->buffer,                        0, test_case->buffer_size);
     }
 
     // call run method for this test case
@@ -62,7 +61,7 @@ Result bench(TestCase *test_case, int comm_rank, int comm_size)
     result.bandwidth = ((double)test_case->buffer_size * test_case->iteration_count) / result.timings[Total];
 
     // check that data was transmitted correctly
-    result.success = !memcmp(test_case->buffer, buffer_contents, test_case->buffer_size);
+    result.success = !memcmp(test_case->internal_buffer, buffer_contents, test_case->internal_buffer_size);
 
     return result;
 }
@@ -134,7 +133,7 @@ int main(int argc, char **argv)
             usleep(10000); // sleep 10 ms
 
             if (comm_rank == 1) {
-                printf("            %s, bandwidth: %6.1lfGiB/s, avg time: %6.1lfms, std-deviation = %6.1lfms\n", result->success ? "success" : "failure", result->bandwidth/1024/1024/1024, result->timings[Iteration] * 1000, result->timings_std_dev[Iteration] * 1000);
+                printf("            %s, bandwidth: %6.1lfGiB/s, avg time: %6.1lfms (%6.1lfms in MPI_Wait), std-deviation = %6.1lfms\n", result->success ? "success" : "failure", result->bandwidth/1024/1024/1024, result->timings[Iteration] * 1000, result->timings[IterationWait] * 1000, result->timings_std_dev[Iteration] * 1000);
                 fflush(stdout);
             }
         }

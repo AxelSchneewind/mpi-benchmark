@@ -87,6 +87,9 @@ struct TestCase
     // data buffer
     char* buffer;
     MPI_Count buffer_size;
+    char* internal_buffer;  // internal buffer to allow for canary bytes left and right of buffer
+    MPI_Count internal_buffer_size;
+    MPI_Count canary_count;
 
     enum SendPattern send_pattern_num;
     permutation send_pattern;
