@@ -25,7 +25,7 @@
 
 #include "cmdline.h"
 
-const char *gengetopt_args_info_purpose = "";
+const char *gengetopt_args_info_purpose = "measures effective bandwidth for point-to-point transfers using different MPI\ntransfer methods";
 
 const char *gengetopt_args_info_usage = "Usage: mpi benchmark [OPTION]...";
 
@@ -41,6 +41,8 @@ const char *gengetopt_args_info_help[] = {
   "  -I, --warmup-iteration-count=INT\n                                the number of warmup iterations per test case\n                                  (default=`10')",
   "      --post-warmup-sleep=INT   the number of microseconds to sleep after\n                                  warmup  (default=`0')",
   "      --pre-complete-sleep=INT  the number of microseconds to sleep before\n                                  calling MPI_Wait  (default=`0')",
+  "\nparameters:",
+  "  benchmarks will be run for the cartesian product of mode, partition sizes,\n  (receive side partition sizes), thread counts, send-patterns",
   "  -m, --modes=STRING            a comma separated list containing the\n                                  benchmarks to run  (default=`all')",
   "  -p, --min-partition-size=INT  the logs of the minimal partition sizes for\n                                  each mode  (default=`0')",
   "  -P, --max-partition-size=INT  the logs of the maximal partition sizes for\n                                  each mode  (default=`0')",
@@ -48,6 +50,7 @@ const char *gengetopt_args_info_help[] = {
   "  -t, --min-thread-count=INT    log2 of the minimal thread counts for each mode\n                                  (default=`0')",
   "  -T, --max-thread-count=INT    log2 of the maximal thread counts for each mode\n                                  (default=`0')",
   "  -s, --send-patterns=ENUM      send patterns to use for all test cases\n                                  (possible values=\"Linear\",\n                                  \"LinearInverse\", \"Stride2\",\n                                  \"Stride128\", \"Stride1K\", \"Stride16K\",\n                                  \"Random\", \"RandomBurst128\",\n                                  \"RandomBurst1K\", \"RandomBurst16K\",\n                                  \"GridBoundary\" default=`Linear')",
+  "\noutput:",
   "  -n, --bench-name=STRING       name of this benchmark  (default=`')",
   "  -o, --output-file=FILE        list of files (corresponding to the respective\n                                  rank) that the results will be written to\n                                  (csv format)",
     0
@@ -144,27 +147,27 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->warmup_iteration_count_help = gengetopt_args_info_help[4] ;
   args_info->post_warmup_sleep_help = gengetopt_args_info_help[5] ;
   args_info->pre_complete_sleep_help = gengetopt_args_info_help[6] ;
-  args_info->modes_help = gengetopt_args_info_help[7] ;
+  args_info->modes_help = gengetopt_args_info_help[9] ;
   args_info->modes_min = 0;
   args_info->modes_max = 0;
-  args_info->min_partition_size_help = gengetopt_args_info_help[8] ;
+  args_info->min_partition_size_help = gengetopt_args_info_help[10] ;
   args_info->min_partition_size_min = 0;
   args_info->min_partition_size_max = 0;
-  args_info->max_partition_size_help = gengetopt_args_info_help[9] ;
+  args_info->max_partition_size_help = gengetopt_args_info_help[11] ;
   args_info->max_partition_size_min = 0;
   args_info->max_partition_size_max = 0;
-  args_info->different_partition_sizes_help = gengetopt_args_info_help[10] ;
-  args_info->min_thread_count_help = gengetopt_args_info_help[11] ;
+  args_info->different_partition_sizes_help = gengetopt_args_info_help[12] ;
+  args_info->min_thread_count_help = gengetopt_args_info_help[13] ;
   args_info->min_thread_count_min = 0;
   args_info->min_thread_count_max = 0;
-  args_info->max_thread_count_help = gengetopt_args_info_help[12] ;
+  args_info->max_thread_count_help = gengetopt_args_info_help[14] ;
   args_info->max_thread_count_min = 0;
   args_info->max_thread_count_max = 0;
-  args_info->send_patterns_help = gengetopt_args_info_help[13] ;
+  args_info->send_patterns_help = gengetopt_args_info_help[15] ;
   args_info->send_patterns_min = 0;
   args_info->send_patterns_max = 0;
-  args_info->bench_name_help = gengetopt_args_info_help[14] ;
-  args_info->output_file_help = gengetopt_args_info_help[15] ;
+  args_info->bench_name_help = gengetopt_args_info_help[17] ;
+  args_info->output_file_help = gengetopt_args_info_help[18] ;
   args_info->output_file_min = 2;
   args_info->output_file_max = 2;
   
