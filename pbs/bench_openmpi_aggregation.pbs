@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#PBS -N openmpi_503
+#PBS -l select=2:node_type=rome:mpiprocs=2
+#PBS -l walltime=4:00:00
+
+cd $PBS_O_WORKDIR
+
+source ./pbs/run-configs/ompi_custom.sh
+source ./pbs/bench.sh
+
+setup "$IMPL/aggregation"
+
+which mpirun > version_openmpi.log
+mpirun --version >> version_openmpi.log
+
+# default psend implementation
+$MPI_RUN --mca part persist $MPI_ARGS $EXECUTABLE $(make_bench_partitionings_args part) >> results.log 2>&1
+
+# aggregated psend implementation
+MPI_AGGREGATION_ARGS=--mca part persist_aggregated --mca part_persist_aggregated_min_message_size 4096 --mca part_persist_aggregated_max_message_count 2048
+$MPI_RUN $MPI_AGGREGATION_ARGS $MPI_ARGS $EXECUTABLE $(make_bench_partitionings_args part_aggregated) >> results.log 2>&1

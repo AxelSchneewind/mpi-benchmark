@@ -2,7 +2,7 @@
 source ./pbs/run-configs.sh
 
 MPI_RUN=mpirun
-MPI_ARGS=-np 2 -N 1 --mca btl ^uct --mca part persist_aggregated
+MPI_ARGS=-np 2 -N 1 --mca btl ^uct
 EXECUTABLE=$(bin_directory)/bench_openmpi_503
 
 IMPL=openmpi/5.0.3/custom

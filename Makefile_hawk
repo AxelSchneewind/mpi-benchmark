@@ -1,4 +1,5 @@
 
+# 
 MPI_RUN=mpirun
 MPI_CC=mpicc
 
@@ -9,16 +10,16 @@ MPI_CC_CUSTOM=/zhome/academic/HLRS/hlrs/hpcschne/ompi/build/bin/mpicc
 
 SRC_CUSTOM_PSEND=message-aggregation/custom_psend_aggregate_simple.c
 # message-aggregation/intervals.c message-aggregation/custom_psend.c
-SRC=$(wildcard src/*.c) $(wildcard src/benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c custom_psend_dummy.c win.c partitioned_get_status.c, $(wildcard *.c)) $(SRC_CUSTOM_PSEND)
-SRC_NOPSEND=$(filter-out $(wildcard src/benchmarks/bench_psen*.c), $(SRC)) benchmarks/bench_psend_custom.c
+SRC_NOPSEND=$(filter-out $(wildcard benchmarks/bench_psen*.c), $(SRC)) benchmarks/bench_psend_custom.c
+SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c custom_psend_dummy.c win.c partitioned_get_status.c, $(wildcard *.c)) $(SRC_CUSTOM_PSEND)
 
 CFLAGS=-fopenmp -lm -lpthread -I. -Wall -O1 -DNDEBUG
 
 .phony: all bench run
 all: bench
 
-bench_dbg: $(SRC) 
-	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -Isrc -lm
+bench_dbg: $(SRC) bench.h test_cases.h
+	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I. -lm
 
 .phony: bin/bench_openmpi bin/bench_mpich bin/bench_impi bin/bench_cpe bin/bench_mpt
 bin/bench_openmpi: $(SRC) bench.h test_cases.h
@@ -46,7 +47,13 @@ bench: bin/bench_openmpi bin/bench_mpich bin/bench_impi bin/bench_cpe bin/bench_
 .phony: run_bench_openmpi run_bench_mpich run_bench_impi run_bench_cpe run_bench_mpt
 run_bench_openmpi_default: bin/bench_openmpi_503
 	rm -rf results/openmpi/5.0.3/default
-	qsub pbs/bench_openmpi_503.pbs
+	qsub pbs/bench_openmpi.pbs
+run_bench_openmpi_aggregation: bin/bench_openmpi_503
+	rm -rf results/openmpi/5.0.3/aggregation
+	qsub pbs/bench_openmpi_aggregation.pbs
+run_bench_openmpi_custom: bin/bench_openmpi_custom
+	rm -rf results/openmpi/5.0.3/custom
+	qsub pbs/bench_openmpi_custom.pbs
 run_trace_openmpi_default: bin/trace_openmpi_503
 	rm -rf results/openmpi/5.0.3/trace-default
 	qsub pbs/trace_openmpi_503.pbs

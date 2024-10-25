@@ -1,8 +1,9 @@
 #!/bin/bash
 
-#PBS -N bench_openmpi
+#PBS -N openmpi_503
 #PBS -l select=2:node_type=rome:mpiprocs=2
 #PBS -l walltime=4:00:00
+
 cd $PBS_O_WORKDIR
 
 source ./pbs/run-configs/ompi.sh
@@ -10,5 +11,8 @@ source ./pbs/bench.sh
 
 setup "$IMPL"
 
-mpirun --version > version_openmpi.log
-$MPI_RUN $MPI_ARGS $EXECUTABLE $(make_bench_args) > results.log 2>&1
+which mpirun > version_openmpi.log
+mpirun --version >> version_openmpi.log
+
+$MPI_RUN $MPI_ARGS $EXECUTABLE $(make_bench_args)               >> results.log 2>&1
+$MPI_RUN $MPI_ARGS $EXECUTABLE $(make_bench_partitionings_args) >> results.log 2>&1
