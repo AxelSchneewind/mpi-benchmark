@@ -15,8 +15,8 @@ which mpirun > version_openmpi.log
 mpirun --version >> version_openmpi.log
 
 # default psend implementation
-$MPI_RUN --mca part persist $MPI_ARGS $EXECUTABLE $(make_bench_partitionings_args part) >> results.log 2>&1
+$MPI_RUN --mca part persist $MPI_ARGS $EXECUTABLE $(make_aggregated_bench_args part) >> results.log 2>&1
 
 # aggregated psend implementation
-MPI_AGGREGATION_ARGS=--mca part persist_aggregated --mca part_persist_aggregated_min_message_size 4096 --mca part_persist_aggregated_max_message_count 2048
-$MPI_RUN $MPI_AGGREGATION_ARGS $MPI_ARGS $EXECUTABLE $(make_bench_partitionings_args part_aggregated) >> results.log 2>&1
+MPI_AGGREGATION_ARGS="--mca part persist_aggregated --mca part_persist_aggregated_min_message_size 16384 --mca part_persist_aggregated_max_message_count 512"
+$MPI_RUN $MPI_AGGREGATION_ARGS $MPI_ARGS $EXECUTABLE $(make_aggregated_bench_args part_aggregated) >> results.log 2>&1

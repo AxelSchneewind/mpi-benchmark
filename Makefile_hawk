@@ -1,96 +1,36 @@
 
-# 
-MPI_RUN=mpirun
-MPI_CC=mpicc
+MPI_RUN?=mpirun
+MPI_CC?=mpicc
+BUILD_DIR?=build
 
-# custom openmpi build
-MPI_RUN_CUSTOM=/zhome/academic/HLRS/hlrs/hpcschne/ompi/build/bin/mpirun
-MPI_CC_CUSTOM=/zhome/academic/HLRS/hlrs/hpcschne/ompi/build/bin/mpicc
-
-
-SRC_CUSTOM_PSEND=message-aggregation/custom_psend_aggregate_simple.c
-# message-aggregation/intervals.c message-aggregation/custom_psend.c
+SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c custom_psend_dummy.c win.c partitioned_get_status.c, $(wildcard src/*.c))
 SRC_NOPSEND=$(filter-out $(wildcard benchmarks/bench_psen*.c), $(SRC)) benchmarks/bench_psend_custom.c
-SRC=$(wildcard benchmarks/*.c) $(filter-out get_status.c parrived.c interval_tree_test.c custom_psend_old.c custom_psend_new.c custom_psend_dummy.c win.c partitioned_get_status.c, $(wildcard *.c)) $(SRC_CUSTOM_PSEND)
 
 CFLAGS=-fopenmp -lm -lpthread -I. -Wall -O1 -DNDEBUG
 
-.phony: all bench run
-all: bench
+# benchmark compilation units
+MAIN_SRC=src/bench.c
+MAIN_OBJ=$(patsubst src/%.c,$(BUILD_DIR)/%.o, $(MAIN_SRC))
+FRAMEWORK_SRC=$(filter-out src/bench.c src/custom_psend_dummy.c, $(wildcard src/*.c)) 
+FRAMEWORK_OBJ=$(patsubst src/%.c,$(BUILD_DIR)/%.o, $(FRAMEWORK_SRC) src/custom_psend_dummy.c)
+BENCHMARKS_SRC=$(wildcard src/benchmarks/*.c)
+BENCHMARKS_OBJ=$(patsubst src/%.c,$(BUILD_DIR)/%.o, $(BENCHMARKS_SRC))
 
-bench_dbg: $(SRC) bench.h test_cases.h
-	$(MPI_CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I. -lm
+$(BUILD_DIR)/%.o: src/%.c
+	mkdir -p $(@D) &&\
+	$(MPI_CC) $^ -O2 -c -Isrc -fopenmp -o $@
 
-.phony: bin/bench_openmpi bin/bench_mpich bin/bench_impi bin/bench_cpe bin/bench_mpt
-bin/bench_openmpi: $(SRC) bench.h test_cases.h
-	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.0 && $(MPI_CC) $(SRC) -o bin/bench_openmpi $(CFLAGS))
-bin/bench_openmpi_503: $(SRC) bench.h test_cases.h
-	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.3 && $(MPI_CC) $(SRC) -o bin/bench_openmpi_503 $(CFLAGS))
-bin/bench_openmpi_custom: $(SRC) bench.h test_cases.h
-	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.3 && $(MPI_CC_CUSTOM) $(SRC) -o bin/bench_openmpi_custom $(CFLAGS))
-bin/trace_openmpi_503: $(SRC) bench.h test_cases.h
-	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 openmpi/5.0.3 && source ~/tracing-env.sh && scorep-mpicc $(SRC) -o bin/trace_openmpi_503 $(CFLAGS))
-bin/bench_mpich: $(SRC) bench.h test_cases.h
-	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 mpich/4.1.2 && $(MPI_CC) $(SRC) -o bin/bench_mpich $(CFLAGS))
-bin/trace_mpich: $(SRC) bench.h test_cases.h
-	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 mpich/4.1.2 && source ~/tracing-env-mpich.sh && scorep-mpicc $(SRC) -o bin/trace_mpich $(CFLAGS))
-bin/bench_impi: $(SRC_NOPSEND) bench.h test_cases.h
-	echo $(shell module load hlrs-software-stack/current gcc/13.1.0 impi/2021.9.0 && $(MPI_CC) $(SRC_NOPSEND) -o bin/bench_impi $(CFLAGS) -DDISABLE_PSEND)
-bin/bench_cpe: $(SRC_NOPSEND) bench.h test_cases.h
-	echo $(shell module load CPE/23.12 && $(MPI_CC) $(SRC_NOPSEND) -o bin/bench_cpe $(CFLAGS) -DDISABLE_PSEND)
-bin/bench_mpt: $(SRC_NOPSEND) bench.h test_cases.h
-	echo $(shell module load hlrs-software-stack/current gcc/10.2.0 mpt/2.28 && $(MPI_CC) $(SRC_NOPSEND) -o bin/bench_mpt $(CFLAGS) -DDISABLE_PSEND)
+$(BUILD_DIR)/bench: $(MAIN_SRC) $(BENCHMARKS_OBJ) $(FRAMEWORK_OBJ)
+	$(MPI_CC) $(filter %c %.o,$^) $(CFLAGS) -o $@
 
-bench: bin/bench_openmpi bin/bench_mpich bin/bench_impi bin/bench_cpe bin/bench_mpt
-	echo 'Making benchmark binaries'
+$(BUILD_DIR)/trace: $(MAIN_SRC) $(BENCHMARKS_OBJ) $(FRAMEWORK_OBJ)
+	scorep-mpicc $(filter %c %.o,$^) $(CFLAGS) -o $@
 
-.phony: run_bench_openmpi run_bench_mpich run_bench_impi run_bench_cpe run_bench_mpt
-run_bench_openmpi_default: bin/bench_openmpi_503
-	rm -rf results/openmpi/5.0.3/default
-	qsub pbs/bench_openmpi.pbs
-run_bench_openmpi_aggregation: bin/bench_openmpi_503
-	rm -rf results/openmpi/5.0.3/aggregation
-	qsub pbs/bench_openmpi_aggregation.pbs
-run_bench_openmpi_custom: bin/bench_openmpi_custom
-	rm -rf results/openmpi/5.0.3/custom
-	qsub pbs/bench_openmpi_custom.pbs
-run_trace_openmpi_default: bin/trace_openmpi_503
-	rm -rf results/openmpi/5.0.3/trace-default
-	qsub pbs/trace_openmpi_503.pbs
-run_bench_openmpi_ucx: bin/bench_openmpi_503
-	rm -rf results/openmpi/5.0.3/ucx
-	qsub pbs/bench_openmpi_503_ucx.pbs
-run_bench_openmpi_ob1: bin/bench_openmpi_503
-	rm -rf results/openmpi/5.0.3/ob1
-	qsub pbs/bench_openmpi_503_ob1.pbs
-run_bench_openmpi_500_default: bin/bench_openmpi 
-	rm -rf results/openmpi/5.0.0/default
-	qsub pbs/bench_openmpi.pbs
-run_bench_openmpi_500_ob1: bin/bench_openmpi 
-	rm -rf results/openmpi/5.0.0/ob1
-	qsub pbs/bench_openmpi_ob1.pbs
-run_bench_openmpi_500_ucx: bin/bench_openmpi 
-	rm -rf results/openmpi/5.0.0/ucx
-	qsub pbs/bench_openmpi_ucx.pbs
 
-run_bench_openmpi: run_bench_openmpi_default run_bench_openmpi_ucx run_bench_openmpi_ob1
-run_bench_openmpi_500: run_bench_openmpi_500_default run_bench_openmpi_500_ucx run_bench_openmpi_500_ob1
+run: $(BUILD_DIR)/bench
+	qsub $(BENCH_SCRIPT)
 
-run_bench_mpich: bin/bench_mpich
-	rm -rf results/mpich/*/
-	qsub pbs/bench_mpich.pbs
-run_trace_mpich: bin/trace_mpich
-	rm -rf results/mpich/4.1.2-trace/
-	qsub pbs/trace_mpich.pbs
-run_bench_impi: bin/bench_impi
-	rm -rf results/impi/*/
-	qsub pbs/bench_impi.pbs
-run_bench_cpe: bin/bench_cpe
-	rm -rf results/cpe/*/
-	qsub pbs/bench_cpe.pbs
-run_bench_mpt: bin/bench_mpt
-	rm -rf results/mpt/*/
-	qsub pbs/bench_mpt.pbs
+.phony: build
+build: $(BUILD_DIR)/bench
 
-run: run_bench_openmpi run_bench_mpich run_bench_impi run_bench_cpe run_bench_mpt
 

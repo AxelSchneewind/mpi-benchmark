@@ -2,7 +2,7 @@
 
 MPI_RUN=mpirun
 MPI_ARGS=-np 2 -N 1
-EXECUTABLE=$(bin_directory)/bench_mpt
+EXECUTABLE=$PBS_O_WORKDIR/build/mpt/bench
 
 IMPL=mpt/2.28
 

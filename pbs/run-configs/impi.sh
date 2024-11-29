@@ -3,7 +3,7 @@ source ./pbs/run-configs.sh
 
 MPI_RUN=mpirun
 MPI_ARGS=-np 2
-EXECUTABLE=$(bin_directory)/bench_impi
+EXECUTABLE=$PBS_O_WORKDIR/build/impi/bench
 
 IMPL=impi/19.1.0
 

@@ -3,7 +3,7 @@ source ./pbs/run-configs.sh
 
 MPI_RUN=mpirun
 MPI_ARGS=-np 2 -ppn 1
-EXECUTABLE=$(bin_directory)/bench_mpich
+EXECUTABLE=$PBS_O_WORKDIR/build/mpich/bench
 
 IMPL=mpich/4.1.2
 
