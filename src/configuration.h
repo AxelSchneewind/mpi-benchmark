@@ -18,6 +18,9 @@ struct configuration_t {
     const char* name;
     MPI_Count buffer_size;
 
+    // factor for buffer size, partition counts, and thread counts
+    int factor;
+
     // warmup
     int warmup_iterations;
     int post_warmup_sleep;

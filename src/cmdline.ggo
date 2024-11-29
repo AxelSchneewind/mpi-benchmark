@@ -3,10 +3,13 @@ version "0.1"
 purpose "measures effective bandwidth for point-to-point transfers using different MPI transfer methods"
 
 option "buffer-size" b "the log of the buffer size in bytes" int default="23" optional
+option "factor" - "factor to apply to buffer size and thread counts" int default="1" optional
+
 option "iteration-count" i "the number of iterations per test case" int default="100" optional
 option "warmup-iteration-count" I "the number of warmup iterations per test case" int default="10" optional
 option "post-warmup-sleep" - "the number of microseconds to sleep after warmup" int default="0" optional
 option "pre-complete-sleep" - "the number of microseconds to sleep before calling MPI_Wait" int default="0" optional
+
 
 
 section "parameters" sectiondesc="benchmarks will be run for the cartesian product of mode, partition sizes, (receive side partition sizes), thread counts, send-patterns"
@@ -16,7 +19,7 @@ option "min-partition-size" p "the logs of the minimal partition sizes for each 
 option "max-partition-size" P "the logs of the maximal partition sizes for each mode" int default="0" multiple
 option "different-partition-sizes" c "flag to enable different partition sizes for send and receive sides" flag off
 
-option "min-thread-count" t "log2 of the minimal thread counts for each mode" int default="0" multiple
+option "min-thread-count" t "log2 of the minimal thread counts for each mode" int default="-1" multiple
 option "max-thread-count" T "log2 of the maximal thread counts for each mode" int default="0" multiple
 
 option "send-patterns" s "send patterns to use for all test cases" enum values="Linear","LinearInverse","Stride2","Stride128","Stride1K","Stride16K","Random","RandomBurst128","RandomBurst1K","RandomBurst16K","GridBoundary" default="Linear" multiple optional

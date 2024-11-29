@@ -24,7 +24,8 @@ configuration config_from_args(struct gengetopt_args_info* args) {
     result->post_warmup_sleep = args->post_warmup_sleep_arg;
     result->pre_complete_sleep = args->pre_complete_sleep_arg;
 
-    result->buffer_size = (1 << args->buffer_size_arg);
+    result->factor = args->factor_arg;
+    result->buffer_size = result->factor * (1 << args->buffer_size_arg);
     result->num_send_patterns = (0 >= num_send_patterns) ? 1 : num_send_patterns;
 
     // check which modes are selected
@@ -156,8 +157,12 @@ int config_min_partition_size(configuration config, Mode mode) {
 }
 
 int config_max_thread_count(configuration config, Mode mode){
-    return (1 << config->max_thread_count_log[mode]);
+    if (config->max_thread_count_log[mode] == -1)
+        return 1;
+    return config->factor * (1 << config->max_thread_count_log[mode]);
 }
 int config_min_thread_count(configuration config, Mode mode){
-    return (1 << config->min_thread_count_log[mode]);
+    if (config->min_thread_count_log[mode] == -1)
+        return 1;
+    return config->factor * (1 << config->min_thread_count_log[mode]);
 }

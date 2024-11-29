@@ -44,6 +44,9 @@ struct gengetopt_args_info
   int buffer_size_arg;	/**< @brief the log of the buffer size in bytes (default='23').  */
   char * buffer_size_orig;	/**< @brief the log of the buffer size in bytes original value given at command line.  */
   const char *buffer_size_help; /**< @brief the log of the buffer size in bytes help description.  */
+  int factor_arg;	/**< @brief factor to apply to buffer size and thread counts (default='1').  */
+  char * factor_orig;	/**< @brief factor to apply to buffer size and thread counts original value given at command line.  */
+  const char *factor_help; /**< @brief factor to apply to buffer size and thread counts help description.  */
   int iteration_count_arg;	/**< @brief the number of iterations per test case (default='100').  */
   char * iteration_count_orig;	/**< @brief the number of iterations per test case original value given at command line.  */
   const char *iteration_count_help; /**< @brief the number of iterations per test case help description.  */
@@ -73,7 +76,7 @@ struct gengetopt_args_info
   const char *max_partition_size_help; /**< @brief the logs of the maximal partition sizes for each mode help description.  */
   int different_partition_sizes_flag;	/**< @brief flag to enable different partition sizes for send and receive sides (default=off).  */
   const char *different_partition_sizes_help; /**< @brief flag to enable different partition sizes for send and receive sides help description.  */
-  int* min_thread_count_arg;	/**< @brief log2 of the minimal thread counts for each mode (default='0').  */
+  int* min_thread_count_arg;	/**< @brief log2 of the minimal thread counts for each mode (default='-1').  */
   char ** min_thread_count_orig;	/**< @brief log2 of the minimal thread counts for each mode original value given at command line.  */
   unsigned int min_thread_count_min; /**< @brief log2 of the minimal thread counts for each mode's minimum occurreces */
   unsigned int min_thread_count_max; /**< @brief log2 of the minimal thread counts for each mode's maximum occurreces */
@@ -100,6 +103,7 @@ struct gengetopt_args_info
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int buffer_size_given ;	/**< @brief Whether buffer-size was given.  */
+  unsigned int factor_given ;	/**< @brief Whether factor was given.  */
   unsigned int iteration_count_given ;	/**< @brief Whether iteration-count was given.  */
   unsigned int warmup_iteration_count_given ;	/**< @brief Whether warmup-iteration-count was given.  */
   unsigned int post_warmup_sleep_given ;	/**< @brief Whether post-warmup-sleep was given.  */

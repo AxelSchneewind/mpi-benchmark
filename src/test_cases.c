@@ -305,6 +305,10 @@ void test_cases_init(configuration config, TestCases* tests)
                                 max_num_threads = test_case->thread_count;
                             test_case->partitions_per_thread = test_case->partition_count / test_case->thread_count;
                             assert(test_case->partitions_per_thread * test_case->thread_count == test_case->partition_count);
+
+                            // next are multithreaded cases, here we need the factor;
+                            if (t == 1)
+                                t *= config->factor;
                         }
                     }
                 }

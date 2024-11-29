@@ -37,6 +37,7 @@ const char *gengetopt_args_info_help[] = {
   "  -h, --help                    Print help and exit",
   "  -V, --version                 Print version and exit",
   "  -b, --buffer-size=INT         the log of the buffer size in bytes\n                                  (default=`23')",
+  "      --factor=INT              factor to apply to buffer size and thread\n                                  counts  (default=`1')",
   "  -i, --iteration-count=INT     the number of iterations per test case\n                                  (default=`100')",
   "  -I, --warmup-iteration-count=INT\n                                the number of warmup iterations per test case\n                                  (default=`10')",
   "      --post-warmup-sleep=INT   the number of microseconds to sleep after\n                                  warmup  (default=`0')",
@@ -47,7 +48,7 @@ const char *gengetopt_args_info_help[] = {
   "  -p, --min-partition-size=INT  the logs of the minimal partition sizes for\n                                  each mode  (default=`0')",
   "  -P, --max-partition-size=INT  the logs of the maximal partition sizes for\n                                  each mode  (default=`0')",
   "  -c, --different-partition-sizes\n                                flag to enable different partition sizes for\n                                  send and receive sides  (default=off)",
-  "  -t, --min-thread-count=INT    log2 of the minimal thread counts for each mode\n                                  (default=`0')",
+  "  -t, --min-thread-count=INT    log2 of the minimal thread counts for each mode\n                                  (default=`-1')",
   "  -T, --max-thread-count=INT    log2 of the maximal thread counts for each mode\n                                  (default=`0')",
   "  -s, --send-patterns=ENUM      send patterns to use for all test cases\n                                  (possible values=\"Linear\",\n                                  \"LinearInverse\", \"Stride2\",\n                                  \"Stride128\", \"Stride1K\", \"Stride16K\",\n                                  \"Random\", \"RandomBurst128\",\n                                  \"RandomBurst1K\", \"RandomBurst16K\",\n                                  \"GridBoundary\" default=`Linear')",
   "\noutput:",
@@ -86,6 +87,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
   args_info->buffer_size_given = 0 ;
+  args_info->factor_given = 0 ;
   args_info->iteration_count_given = 0 ;
   args_info->warmup_iteration_count_given = 0 ;
   args_info->post_warmup_sleep_given = 0 ;
@@ -107,6 +109,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   FIX_UNUSED (args_info);
   args_info->buffer_size_arg = 23;
   args_info->buffer_size_orig = NULL;
+  args_info->factor_arg = 1;
+  args_info->factor_orig = NULL;
   args_info->iteration_count_arg = 100;
   args_info->iteration_count_orig = NULL;
   args_info->warmup_iteration_count_arg = 10;
@@ -143,31 +147,32 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->help_help = gengetopt_args_info_help[0] ;
   args_info->version_help = gengetopt_args_info_help[1] ;
   args_info->buffer_size_help = gengetopt_args_info_help[2] ;
-  args_info->iteration_count_help = gengetopt_args_info_help[3] ;
-  args_info->warmup_iteration_count_help = gengetopt_args_info_help[4] ;
-  args_info->post_warmup_sleep_help = gengetopt_args_info_help[5] ;
-  args_info->pre_complete_sleep_help = gengetopt_args_info_help[6] ;
-  args_info->modes_help = gengetopt_args_info_help[9] ;
+  args_info->factor_help = gengetopt_args_info_help[3] ;
+  args_info->iteration_count_help = gengetopt_args_info_help[4] ;
+  args_info->warmup_iteration_count_help = gengetopt_args_info_help[5] ;
+  args_info->post_warmup_sleep_help = gengetopt_args_info_help[6] ;
+  args_info->pre_complete_sleep_help = gengetopt_args_info_help[7] ;
+  args_info->modes_help = gengetopt_args_info_help[10] ;
   args_info->modes_min = 0;
   args_info->modes_max = 0;
-  args_info->min_partition_size_help = gengetopt_args_info_help[10] ;
+  args_info->min_partition_size_help = gengetopt_args_info_help[11] ;
   args_info->min_partition_size_min = 0;
   args_info->min_partition_size_max = 0;
-  args_info->max_partition_size_help = gengetopt_args_info_help[11] ;
+  args_info->max_partition_size_help = gengetopt_args_info_help[12] ;
   args_info->max_partition_size_min = 0;
   args_info->max_partition_size_max = 0;
-  args_info->different_partition_sizes_help = gengetopt_args_info_help[12] ;
-  args_info->min_thread_count_help = gengetopt_args_info_help[13] ;
+  args_info->different_partition_sizes_help = gengetopt_args_info_help[13] ;
+  args_info->min_thread_count_help = gengetopt_args_info_help[14] ;
   args_info->min_thread_count_min = 0;
   args_info->min_thread_count_max = 0;
-  args_info->max_thread_count_help = gengetopt_args_info_help[14] ;
+  args_info->max_thread_count_help = gengetopt_args_info_help[15] ;
   args_info->max_thread_count_min = 0;
   args_info->max_thread_count_max = 0;
-  args_info->send_patterns_help = gengetopt_args_info_help[15] ;
+  args_info->send_patterns_help = gengetopt_args_info_help[16] ;
   args_info->send_patterns_min = 0;
   args_info->send_patterns_max = 0;
-  args_info->bench_name_help = gengetopt_args_info_help[17] ;
-  args_info->output_file_help = gengetopt_args_info_help[18] ;
+  args_info->bench_name_help = gengetopt_args_info_help[18] ;
+  args_info->output_file_help = gengetopt_args_info_help[19] ;
   args_info->output_file_min = 2;
   args_info->output_file_max = 2;
   
@@ -323,6 +328,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
 {
 
   free_string_field (&(args_info->buffer_size_orig));
+  free_string_field (&(args_info->factor_orig));
   free_string_field (&(args_info->iteration_count_orig));
   free_string_field (&(args_info->warmup_iteration_count_orig));
   free_string_field (&(args_info->post_warmup_sleep_orig));
@@ -426,6 +432,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "version", 0, 0 );
   if (args_info->buffer_size_given)
     write_into_file(outfile, "buffer-size", args_info->buffer_size_orig, 0);
+  if (args_info->factor_given)
+    write_into_file(outfile, "factor", args_info->factor_orig, 0);
   if (args_info->iteration_count_given)
     write_into_file(outfile, "iteration-count", args_info->iteration_count_orig, 0);
   if (args_info->warmup_iteration_count_given)
@@ -1073,6 +1081,7 @@ cmdline_parser_internal (
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
         { "buffer-size",	1, NULL, 'b' },
+        { "factor",	1, NULL, 0 },
         { "iteration-count",	1, NULL, 'i' },
         { "warmup-iteration-count",	1, NULL, 'I' },
         { "post-warmup-sleep",	1, NULL, 0 },
@@ -1181,7 +1190,7 @@ cmdline_parser_internal (
         case 't':	/* log2 of the minimal thread counts for each mode.  */
         
           if (update_multiple_arg_temp(&min_thread_count_list, 
-              &(local_args_info.min_thread_count_given), optarg, 0, "0", ARG_INT,
+              &(local_args_info.min_thread_count_given), optarg, 0, "-1", ARG_INT,
               "min-thread-count", 't',
               additional_error))
             goto failure;
@@ -1228,8 +1237,22 @@ cmdline_parser_internal (
           break;
 
         case 0:	/* Long option with no short option */
+          /* factor to apply to buffer size and thread counts.  */
+          if (strcmp (long_options[option_index].name, "factor") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->factor_arg), 
+                 &(args_info->factor_orig), &(args_info->factor_given),
+                &(local_args_info.factor_given), optarg, 0, "1", ARG_INT,
+                check_ambiguity, override, 0, 0,
+                "factor", '-',
+                additional_error))
+              goto failure;
+          
+          }
           /* the number of microseconds to sleep after warmup.  */
-          if (strcmp (long_options[option_index].name, "post-warmup-sleep") == 0)
+          else if (strcmp (long_options[option_index].name, "post-warmup-sleep") == 0)
           {
           
           
@@ -1282,9 +1305,10 @@ cmdline_parser_internal (
     &(args_info->max_partition_size_orig), args_info->max_partition_size_given,
     local_args_info.max_partition_size_given, 0,
     ARG_INT, max_partition_size_list);
+  multiple_default_value.int_arg = -1;
   update_multiple_arg((void *)&(args_info->min_thread_count_arg),
     &(args_info->min_thread_count_orig), args_info->min_thread_count_given,
-    local_args_info.min_thread_count_given, 0,
+    local_args_info.min_thread_count_given, &multiple_default_value,
     ARG_INT, min_thread_count_list);
   update_multiple_arg((void *)&(args_info->max_thread_count_arg),
     &(args_info->max_thread_count_orig), args_info->max_thread_count_given,
