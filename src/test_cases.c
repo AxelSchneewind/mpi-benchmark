@@ -103,14 +103,21 @@ void partition_send_pattern_create(permutation* result_ptr, SendPattern pattern,
     switch (pattern) {
         case GridBoundary:
             {
-                // compute logarithm, to factor buffer_size into width and height
+                // factor partition count into width and height
+                // get factor not divisible by two
+                long coprime_factor = buffer_size / partition_size;
+                while ((coprime_factor % 2) == 0) coprime_factor = coprime_factor / 2;
+
                 int logarithm = 0;
-                for (int b = buffer_size/partition_size; b > 1; b = (b >> 1))
+                for (int b = buffer_size / partition_size; b > coprime_factor; b = b / 2)
                     logarithm++;
 
-                size_t width = 1 << (logarithm/2);
-                size_t height = 1 << ((logarithm + 1)/2);
-                assert(width * height == buffer_size/partition_size);
+                size_t width = (1 << (logarithm/2));
+                size_t height = (buffer_size / partition_size) / width;
+                if(width * height != buffer_size / partition_size) {
+                    printf("%lu * %lu != %u / %u (=%u)\n", width, height, buffer_size, partition_size, buffer_size / partition_size);
+                    assert(0);
+                };
                 make_grid_boundary_pattern(*result_ptr, width, height, NULL, NULL);
             }
             break;
