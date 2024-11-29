@@ -14,5 +14,7 @@ setup "$IMPL"
 which mpirun > version_openmpi.log
 mpirun --version >> version_openmpi.log
 
+echo "$MPI_RUN $MPI_ARGS $EXECUTABLE $(make_bench_args)              "
+echo "$MPI_RUN $MPI_ARGS $EXECUTABLE $(make_bench_partitionings_args)"
 $MPI_RUN $MPI_ARGS $EXECUTABLE $(make_bench_args)               >> results.log 2>&1
 $MPI_RUN $MPI_ARGS $EXECUTABLE $(make_bench_partitionings_args) >> results.log 2>&1

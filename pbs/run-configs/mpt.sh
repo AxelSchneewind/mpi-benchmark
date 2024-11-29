@@ -1,4 +1,5 @@
 #!/bin/bash
+source $PBS_O_WORKDIR/pbs/run-configs.sh
 
 MPI_RUN=mpirun
 MPI_ARGS=-np 2 -N 1
