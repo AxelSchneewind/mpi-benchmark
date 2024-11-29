@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <time.h>
 
+#include <stdio.h>
 
 
 /********** PATTERN CREATION ***********/
@@ -58,9 +59,14 @@ void make_grid_boundary_pattern(int* result, size_t width, size_t height, int* b
         for (size_t i = 1; i < height - 1; i++)
         {
             result[numbers_put++] = i * width;
-            result[numbers_put++] = (i + 1) * width - 1;
-        }
 
+        }
+        if (width > 1) {
+            for (size_t i = 1; i < height - 1; i++)
+            {
+                    result[numbers_put++] = (i + 1) * width - 1;
+            }
+        }
     }
 
     // insert last row
@@ -71,7 +77,10 @@ void make_grid_boundary_pattern(int* result, size_t width, size_t height, int* b
     }
 
     int boundary_size = numbers_put;
-    assert(boundary_size <= width * height);
+    if(boundary_size > width * height) {
+        printf( "%i > %i * %i\n",  boundary_size, width, height);
+        assert(0);
+    }
 
     // permute boundary cells
     if (NULL != boundary_permutation)
