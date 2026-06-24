@@ -1,11 +1,9 @@
 
-### FOR LOCAL TESTING
-
-MPI_DIR=/home/axel/work/openmpi-development/devel/ompi/build/bin/
+SETUP=FULL_LOCAL
 SETUP=PARTITIONED_LOCAL
 
-MPI_RUN=$(MPI_DIR)mpirun
-CC=$(MPI_DIR)mpicc
+MPI_RUN=../ompi/build/bin/mpirun
+CC=../ompi/build/bin/mpicc
 
 SRC=$(wildcard benchmarks/*.c) $(filter-out interval_tree_test.c get_status.c parrived.c custom_psend_old.c custom_psend_new.c partitioned_get_status.c win.c, $(wildcard *.c))
 
@@ -28,4 +26,3 @@ run_valgrind: bench
 
 debug: bench_dbg
 	$(MPI_RUN) -n 2 ddd --args ./bench_dbg  $(SETUP)
-
