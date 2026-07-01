@@ -3,7 +3,7 @@
 #include "custom_psend.h"
 
 
-void bench_custom_psend(TestCase *test_case, Result *result, int comm_rank)
+void bench_custom_psend(TestCase *test_case, Result *result, int comm_rank, int comm_ranks)
 {
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 

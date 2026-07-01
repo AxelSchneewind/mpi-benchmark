@@ -1,6 +1,6 @@
 #include "bench.h"
 
-void bench_win(TestCase *test_case, Result *result, int comm_rank)
+void bench_win(TestCase *test_case, Result *result, int comm_rank, int comm_ranks)
 {
 	MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 

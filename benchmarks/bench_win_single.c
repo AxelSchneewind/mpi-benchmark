@@ -15,7 +15,7 @@
 		printf("\n");                                             \
 	}
 
-void bench_win_single(TestCase *test_case, Result *result, int comm_rank)
+void bench_win_single(TestCase *test_case, Result *result, int comm_rank, int comm_ranks)
 {
 	// init window
 	MPI_Win window;

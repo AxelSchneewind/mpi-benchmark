@@ -2,7 +2,7 @@
 #include "stdio.h"
 
 
-void bench_send(TestCase *test_case, Result *result, int comm_rank)
+void bench_send(TestCase *test_case, Result *result, int comm_rank, int comm_ranks)
 {
     timers timers;
     timers_init(&timers, TimerCount);

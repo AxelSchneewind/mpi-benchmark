@@ -2,7 +2,7 @@
 #include "stdio.h"
 
 
-void bench_isend(TestCase *test_case, Result *result, int comm_rank)
+void bench_isend(TestCase *test_case, Result *result, int comm_rank, int comm_ranks)
 {
     MPI_Request *requests = malloc(sizeof(MPI_Request) * test_case->partition_count);
 

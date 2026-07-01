@@ -124,7 +124,7 @@ Result bench(TestCase *test_case, int comm_rank, int comm_size)
     // call run method for this test case
     Result result;
     if (test_case->method.run != NULL)
-        (*test_case->method.run)(test_case, &result, comm_rank);
+        (*test_case->method.run)(test_case, &result, comm_rank, comm_size);
 
     // compute bandwidth
     result.bandwidth = ((double)test_case->buffer_size * test_case->iteration_count) / result.timings[Total];
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
-    if (comm_size != 2)
+    if (comm_size < 2)
         return -1;
 
 

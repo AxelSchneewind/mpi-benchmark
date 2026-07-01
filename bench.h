@@ -21,25 +21,25 @@ static const char* const send_pattern_identifiers[SendPatternCount] = {
     "random_burst_16K"
 };
 
-extern void bench_send(TestCase *test_case, Result *result, int comm_rank);
-extern void bench_send_persistent(TestCase *test_case, Result *result, int comm_rank);
-extern void bench_isend(TestCase *test_case, Result *result, int comm_rank);
-extern void bench_isend_test(TestCase *test_case, Result *result, int comm_rank);
-extern void bench_isend_then_test(TestCase *test_case, Result *result, int comm_rank);
-extern void bench_isend_testall(TestCase *test_case, Result *result, int comm_rank);
+extern void bench_send(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
+extern void bench_send_persistent(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
+extern void bench_isend(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
+extern void bench_isend_test(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
+extern void bench_isend_then_test(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
+extern void bench_isend_testall(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
 
 #ifndef DISABLE_PSEND
-extern void bench_psend(TestCase *test_case, Result *result, int comm_rank);
-extern void bench_psend_list(TestCase *test_case, Result *result, int comm_rank);
-extern void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank);
-extern void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank);
-extern void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_rank);
-extern void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank);
+extern void bench_psend(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
+extern void bench_psend_list(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
+extern void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
+extern void bench_psend_progress(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
+extern void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
+extern void bench_psend_threaded(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
 #endif
 
-extern void bench_custom_psend(TestCase *test_case, Result *result, int comm_rank);
-extern void bench_win_single(TestCase *test_case, Result *result, int comm_rank);
-extern void bench_win(TestCase *test_case, Result *result, int comm_rank);
+extern void bench_custom_psend(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
+extern void bench_win_single(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
+extern void bench_win(TestCase *test_case, Result *result, int comm_rank, int comm_ranks);
 
 static RunMethod const mode_methods[ModeCount] = {
 	{ &bench_send },

@@ -162,7 +162,7 @@ void progress_thread_destroy(progress_thread *thread)
  *   6 0x000000000005fb25 ompi_sync_wait_mt()  ???:0
  *   7 0x000000000009795f ompi_request_default_wait()  ???:0
  *   8 0x00000000000e8ffe MPI_Wait()  ???:0
- *   9 0x0000000000403cbb bench_psend_progress_thread()  ???:0
+ *   9 0x0000000000403cbb bench_psend_progress_thread(, int comm_ranks)  ???:0
  *  10 0x0000000000406931 bench()  ???:0
  *  11 0x0000000000401905 main()  ???:0
  *  12 0x000000000003ad85 __libc_start_main()  ???:0
@@ -171,7 +171,7 @@ void progress_thread_destroy(progress_thread *thread)
  *
  * has not been tested in multithreaded execution
  */
-void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_rank)
+void bench_psend_progress_thread(TestCase *test_case, Result *result, int comm_rank, int comm_ranks)
 {
 	// init
 	MPI_Request request;

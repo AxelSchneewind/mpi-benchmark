@@ -54,7 +54,7 @@ extern void make_send_pattern(permutation result, size_t count, SendPattern patt
 
 struct TestCase;
 struct Result;
-typedef struct {void (*run)(struct TestCase* test_case, struct Result *result, int comm_rank); } RunMethod;
+typedef struct {void (*run)(struct TestCase* test_case, struct Result *result, int comm_rank, int comm_ranks); } RunMethod;
 
 struct TestCase
 {

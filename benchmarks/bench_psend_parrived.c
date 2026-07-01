@@ -1,7 +1,7 @@
 #include "bench.h"
 
 
-void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank)
+void bench_psend_parrived(TestCase *test_case, Result *result, int comm_rank, int comm_ranks)
 {
     // init requests and timer
     MPI_Request request;
