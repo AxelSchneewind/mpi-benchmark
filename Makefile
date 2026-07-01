@@ -1,14 +1,17 @@
 
-SETUP=FULL_LOCAL
 SETUP=PARTITIONED_LOCAL
 
 MPI_RUN=../ompi/build/bin/mpirun
 CC=../ompi/build/bin/mpicc
 
-SRC=$(wildcard benchmarks/*.c) $(filter-out interval_tree_test.c get_status.c parrived.c custom_psend_old.c custom_psend_new.c partitioned_get_status.c win.c, $(wildcard *.c))
+SRC=$(wildcard benchmarks/*.c) $(wildcard *.c)
 
-.phony: all run debug ddd deploy run-remote get put run_get_status run_parrived
+.phony: all run debug 
 all: bench
+
+
+cmdline.c cmdline.h: cmdline.ggo
+	gengetopt -i cmdline.ggo -F cmdline
 
 bench_dbg: $(SRC) bench.h test_cases.h
 	$(CC) $(SRC) -o bench_dbg -Wall -g -lpthread -I. -lm -fopenmp

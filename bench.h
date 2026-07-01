@@ -11,14 +11,14 @@
 
 static const char* const send_pattern_identifiers[SendPatternCount] = {
     "linear",
-    "linear inverse",
-    "stride (128B)",
-    "stride (1KB)",
-    "stride (16KB)",
+    "linear_inverse",
+    "stride_128",
+    "stride_1K",
+    "stride_16K",
     "random",
-    "random burst (128B)",
-    "random burst (1KB)",
-    "random burst (16KB)"
+    "random_burst_128",
+    "random_burst_1K",
+    "random_burst_16K"
 };
 
 extern void bench_send(TestCase *test_case, Result *result, int comm_rank);

@@ -3,6 +3,8 @@
 #include "test_cases.h"
 #include "setups.h"
 
+#include "cmdline.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -140,6 +142,10 @@ int main(int argc, char **argv)
     if (thread_support != MPI_THREAD_MULTIPLE)
         return -1;
 
+    // parse args
+    struct gengetopt_args_info args_info;
+    cmdline_parser (argc, argv, &args_info);
+
     int comm_rank, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
@@ -147,7 +153,8 @@ int main(int argc, char **argv)
     if (comm_size != 2)
         return -1;
 
-    setup selection = select_setup(argv[1]);
+
+    setup selection = make_setup(&args_info);
     if (NULL == selection) 
         return -1;
 
