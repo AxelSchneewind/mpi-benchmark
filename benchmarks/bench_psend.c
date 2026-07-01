@@ -7,7 +7,7 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank, int comm_ra
     timers_init(&timers, TimerCount);
 
     int recv_from = (comm_rank + comm_ranks - 1) % comm_ranks;
-    int send_to   = (comm_rank + comm_ranks + 1) % comm_ranks;
+    int send_to   = (comm_rank              + 1) % comm_ranks;
 
     MPI_Request send_request, recv_request;
 
@@ -37,7 +37,7 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank, int comm_ra
 
         MPI_CHECK(MPI_Start(&recv_request));
         MPI_CHECK(MPI_Wait(&recv_request, &result->recv_status));
-    } else if (comm_rank == 1) {
+    } else {
         MPI_CHECK(MPI_Start(&recv_request));
         MPI_CHECK(MPI_Wait(&recv_request, &result->recv_status));
 
@@ -61,6 +61,8 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank, int comm_ra
     if (0 == comm_rank) {
         for (int i = 0; i < test_case->iteration_count; i++)
         {
+            MPI_Start(&recv_request);
+
             // send
             timers_start(timers, Iteration);
             timers_start(timers, IterationStartToWait);
@@ -82,12 +84,13 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank, int comm_ra
             timers_stop(timers, Iteration);
 
             // recv
-            MPI_Start(&recv_request);
             MPI_Wait(&recv_request, MPI_STATUS_IGNORE);
         }
     } else {
         for (int i = 0; i < test_case->iteration_count; i++)
         {
+            MPI_Start(&send_request);
+
             // recv
             timers_start(timers, Iteration);
             timers_start(timers, IterationStartToWait);
@@ -98,8 +101,6 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank, int comm_ra
             timers_stop(timers, Iteration);
 
             // send
-            MPI_Start(&send_request);
-
             #pragma omp parallel for num_threads(test_case->thread_count)
             for (int t = 0; t < test_case->thread_count; t++) {
                 for (int p = 0; p < test_case->partitions_per_thread; p++) {
