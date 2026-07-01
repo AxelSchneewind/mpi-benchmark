@@ -17,20 +17,20 @@
 
 
 // perform some virtual work on a partition
-void work(const MPI_Count partition_size)
+int work(const MPI_Count partition_size)
 {
     // struct timespec t1, t2;
     // t1.tv_sec = 0;
     // t1.tv_nsec = partition_size / 512;
     // if (t1.tv_nsec > 0)
     //     nanosleep(&t1, &t2);
-    // int t = 13;
-    // for (size_t i = 0; i < partition_size; i++)
-    // {
-    //     t = t * t;
-    // }
+    int t = 13;
+    for (size_t i = 0; i < partition_size; i++)
+    {
+        t = t * t;
+    }
 
-    return;
+    return t;
 }
 
 
@@ -175,7 +175,7 @@ int main(int argc, char **argv)
         TestCase *test_case = test_cases_get_test_case(tests, i);
         Result *result = test_cases_get_result(tests, i);
 
-        if (comm_rank == 1)
+        if (comm_rank == 0)
         {
             if (test_case->partition_size == test_case->partition_size_recv)
                 printf("Running test %.4li in mode %15s, with %i threads, partition size %7lli, send pattern %s :\n\t", i, mode_names[test_case->mode], test_case->thread_count, test_case->partition_size, send_pattern_identifiers[test_case->send_pattern_num]);
@@ -204,12 +204,12 @@ int main(int argc, char **argv)
             }
         }
 
-        record_result(test_case, result, result_file);
+        if (result_file) record_result(test_case, result, result_file);
 
         success &= result->success;
     }
 
-    close_result_file(result_file);
+    if (result_file) close_result_file(result_file);
     test_cases_free(&tests);
 
     MPI_Finalize();
