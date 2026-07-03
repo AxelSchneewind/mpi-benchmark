@@ -32,6 +32,9 @@ setup make_setup(struct gengetopt_args_info* args)
         .num_send_patterns = 1
     };
 
+    if (args->partition_size_max_arg)
+        result.max_partition_size = args->partition_size_max_arg;
+
     if (is_psend(mode)) {
         for (int i = result.max_partition_size; i >= result.min_partition_size; i /= 2)
         for (int j = result.max_partition_size; j >= result.min_partition_size; j /= 2)

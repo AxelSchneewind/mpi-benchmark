@@ -34,14 +34,15 @@ const char *gengetopt_args_info_versiontext = "kinda buggy";
 const char *gengetopt_args_info_description = "<description>";
 
 const char *gengetopt_args_info_help[] = {
-  "  -h, --help                 Print help and exit",
-  "  -V, --version              Print version and exit",
-  "  -m, --mode=STRING          mode of transfer  (default=`Send')",
-  "  -n, --num-values=INT       number of values to communicate in tests\n                               (default=`4096')",
-  "  -q, --partition-size=INT   number of values per partition  (default=`100')",
-  "  -i, --iterations=INT       number of iterations  (default=`100')",
-  "  -p, --send-pattern=STRING  order in which elements will be marked ready\n                               (default=`Linear')",
-  "  -j, --num-threads=INT      number of threads  (default=`1')",
+  "  -h, --help                    Print help and exit",
+  "  -V, --version                 Print version and exit",
+  "  -m, --mode=STRING             mode of transfer  (default=`Send')",
+  "  -n, --num-values=INT          number of values to communicate in tests\n                                  (default=`4096')",
+  "  -q, --partition-size=INT      number of values per partition  (default=`100')",
+  "  -Q, --partition-size-max=INT  maximum number of values per partition (if\n                                  specified, paritition counts between min and\n                                  max will be used)  (default=`0')",
+  "  -i, --iterations=INT          number of iterations  (default=`100')",
+  "  -p, --send-pattern=STRING     order in which elements will be marked ready\n                                  (default=`Linear')",
+  "  -j, --num-threads=INT         number of threads  (default=`1')",
     0
 };
 
@@ -71,6 +72,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->mode_given = 0 ;
   args_info->num_values_given = 0 ;
   args_info->partition_size_given = 0 ;
+  args_info->partition_size_max_given = 0 ;
   args_info->iterations_given = 0 ;
   args_info->send_pattern_given = 0 ;
   args_info->num_threads_given = 0 ;
@@ -86,6 +88,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->num_values_orig = NULL;
   args_info->partition_size_arg = 100;
   args_info->partition_size_orig = NULL;
+  args_info->partition_size_max_arg = 0;
+  args_info->partition_size_max_orig = NULL;
   args_info->iterations_arg = 100;
   args_info->iterations_orig = NULL;
   args_info->send_pattern_arg = gengetopt_strdup ("Linear");
@@ -105,9 +109,10 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->mode_help = gengetopt_args_info_help[2] ;
   args_info->num_values_help = gengetopt_args_info_help[3] ;
   args_info->partition_size_help = gengetopt_args_info_help[4] ;
-  args_info->iterations_help = gengetopt_args_info_help[5] ;
-  args_info->send_pattern_help = gengetopt_args_info_help[6] ;
-  args_info->num_threads_help = gengetopt_args_info_help[7] ;
+  args_info->partition_size_max_help = gengetopt_args_info_help[5] ;
+  args_info->iterations_help = gengetopt_args_info_help[6] ;
+  args_info->send_pattern_help = gengetopt_args_info_help[7] ;
+  args_info->num_threads_help = gengetopt_args_info_help[8] ;
   
 }
 
@@ -201,6 +206,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->mode_orig));
   free_string_field (&(args_info->num_values_orig));
   free_string_field (&(args_info->partition_size_orig));
+  free_string_field (&(args_info->partition_size_max_orig));
   free_string_field (&(args_info->iterations_orig));
   free_string_field (&(args_info->send_pattern_arg));
   free_string_field (&(args_info->send_pattern_orig));
@@ -245,6 +251,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "num-values", args_info->num_values_orig, 0);
   if (args_info->partition_size_given)
     write_into_file(outfile, "partition-size", args_info->partition_size_orig, 0);
+  if (args_info->partition_size_max_given)
+    write_into_file(outfile, "partition-size-max", args_info->partition_size_max_orig, 0);
   if (args_info->iterations_given)
     write_into_file(outfile, "iterations", args_info->iterations_orig, 0);
   if (args_info->send_pattern_given)
@@ -512,13 +520,14 @@ cmdline_parser_internal (
         { "mode",	1, NULL, 'm' },
         { "num-values",	1, NULL, 'n' },
         { "partition-size",	1, NULL, 'q' },
+        { "partition-size-max",	1, NULL, 'Q' },
         { "iterations",	1, NULL, 'i' },
         { "send-pattern",	1, NULL, 'p' },
         { "num-threads",	1, NULL, 'j' },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVm:n:q:i:p:j:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVm:n:q:Q:i:p:j:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -566,6 +575,18 @@ cmdline_parser_internal (
               &(local_args_info.partition_size_given), optarg, 0, "100", ARG_INT,
               check_ambiguity, override, 0, 0,
               "partition-size", 'q',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'Q':	/* maximum number of values per partition (if specified, paritition counts between min and max will be used).  */
+        
+        
+          if (update_arg( (void *)&(args_info->partition_size_max_arg), 
+               &(args_info->partition_size_max_orig), &(args_info->partition_size_max_given),
+              &(local_args_info.partition_size_max_given), optarg, 0, "0", ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "partition-size-max", 'Q',
               additional_error))
             goto failure;
         

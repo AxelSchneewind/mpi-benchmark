@@ -41,9 +41,9 @@ FILE *open_result_file(int comm_rank)
 
     // open file and overwrite with header line
     if (comm_rank == 0)
-        file = fopen("./R0.csv", "w");
+        file = fopen("./R0.csv", "a");
     else if (comm_rank == 1)
-        file = fopen("./R1.csv", "w");
+        file = fopen("./R1.csv", "a");
     else
     {
         printf("no output from this rank\n");

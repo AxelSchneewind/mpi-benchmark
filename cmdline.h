@@ -48,6 +48,9 @@ struct gengetopt_args_info
   int partition_size_arg;	/**< @brief number of values per partition (default='100').  */
   char * partition_size_orig;	/**< @brief number of values per partition original value given at command line.  */
   const char *partition_size_help; /**< @brief number of values per partition help description.  */
+  int partition_size_max_arg;	/**< @brief maximum number of values per partition (if specified, paritition counts between min and max will be used) (default='0').  */
+  char * partition_size_max_orig;	/**< @brief maximum number of values per partition (if specified, paritition counts between min and max will be used) original value given at command line.  */
+  const char *partition_size_max_help; /**< @brief maximum number of values per partition (if specified, paritition counts between min and max will be used) help description.  */
   int iterations_arg;	/**< @brief number of iterations (default='100').  */
   char * iterations_orig;	/**< @brief number of iterations original value given at command line.  */
   const char *iterations_help; /**< @brief number of iterations help description.  */
@@ -63,6 +66,7 @@ struct gengetopt_args_info
   unsigned int mode_given ;	/**< @brief Whether mode was given.  */
   unsigned int num_values_given ;	/**< @brief Whether num-values was given.  */
   unsigned int partition_size_given ;	/**< @brief Whether partition-size was given.  */
+  unsigned int partition_size_max_given ;	/**< @brief Whether partition-size-max was given.  */
   unsigned int iterations_given ;	/**< @brief Whether iterations was given.  */
   unsigned int send_pattern_given ;	/**< @brief Whether send-pattern was given.  */
   unsigned int num_threads_given ;	/**< @brief Whether num-threads was given.  */
