@@ -24,6 +24,8 @@ setup make_setup(struct gengetopt_args_info* args)
         .buffer_size = args->num_values_arg,
         .iterations = args->iterations_arg,
         .mode = mode,
+	.allow_1_to_n = args->allow_1_to_n_arg,
+	.allow_n_to_1 = args->allow_n_to_1_arg,
         .min_partition_size = args->partition_size_arg,
         .max_partition_size = args->partition_size_arg,
         .min_thread_count = args->num_threads_arg,

@@ -40,6 +40,8 @@ const char *gengetopt_args_info_help[] = {
   "  -n, --num-values=INT          number of values to communicate in tests\n                                  (default=`4096')",
   "  -q, --partition-size=INT      number of values per partition  (default=`100')",
   "  -Q, --partition-size-max=INT  maximum number of values per partition (if\n                                  specified, paritition counts between min and\n                                  max will be used)  (default=`0')",
+  "      --allow-1-to-n=INT        whether to test cases where receive side has\n                                  more partitions than sender  (default=`0')",
+  "      --allow-n-to-1=INT        whether to test cases where send    side has\n                                  more partitions than receiver  (default=`0')",
   "  -i, --iterations=INT          number of iterations  (default=`100')",
   "  -p, --send-pattern=STRING     order in which elements will be marked ready\n                                  (default=`Linear')",
   "  -j, --num-threads=INT         number of threads  (default=`1')",
@@ -73,6 +75,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->num_values_given = 0 ;
   args_info->partition_size_given = 0 ;
   args_info->partition_size_max_given = 0 ;
+  args_info->allow_1_to_n_given = 0 ;
+  args_info->allow_n_to_1_given = 0 ;
   args_info->iterations_given = 0 ;
   args_info->send_pattern_given = 0 ;
   args_info->num_threads_given = 0 ;
@@ -90,6 +94,10 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->partition_size_orig = NULL;
   args_info->partition_size_max_arg = 0;
   args_info->partition_size_max_orig = NULL;
+  args_info->allow_1_to_n_arg = 0;
+  args_info->allow_1_to_n_orig = NULL;
+  args_info->allow_n_to_1_arg = 0;
+  args_info->allow_n_to_1_orig = NULL;
   args_info->iterations_arg = 100;
   args_info->iterations_orig = NULL;
   args_info->send_pattern_arg = gengetopt_strdup ("Linear");
@@ -110,9 +118,11 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->num_values_help = gengetopt_args_info_help[3] ;
   args_info->partition_size_help = gengetopt_args_info_help[4] ;
   args_info->partition_size_max_help = gengetopt_args_info_help[5] ;
-  args_info->iterations_help = gengetopt_args_info_help[6] ;
-  args_info->send_pattern_help = gengetopt_args_info_help[7] ;
-  args_info->num_threads_help = gengetopt_args_info_help[8] ;
+  args_info->allow_1_to_n_help = gengetopt_args_info_help[6] ;
+  args_info->allow_n_to_1_help = gengetopt_args_info_help[7] ;
+  args_info->iterations_help = gengetopt_args_info_help[8] ;
+  args_info->send_pattern_help = gengetopt_args_info_help[9] ;
+  args_info->num_threads_help = gengetopt_args_info_help[10] ;
   
 }
 
@@ -207,6 +217,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->num_values_orig));
   free_string_field (&(args_info->partition_size_orig));
   free_string_field (&(args_info->partition_size_max_orig));
+  free_string_field (&(args_info->allow_1_to_n_orig));
+  free_string_field (&(args_info->allow_n_to_1_orig));
   free_string_field (&(args_info->iterations_orig));
   free_string_field (&(args_info->send_pattern_arg));
   free_string_field (&(args_info->send_pattern_orig));
@@ -253,6 +265,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "partition-size", args_info->partition_size_orig, 0);
   if (args_info->partition_size_max_given)
     write_into_file(outfile, "partition-size-max", args_info->partition_size_max_orig, 0);
+  if (args_info->allow_1_to_n_given)
+    write_into_file(outfile, "allow-1-to-n", args_info->allow_1_to_n_orig, 0);
+  if (args_info->allow_n_to_1_given)
+    write_into_file(outfile, "allow-n-to-1", args_info->allow_n_to_1_orig, 0);
   if (args_info->iterations_given)
     write_into_file(outfile, "iterations", args_info->iterations_orig, 0);
   if (args_info->send_pattern_given)
@@ -521,6 +537,8 @@ cmdline_parser_internal (
         { "num-values",	1, NULL, 'n' },
         { "partition-size",	1, NULL, 'q' },
         { "partition-size-max",	1, NULL, 'Q' },
+        { "allow-1-to-n",	1, NULL, 0 },
+        { "allow-n-to-1",	1, NULL, 0 },
         { "iterations",	1, NULL, 'i' },
         { "send-pattern",	1, NULL, 'p' },
         { "num-threads",	1, NULL, 'j' },
@@ -629,6 +647,36 @@ cmdline_parser_internal (
           break;
 
         case 0:	/* Long option with no short option */
+          /* whether to test cases where receive side has more partitions than sender.  */
+          if (strcmp (long_options[option_index].name, "allow-1-to-n") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->allow_1_to_n_arg), 
+                 &(args_info->allow_1_to_n_orig), &(args_info->allow_1_to_n_given),
+                &(local_args_info.allow_1_to_n_given), optarg, 0, "0", ARG_INT,
+                check_ambiguity, override, 0, 0,
+                "allow-1-to-n", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* whether to test cases where send    side has more partitions than receiver.  */
+          else if (strcmp (long_options[option_index].name, "allow-n-to-1") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->allow_n_to_1_arg), 
+                 &(args_info->allow_n_to_1_orig), &(args_info->allow_n_to_1_given),
+                &(local_args_info.allow_n_to_1_given), optarg, 0, "0", ARG_INT,
+                check_ambiguity, override, 0, 0,
+                "allow-n-to-1", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          
+          break;
         case '?':	/* Invalid option.  */
           /* `getopt_long' already printed an error message.  */
           goto failure;

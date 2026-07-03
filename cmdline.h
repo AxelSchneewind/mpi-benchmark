@@ -51,6 +51,12 @@ struct gengetopt_args_info
   int partition_size_max_arg;	/**< @brief maximum number of values per partition (if specified, paritition counts between min and max will be used) (default='0').  */
   char * partition_size_max_orig;	/**< @brief maximum number of values per partition (if specified, paritition counts between min and max will be used) original value given at command line.  */
   const char *partition_size_max_help; /**< @brief maximum number of values per partition (if specified, paritition counts between min and max will be used) help description.  */
+  int allow_1_to_n_arg;	/**< @brief whether to test cases where receive side has more partitions than sender (default='0').  */
+  char * allow_1_to_n_orig;	/**< @brief whether to test cases where receive side has more partitions than sender original value given at command line.  */
+  const char *allow_1_to_n_help; /**< @brief whether to test cases where receive side has more partitions than sender help description.  */
+  int allow_n_to_1_arg;	/**< @brief whether to test cases where send    side has more partitions than receiver (default='0').  */
+  char * allow_n_to_1_orig;	/**< @brief whether to test cases where send    side has more partitions than receiver original value given at command line.  */
+  const char *allow_n_to_1_help; /**< @brief whether to test cases where send    side has more partitions than receiver help description.  */
   int iterations_arg;	/**< @brief number of iterations (default='100').  */
   char * iterations_orig;	/**< @brief number of iterations original value given at command line.  */
   const char *iterations_help; /**< @brief number of iterations help description.  */
@@ -67,6 +73,8 @@ struct gengetopt_args_info
   unsigned int num_values_given ;	/**< @brief Whether num-values was given.  */
   unsigned int partition_size_given ;	/**< @brief Whether partition-size was given.  */
   unsigned int partition_size_max_given ;	/**< @brief Whether partition-size-max was given.  */
+  unsigned int allow_1_to_n_given ;	/**< @brief Whether allow-1-to-n was given.  */
+  unsigned int allow_n_to_1_given ;	/**< @brief Whether allow-n-to-1 was given.  */
   unsigned int iterations_given ;	/**< @brief Whether iterations was given.  */
   unsigned int send_pattern_given ;	/**< @brief Whether send-pattern was given.  */
   unsigned int num_threads_given ;	/**< @brief Whether num-threads was given.  */

@@ -22,6 +22,8 @@ struct setup_t {
     int mode;
     int min_thread_count;
     int max_thread_count;
+    bool allow_1_to_n;
+    bool allow_n_to_1;
     int min_partition_size;
     int max_partition_size;                                                                                         
     // TODO: only accept one send pattern

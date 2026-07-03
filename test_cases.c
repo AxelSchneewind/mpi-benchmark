@@ -179,7 +179,11 @@ void test_cases_init(setup configuration, TestCases* tests)
     // iterate over send side partition sizes
     for (MPI_Count partition_size = configuration->max_partition_size; partition_size >= configuration->min_partition_size; partition_size /= 2) {
         // iterate over receive side partition sizes
-        for (MPI_Count partition_size_recv = (is_psend(mode) ? configuration->max_partition_size : partition_size); partition_size_recv >= (is_psend(mode) ? configuration->min_partition_size : partition_size); partition_size_recv /= 2) {
+	bool allow_1_to_n = is_psend(mode) && configuration->allow_1_to_n;
+	bool allow_n_to_1 = is_psend(mode) && configuration->allow_1_to_n;
+	size_t max_recv_parts = (allow_1_to_n ? configuration->max_partition_size : partition_size);
+	size_t min_recv_parts = (allow_n_to_1 ? configuration->min_partition_size : partition_size);
+        for (MPI_Count partition_size_recv = max_recv_parts; partition_size_recv >= min_recv_parts; partition_size_recv /= 2) {
             // iterate over thread count
             for (int t = configuration->min_thread_count; t <= configuration->max_thread_count; t *= 2) {
                 // iterate over send patterns
@@ -216,7 +220,7 @@ void test_cases_init(setup configuration, TestCases* tests)
                     }
                     if (test_case->thread_count > max_num_threads)
                         max_num_threads = test_case->thread_count;
-                    test_case->partitions_per_thread = test_case->partition_count / test_case->thread_count;
+                    test_case->partitions_per_thread = (test_case->partition_count + test_case->thread_count - 1) / test_case->thread_count;
                     assert(test_case->partitions_per_thread * test_case->thread_count == test_case->partition_count);
                 }
             }
