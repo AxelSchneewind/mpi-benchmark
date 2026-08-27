@@ -29,7 +29,7 @@ const char *gengetopt_args_info_purpose = "measure effective bandwidth for diffe
 
 const char *gengetopt_args_info_usage = "Usage: <usage>";
 
-const char *gengetopt_args_info_versiontext = "kinda buggy";
+const char *gengetopt_args_info_versiontext = "";
 
 const char *gengetopt_args_info_description = "<description>";
 
@@ -45,6 +45,7 @@ const char *gengetopt_args_info_help[] = {
   "  -i, --iterations=INT          number of iterations  (default=`100')",
   "  -p, --send-pattern=STRING     order in which elements will be marked ready\n                                  (default=`Linear')",
   "  -j, --num-threads=INT         number of threads  (default=`1')",
+  "  -c, --computations-per-element=INT\n                                number of iterations of a simple computation to\n                                  run for each data element  (default=`1000')",
     0
 };
 
@@ -80,6 +81,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->iterations_given = 0 ;
   args_info->send_pattern_given = 0 ;
   args_info->num_threads_given = 0 ;
+  args_info->computations_per_element_given = 0 ;
 }
 
 static
@@ -104,6 +106,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->send_pattern_orig = NULL;
   args_info->num_threads_arg = 1;
   args_info->num_threads_orig = NULL;
+  args_info->computations_per_element_arg = 1000;
+  args_info->computations_per_element_orig = NULL;
   
 }
 
@@ -123,6 +127,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->iterations_help = gengetopt_args_info_help[8] ;
   args_info->send_pattern_help = gengetopt_args_info_help[9] ;
   args_info->num_threads_help = gengetopt_args_info_help[10] ;
+  args_info->computations_per_element_help = gengetopt_args_info_help[11] ;
   
 }
 
@@ -223,6 +228,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->send_pattern_arg));
   free_string_field (&(args_info->send_pattern_orig));
   free_string_field (&(args_info->num_threads_orig));
+  free_string_field (&(args_info->computations_per_element_orig));
   
   
 
@@ -275,6 +281,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "send-pattern", args_info->send_pattern_orig, 0);
   if (args_info->num_threads_given)
     write_into_file(outfile, "num-threads", args_info->num_threads_orig, 0);
+  if (args_info->computations_per_element_given)
+    write_into_file(outfile, "computations-per-element", args_info->computations_per_element_orig, 0);
   
 
   i = EXIT_SUCCESS;
@@ -542,10 +550,11 @@ cmdline_parser_internal (
         { "iterations",	1, NULL, 'i' },
         { "send-pattern",	1, NULL, 'p' },
         { "num-threads",	1, NULL, 'j' },
+        { "computations-per-element",	1, NULL, 'c' },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVm:n:q:Q:i:p:j:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVm:n:q:Q:i:p:j:c:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -641,6 +650,18 @@ cmdline_parser_internal (
               &(local_args_info.num_threads_given), optarg, 0, "1", ARG_INT,
               check_ambiguity, override, 0, 0,
               "num-threads", 'j',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'c':	/* number of iterations of a simple computation to run for each data element.  */
+        
+        
+          if (update_arg( (void *)&(args_info->computations_per_element_arg), 
+               &(args_info->computations_per_element_orig), &(args_info->computations_per_element_given),
+              &(local_args_info.computations_per_element_given), optarg, 0, "1000", ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "computations-per-element", 'c',
               additional_error))
             goto failure;
         

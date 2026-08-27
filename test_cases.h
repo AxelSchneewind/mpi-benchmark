@@ -67,6 +67,7 @@ struct TestCase
 	int thread_count;
 	int partitions_per_thread;
 	size_t iteration_count;
+	int computations_per_element;
 	MPI_Count buffer_size;
 	MPI_Count partition_size;
 	MPI_Count partition_size_recv; 		// only used by Psend for now

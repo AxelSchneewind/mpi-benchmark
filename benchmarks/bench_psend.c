@@ -8,12 +8,15 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank)
 
     MPI_Request request;
 
-    if (comm_rank == 0)
-    {
+    // printf("[%i] barrier: \n", comm_rank);
+    // MPI_Barrier(MPI_COMM_WORLD);
+    // printf("[%i] init: \n", comm_rank);
+    if (comm_rank == 0) {
         MPI_Psend_init(test_case->buffer, test_case->partition_count, test_case->partition_size, MPI_CHAR, 1, 0, MPI_COMM_WORLD, MPI_INFO_ENV, &request);
     } else {
         MPI_Precv_init(test_case->buffer, test_case->partition_count_recv, test_case->partition_size_recv, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_INFO_ENV, &request);
     }
+    // printf("[%i] init done\n", comm_rank);
 
     // warmup
     if (comm_rank == 0)
@@ -24,7 +27,7 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank)
         for (int t = 0; t < test_case->thread_count; t++) {
             for (int p = 0; p < test_case->partitions_per_thread; p++) {
                 unsigned int index = p + t * test_case->partitions_per_thread;
-                if (index >= test_case->partition_count) continue;
+                if (index >= test_case->partition_count) break;
                 unsigned int partition_num = test_case->send_pattern[index];
                 MPI_Pready(partition_num, request);
             }
@@ -36,6 +39,7 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank)
         MPI_CHECK(MPI_Wait(&request, &result->recv_status));
     }
 
+    // printf("[%i] warmup done\n", comm_rank);
     MPI_Barrier(MPI_COMM_WORLD);
     timers_start(timers, Total);
 
@@ -50,9 +54,9 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank)
             for (int t = 0; t < test_case->thread_count; t++) {
                 for (int p = 0; p < test_case->partitions_per_thread; p++) {
                     unsigned int index = p + t * test_case->partitions_per_thread;
-                    if (index >= test_case->partition_count) continue;
+                    if (index >= test_case->partition_count) break;
                     unsigned int partition_num = test_case->send_pattern[index];
-                    work(test_case->partition_size);
+                    work(test_case->partition_size, partition_num, test_case->computations_per_element);
                     MPI_Pready(partition_num, request);
                 }
             }
@@ -80,4 +84,8 @@ void bench_psend(TestCase *test_case, Result *result, int comm_rank)
 
     timers_store(timers, result);
     timers_free(timers);
+
+    // printf("[%i] post barrier\n", comm_rank);
+    // MPI_Barrier(MPI_COMM_WORLD);
+    // printf("[%i] benchmark done\n", comm_rank);
 };

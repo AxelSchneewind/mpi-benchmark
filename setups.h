@@ -19,6 +19,7 @@ struct setup_t {
     int num_test_cases;
     MPI_Count buffer_size;
     int iterations;
+    int computations_per_element;
     int mode;
     int min_thread_count;
     int max_thread_count;

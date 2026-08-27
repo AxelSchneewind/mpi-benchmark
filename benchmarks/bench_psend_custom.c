@@ -54,7 +54,7 @@ void bench_custom_psend(TestCase *test_case, Result *result, int comm_rank)
 
 			for (size_t p = 0; p < test_case->partition_count; p++) {
 				unsigned int partition_num = test_case->send_pattern[p];
-				work(test_case->partition_size);
+				work(test_case->partition_size, partition_num, test_case->computations_per_element);
 				MPI_CHECK(custom_MPI_Pready(partition_num, request));
 			}
 

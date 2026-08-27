@@ -66,6 +66,9 @@ struct gengetopt_args_info
   int num_threads_arg;	/**< @brief number of threads (default='1').  */
   char * num_threads_orig;	/**< @brief number of threads original value given at command line.  */
   const char *num_threads_help; /**< @brief number of threads help description.  */
+  int computations_per_element_arg;	/**< @brief number of iterations of a simple computation to run for each data element (default='1000').  */
+  char * computations_per_element_orig;	/**< @brief number of iterations of a simple computation to run for each data element original value given at command line.  */
+  const char *computations_per_element_help; /**< @brief number of iterations of a simple computation to run for each data element help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -78,6 +81,7 @@ struct gengetopt_args_info
   unsigned int iterations_given ;	/**< @brief Whether iterations was given.  */
   unsigned int send_pattern_given ;	/**< @brief Whether send-pattern was given.  */
   unsigned int num_threads_given ;	/**< @brief Whether num-threads was given.  */
+  unsigned int computations_per_element_given ;	/**< @brief Whether computations-per-element was given.  */
 
 } ;
 

@@ -203,6 +203,7 @@ void test_cases_init(setup configuration, TestCases* tests)
                     test_case->method = mode_methods[test_case->mode];
 
                     test_case->iteration_count = configuration->iterations;
+                    test_case->computations_per_element = configuration->computations_per_element;
 
                     test_case->buffer_size = result->buffer_size;
                     test_case->buffer = result->buffer;

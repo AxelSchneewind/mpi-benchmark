@@ -17,20 +17,22 @@
 
 
 // perform some virtual work on a partition
-void work(const MPI_Count partition_size)
+int work(MPI_Count partition_size, int partition, int computations_per_element)
 {
     // struct timespec t1, t2;
     // t1.tv_sec = 0;
     // t1.tv_nsec = partition_size / 512;
     // if (t1.tv_nsec > 0)
     //     nanosleep(&t1, &t2);
-    // int t = 13;
-    // for (size_t i = 0; i < partition_size; i++)
-    // {
-    //     t = t * t;
-    // }
+    int t = 13;
+    size_t iterations = partition_size * computations_per_element;
+    if (partition == 0) iterations += (partition_size * computations_per_element) / 4;
+    for (size_t i = 0; i < iterations; i++)
+    {
+        t = t * t;
+    }
 
-    return;
+    return t;
 }
 
 

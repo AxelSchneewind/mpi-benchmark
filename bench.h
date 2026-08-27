@@ -86,7 +86,7 @@ static const char* const mode_names[ModeCount] = {
 
 
 
-extern void work(const MPI_Count partition_size);
+extern int work(MPI_Count partition_size, int partition, int computations_per_element);
 
 extern Result bench(TestCase *test_case, int comm_rank, int comm_size);
 

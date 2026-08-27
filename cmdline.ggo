@@ -3,7 +3,7 @@ version "0.42"
 purpose "measure effective bandwidth for different transfer modes in a multithreaded setting"
 usage "<usage>"
 description "<description>"
-versiontext "kinda buggy"
+versiontext ""
 
 args "--default-optional"
 
@@ -16,3 +16,4 @@ option "allow-n-to-1" - "whether to test cases where send    side has more parti
 option "iterations" i "number of iterations" int default="100"
 option "send-pattern" p "order in which elements will be marked ready" string default="Linear"
 option "num-threads" j "number of threads" int default="1"
+option "computations-per-element" c "number of iterations of a simple computation to run for each data element" int default="1000"

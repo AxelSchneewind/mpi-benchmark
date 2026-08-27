@@ -29,7 +29,7 @@ void bench_send(TestCase *test_case, Result *result, int comm_rank)
             for (int t = 0; t < test_case->thread_count; t++) {
                 for (size_t p = 0; p < test_case->partitions_per_thread; p++) {
                     unsigned int partition_num = test_case->send_pattern[p + t * test_case->partitions_per_thread];				
-                    work(test_case->partition_size);
+                    work(test_case->partition_size, partition_num, test_case->computations_per_element);
                     MPI_CHECK(MPI_Send(test_case->buffer + test_case->partition_size * partition_num, test_case->partition_size, MPI_BYTE, 1, partition_num, MPI_COMM_WORLD));
                 }
             }
